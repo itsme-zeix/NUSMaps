@@ -2,8 +2,9 @@ import psycopg2
 import requests
 import json
 import base64
+import os
 USERNAME = 'NUSnextbus'
-PASSWORD = '***REMOVED***'
+PASSWORD = os.environ['NUSNEXTBUS']
 encoded_credentials = base64.b64encode(f"{USERNAME}:{PASSWORD}".encode('utf-8')).decode('utf-8')
 headers = {
     'Authorization': f'Basic {encoded_credentials}'
