@@ -42,7 +42,6 @@ plugins:
 # Rules #
 #########
 rules:
-  no-var: "warn"
   semi:
     - "error"
     - "always"
