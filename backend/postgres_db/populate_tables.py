@@ -3,6 +3,7 @@ import requests
 import json
 import base64
 import os
+
 USERNAME = 'NUSnextbus'
 PASSWORD = os.environ['NUSNEXTBUS']
 encoded_credentials = base64.b64encode(
@@ -16,7 +17,6 @@ conn = psycopg2.connect(database = "main",
                         host = 'localhost',
                         password = 'leyew123',
                         port = 5432)
-
 
 def fetch_nus_bus_stops():
     url_extension = "/BusStops"

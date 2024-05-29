@@ -9,28 +9,22 @@ export default function NUSBusServices() {
     latitudeDelta: 0.02,
     longitudeDelta: 0.02,
   };
-
-
   return (
     <View style={styles.mapContainer}>
-      <MapView 
-        style={styles.map} 
-        provider={PROVIDER_GOOGLE} 
-        region={NUS}>
-         <Polygon coordinates={
-          [{latitude:1.29453,longitude:103.769924},
-          {latitude:1.294552,longitude:103.771475},
-          {latitude:1.293619,longitude:103.771475},
-          {latitude:1.293223,longitude:103.775068},
+      <MapView style={styles.map} provider={PROVIDER_GOOGLE} region={NUS}>
+        <Polygon
+          coordinates={[
+            { latitude: 1.29453, longitude: 103.769924 },
+            { latitude: 1.294552, longitude: 103.771475 },
+            { latitude: 1.293619, longitude: 103.771475 },
+            { latitude: 1.293223, longitude: 103.775068 },
           ]}
           strokeColor="#27f"
           strokeWidth={0.01}
           tappable={false}
-        />  
-
+        />
       </MapView>
     </View>
-
   );
 }
 
