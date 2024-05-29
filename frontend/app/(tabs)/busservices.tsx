@@ -9,7 +9,6 @@ export default function NUSBusServices() {
     latitudeDelta: 0.02,
     longitudeDelta: 0.02,
   };
-
   return (
     <View style={styles.mapContainer}>
       <MapView style={styles.map} provider={PROVIDER_GOOGLE} region={NUS}>
