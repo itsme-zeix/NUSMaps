@@ -38,7 +38,7 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 //internal routing here
-const url = "https://routes.googleapis.com/directions/v2:computeRoutes"
+const url = "https://routes.googleapis.com/directions/v2:computeRoutes";
 app.post('/getRoute', (req, res) => {
   //include a way to read the request as a json object to get the latitude and longitude
   var payload = {
