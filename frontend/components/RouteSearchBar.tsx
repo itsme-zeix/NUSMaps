@@ -72,7 +72,6 @@ const styles = StyleSheet.create({
   googleSearchBar : {
       width: "90%",
       alignSelf: "center",
-    },
-  }
-);
+  },
+});
 export default RouteSearchBar;
