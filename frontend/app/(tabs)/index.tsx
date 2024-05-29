@@ -2,38 +2,65 @@ import React from 'react';
 import { View, StyleSheet, SafeAreaView, ScrollView, Text, StatusBar } from 'react-native';
 import BusStopSearchBar from "@/components/BusStopSearchBar" 
 
+interface BusService {
+  busNumber: string;
+  timings: number[];
+};
+
 interface BusStop {
   busStopName: string;
   distanceAway: string;
-  savedBuses: string[][];
-}
+  savedBuses: BusService[];
+};
 
 const ClementiMRT: BusStop = {
   busStopName: "Clementi MRT",
   distanceAway: "~20m away",
-  savedBuses: [["96", "1", "12"], ["96A", "2", "6"]]
-}
+  savedBuses: [
+    {
+      busNumber: "96",
+      timings:[2,17]
+    }, 
+    {
+      busNumber:"96A",
+      timings: [2,6]
+    },
+  ]
+};
 
 const KRMRT: BusStop = {
   busStopName: "Kent Ridge MRT",
   distanceAway: "~1500m away",
-  savedBuses: [["D1", "2", "7"], ["A1", "3", "9"], ["K", "1", "12"]]
-}
+  savedBuses: [
+    {
+      busNumber: "D1",
+      timings:[2,7]
+    }, 
+    {
+      busNumber:"A1",
+      timings: [3,9]
+    },
+    {
+      busNumber:"K",
+      timings:[1,12]
+    }
+  ]
+};
 
 const busStops: BusStop[] = [ClementiMRT, KRMRT];
 
-export const busCard = (bus: string[]) => {
+const busCard = (bus: BusService) => {
   return (
     <View style={ styles.busCard }>
-      <Text style={{ fontSize: 24 }}> { bus[0] } </Text>
+      <Text style={{ fontSize: 24 }}> { bus.busNumber } </Text>
       <Text style={{ fontSize: 10 }}> Arrival Time </Text> 
       <View style={ styles.busTimings }> 
         <View style={ styles.busTiming }> 
-          <Text style={{ color: "#30B800", fontSize: 22 }}>{ bus[1] }</Text>
+          <Text style={{ color: "#30B800", fontSize: 22 }}>{ bus.timings[0] }</Text>
           <Text style={{ color: "#30B800", fontSize: 12 }}>min</Text>
         </View>
         <View style={ styles.busTiming }>
-          <Text style={{ color: "#DE8500", fontSize: 22 }}>{ bus[2] }</Text>
+          <Text style={{ color: "#DE8500", fontSize: 22 }}>{ bus.timings[1] }</Text>
           <Text style={{ color: "#DE8500", fontSize: 12 }}>min</Text>
         </View>
       </View>
@@ -41,7 +68,7 @@ export const busCard = (bus: string[]) => {
   );
 };
 
-export const busStopCard = (busStop: BusStop)  => {
+const busStopCard = (busStop: BusStop)  => {
   return (
     <View style={ styles.busStopCard }>
       <View>
@@ -50,7 +77,7 @@ export const busStopCard = (busStop: BusStop)  => {
       </View>
       <View style={ styles.busTimings }>
         <Text>
-        {busStop.savedBuses.map((bus: string[], index: number) => (
+        {busStop.savedBuses.map((bus: BusService, index: number) => (
           <View key={index}>
             {busCard(bus)}
           </View>
@@ -118,5 +145,4 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
   },
-
 });

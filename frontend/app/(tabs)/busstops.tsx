@@ -68,6 +68,7 @@ export const ColouredCircle = ({ color, size = 50 }: { color: string, size?: num
 };
 
 export const ListItem = ({ item }: { item: any }) => {
+  //Used to render details for 1 bus stop
   const [expanded, setExpanded] = useState(false);
 
   const onItemPress = () => {
