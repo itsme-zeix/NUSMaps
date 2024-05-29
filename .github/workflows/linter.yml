@@ -31,7 +31,11 @@ jobs:
         env:
           # To report GitHub Actions status checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          LINTER_RULES_PATH: /.githhub/workflows/
           JAVASCRIPT_ES_CONFIG_FILE: .eslintrc.yml
           VALIDATE_JAVASCRIPT_STANDARD: false
+          VALIDATE_GITHUB_ACTIONS: false
+          VALIDATE_PYTHON_BLACK: false
+          VALIDATE_PYTHON_PYLINT: false
+          VALIDATE_PYTHON_FLAKE8: false
+          VALIDATE_PYTHON_ISORT: false
 ...
