@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Marker, Region } from 'react-native-maps';
 import { useNavigation } from "@react-navigation/native";
 import * as Location from "expo-location";
-import BusStopSearchBar from '@/components/BusStopSearchBar';
+import RouteSearchBar from '@/components/RouteSearchBar';
 import Toast from "react-native-toast-message";
 
 export default function App() {
@@ -15,19 +15,21 @@ export default function App() {
     latitudeDelta: 0.05,
     longitudeDelta: 0.05,
   });
-  const [errorMsg, setErrorMsg] = useState("");
+  const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
+  const [locationErrorMsg, setLocationErrorMsg] = useState("");
 
   useEffect(() => {
     const getLocation = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         console.log("Permission to access location was denied");
-        setErrorMsg("Permission to access location was denied. Please enable location permissions for the routing feature.")
+        setPermissionErrorMsg("Permission to access location was denied.")
         return;
       }
       
       try {
         let location = await Location.getCurrentPositionAsync({});
+        console.log(location);
         setCurrentLocation(location.coords);
         setRegion({
           latitude: location.coords.latitude,
@@ -36,26 +38,38 @@ export default function App() {
           longitudeDelta: 0.005,
         });
       } catch (error) {
+        setLocationErrorMsg(`Failed to obtain location, ${error}`);
         console.error("Failed to obtain location.", error);
       }
     };
     getLocation();
   }, []);
 
-  // Toast to display error
+  // Toast to display error from denial of gps permission
   useEffect(() => {
-    let text;
-    if (errorMsg != "") {
-      text = errorMsg;
+    if (permissionErrorMsg != "") {
       Toast.show({
         type : "error",
-        text1: text,
+        text1: permissionErrorMsg,
         text2: "Please try again later",
         position : "top",
         autoHide: true,
       });
     }
-  }, [errorMsg]);
+  }, [permissionErrorMsg]);
+
+    //Toast to display error from inability to fetch location even with gps permission
+    useEffect(() => {
+      if (locationErrorMsg != "") {
+        Toast.show({
+          type : "error",
+          text1: locationErrorMsg,
+          text2: "Please try again later",
+          position : "top",
+          autoHide: true,
+        });
+      }
+    }, [locationErrorMsg]);
 
   return (
     <View style={styles.container}>
@@ -71,7 +85,7 @@ export default function App() {
         )}
       </MapView>
       <View style={styles.overlay} >
-        <BusStopSearchBar />
+        <RouteSearchBar location={currentLocation}/>
       </View>
     </View>
   );

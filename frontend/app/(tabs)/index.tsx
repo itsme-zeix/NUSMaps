@@ -5,12 +5,13 @@ import BusStopSearchBar from "@/components/BusStopSearchBar"
 interface BusService {
   busNumber: string;
   timings: number[];
-}
+};
+
 interface BusStop {
   busStopName: string;
   distanceAway: string;
   savedBuses: BusService[];
-}
+};
 
 const ClementiMRT: BusStop = {
   busStopName: "Clementi MRT",
@@ -25,15 +26,15 @@ const ClementiMRT: BusStop = {
       timings: [2,6]
     },
   ]
-}
+};
 
 const KRMRT: BusStop = {
   busStopName: "Kent Ridge MRT",
   distanceAway: "~1500m away",
   savedBuses: [
     {
-    busNumber: "D1",
-    timings:[2,7]
+      busNumber: "D1",
+      timings:[2,7]
     }, 
     {
       busNumber:"A1",
@@ -44,8 +45,7 @@ const KRMRT: BusStop = {
       timings:[1,12]
     }
   ]
-}
-//    ["D1", "2", "7"], ["A1", "3", "9"], ["K", "1", "12"]]
+};
 
 const busStops: BusStop[] = [ClementiMRT, KRMRT];
 
@@ -145,5 +145,4 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
   },
-
 });
