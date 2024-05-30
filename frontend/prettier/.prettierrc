@@ -6,9 +6,9 @@
   "quoteProps": "as-needed",
   "singleQuote": false,
   "semi": true,
-  "printWidth": 300,
+  "printWidth": 600,
   "useTabs": false,
   "tabWidth": 2,
   "trailingComma": "es5",
-  "single-attribute-per-line": false
+  "singleAttributePerLine": false
 }
