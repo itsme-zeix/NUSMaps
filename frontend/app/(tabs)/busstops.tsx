@@ -1,7 +1,18 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, SafeAreaView, TouchableWithoutFeedback, LayoutChangeEvent } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  TouchableWithoutFeedback,
+  LayoutChangeEvent,
+} from "react-native";
 import BusStopSearchBar from "@/components/BusStopSearchBar";
-import Animated, {useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 interface BusStop {
   busStopName: string;
@@ -9,22 +20,33 @@ interface BusStop {
   details: string[][];
 }
 
-
 const changiAirport: BusStop = {
   busStopName: "Changi Airport",
   distanceAway: "~200m away",
-  details: [["name", "time1", "time2"], ["name", "time1", "time2"]],
+  details: [
+    ["name", "time1", "time2"],
+    ["name", "time1", "time2"],
+  ],
 };
 
 const tanahMerahMRT: BusStop = {
   busStopName: "Tanah Merah MRT",
   distanceAway: "~500m away",
-  details: [["name", "time1", "time2"], ["name", "time1", "time2"]],
-}; 
+  details: [
+    ["name", "time1", "time2"],
+    ["name", "time1", "time2"],
+  ],
+};
 
 const busStops: BusStop[] = [changiAirport, tanahMerahMRT];
 
-export const CollapsibleContainer = ({ children, expanded, }: { children: React.ReactNode; expanded: boolean }) => {
+export const CollapsibleContainer = ({
+  children,
+  expanded,
+}: {
+  children: React.ReactNode;
+  expanded: boolean;
+}) => {
   const [height, setHeight] = useState(0);
   const animatedHeight = useSharedValue(0);
 
@@ -37,7 +59,7 @@ export const CollapsibleContainer = ({ children, expanded, }: { children: React.
   };
 
   const collapsibleStyle = useAnimatedStyle(() => {
-    animatedHeight.value = withTiming(expanded ? height : 0); 
+    animatedHeight.value = withTiming(expanded ? height : 0);
 
     return {
       height: animatedHeight.value,
@@ -53,7 +75,13 @@ export const CollapsibleContainer = ({ children, expanded, }: { children: React.
   );
 };
 
-export const ColouredCircle = ({ color, size = 50 }: { color: string, size?: number }) => {
+export const ColouredCircle = ({
+  color,
+  size = 50,
+}: {
+  color: string;
+  size?: number;
+}) => {
   return (
     <View
       style={{
@@ -61,8 +89,8 @@ export const ColouredCircle = ({ color, size = 50 }: { color: string, size?: num
         height: size,
         borderRadius: size / 2,
         backgroundColor: color,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: "center",
+        alignItems: "center",
       }}
     />
   );
@@ -89,12 +117,12 @@ export const ListItem = ({ item }: { item: any }) => {
 
       <CollapsibleContainer expanded={expanded}>
         <View style={styles.textContainer}>
-          {item.details.map((detail:string[], index:number) => (
+          {item.details.map((detail: string[], index: number) => (
             <View key={index} style={styles.detailRow}>
               <View style={styles.leftContainer}>
                 {/* TODO: use conditional to assign colour to circle based on busStopName/tag */}
                 {/* Can consider moving this logic into the BusStop interface */}
-                <ColouredCircle color="blue" size={15}/> 
+                <ColouredCircle color="blue" size={15} />
                 <Text style={[styles.details, styles.text]}>{detail[0]}</Text>
               </View>
               <View style={styles.rightContainer}>
@@ -134,24 +162,24 @@ const styles = StyleSheet.create({
   },
   container: { flexDirection: "row" },
   image: { width: 50, height: 50, margin: 10, borderRadius: 5 },
-  textContainer: { 
+  textContainer: {
     justifyContent: "space-between",
   },
   details: { margin: 10 },
   detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
   },
   leftContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingLeft: 16,
   },
   rightContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingRight: 16,
   },
   text: { opacity: 0.7 },
