@@ -7,7 +7,6 @@ import {
 
 export default function BusStopSearchBar() {
   const [Query, setQuery] = useState("");
-
   const handlePress = () => {
     console.log("Search bar pressed (to expand)");
   };

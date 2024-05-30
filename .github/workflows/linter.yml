@@ -1,11 +1,11 @@
 ---
 name: Linter
 
-on:  # yamllint disable-line rule:truthy
+on: # yamllint disable-line rule:truthy
   push: null
   pull_request: null
 
-permissions: { }
+permissions: {}
 
 jobs:
   build:
@@ -27,13 +27,13 @@ jobs:
           fetch-depth: 0
 
       - name: Super-linter
-        uses: super-linter/super-linter@v6.5.1  # x-release-please-version
+        uses: super-linter/super-linter@v6.5.1 # x-release-please-version
         env:
           # To report GitHub Actions status checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JAVASCRIPT_ES_CONFIG_FILE: .eslintrc.yml
           # Remove JS Standard and TS Standard linting config in favour of esconfig
-          VALIDATE_JAVASCRIPT_STANDARD: false 
+          VALIDATE_JAVASCRIPT_STANDARD: false
           VALIDATE_TYPESCRIPT_STANDARD: false
           VALIDATE_GITHUB_ACTIONS: false
           VALIDATE_PYTHON_BLACK: false
@@ -41,4 +41,4 @@ jobs:
           VALIDATE_PYTHON_FLAKE8: false
           VALIDATE_PYTHON_ISORT: false
           VALIDATE_SQLFLUFF: false
-...
+          VALIDATE_JSCPD: false
