@@ -1,21 +1,22 @@
 import React, { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, TextInput, View, ViewStyle, TextStyle, ImageStyle } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import * as Location from "expo-location";
-// import { REACT_APP_API_KEY } from '@env';
+
 type Coords = {
   latitude: number;
   longitude: number;
 };
 
 interface RouteSearchBarInput {
-  location: Location.LocationObjectCoords | null;
+  location: Location.LocationObjectCoords;
 };
 
-const RouteSearchBar:React.FC<RouteSearchBarInput>  = ({location}) => {
+const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY;
+
+const RouteSearchBar:React.FC<RouteSearchBarInput & {isResultVisible: boolean, changeResultVisiblity: (isResultVisible : boolean) => void}>  = ({location, changeResultVisiblity}) => {
 let curr_location : Coords;
-if (location === null || (location && Object.keys(location).length === 0) ) {
+if (location && Object.keys(location).length === 0) {
   //checks if location is empty(no permissions yet)
   curr_location = {
     latitude: 1.3521,
@@ -39,7 +40,7 @@ return (
         // 'details' is provided when fetchDetails = true
         console.log(data, details);
       }} query={{
-        //key: '',
+        key: apiKey,
         language: 'en',
         location: {
             latitude: curr_location.latitude,
@@ -49,6 +50,7 @@ return (
         components: 'country:sg',
         locationbias: `circle:1000@${curr_location.latitude},${curr_location.longitude}`
         //might need current location to work more effectively
+        //ideal is to click on result and for changeResultVisiblity to alter it
       }}
       styles = {{textInputContainer:styles.googleSearchBar}}
       />

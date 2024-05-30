@@ -9,6 +9,7 @@ interface BusStop {
   details: string[][];
 }
 
+
 const changiAirport: BusStop = {
   busStopName: "Changi Airport",
   distanceAway: "~200m away",
@@ -88,7 +89,7 @@ export const ListItem = ({ item }: { item: any }) => {
 
       <CollapsibleContainer expanded={expanded}>
         <View style={styles.textContainer}>
-          {item.details.map((detail, index) => (
+          {item.details.map((detail:string[], index:number) => (
             <View key={index} style={styles.detailRow}>
               <View style={styles.leftContainer}>
                 {/* TODO: use conditional to assign colour to circle based on busStopName/tag */}

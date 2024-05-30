@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 
 export default function BusStopSearchBar() {
@@ -18,12 +17,7 @@ export default function BusStopSearchBar() {
 //     </View>
 
 // )
-  const resultScreen = () => {
-    <Modal animationType="slide" presentationStyle="pageSheet">
-      <ScrollView>
-      </ScrollView>
-    </Modal>
-  }
+
 
   const handlePress = () => {
     console.log("Search bar pressed (to expand)");

@@ -5,10 +5,19 @@ import { useNavigation } from "@react-navigation/native";
 import * as Location from "expo-location";
 import RouteSearchBar from '@/components/RouteSearchBar';
 import Toast from "react-native-toast-message";
+import ResultScreen from '@/components/ResultsScreen';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function App() {
-
-  const [currentLocation, setCurrentLocation] = useState<Location.LocationObjectCoords | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<Location.LocationObjectCoords>({
+    latitude: 1.3521,
+    longitude: 103.8198,
+    altitude: null,
+    accuracy : null,
+    altitudeAccuracy : null,
+    heading : null,
+    speed : null
+  });
   const [region, setRegion] = useState<Region>({
     latitude: 1.3521,  // Default to Singapore's latitude
     longitude: 103.8198,  // Default to Singapore's longitude
@@ -17,7 +26,8 @@ export default function App() {
   });
   const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
   const [locationErrorMsg, setLocationErrorMsg] = useState("");
-
+  const[isResultVisible, setIsResultVisible] = useState(true);
+  
   useEffect(() => {
     const getLocation = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -71,23 +81,41 @@ export default function App() {
       }
     }, [locationErrorMsg]);
 
+
   return (
-    <View style={styles.container}>
-      <MapView style={styles.map} provider={PROVIDER_GOOGLE}region={region}>
-        {currentLocation && (
-          <Marker
-            coordinate={{
+    <GestureHandlerRootView style = {{flex: 1}}>
+      <View style={styles.container}>
+        <MapView style={styles.map} provider={PROVIDER_GOOGLE}region={region}>
+          {currentLocation && (
+            <Marker
+              coordinate={{
+                latitude: currentLocation.latitude,
+                longitude: currentLocation.longitude,
+              }}
+              title="Your Location"
+            />
+          )}
+        </MapView>
+        <View style={styles.overlay} >
+          <RouteSearchBar location={currentLocation} isResultVisible = {isResultVisible} changeResultVisiblity={setIsResultVisible}/>
+          <ResultScreen origin = {
+            {
               latitude: currentLocation.latitude,
-              longitude: currentLocation.longitude,
-            }}
-            title="Your Location"
-          />
-        )}
-      </MapView>
-      <View style={styles.overlay} >
-        <RouteSearchBar location={currentLocation}/>
+              longitude: currentLocation.longitude
+            }
+          } destination = {
+            {
+              latitude: currentLocation.latitude,
+              longitude: currentLocation.longitude
+            }
+            } departureTiming = "1:05am" arrivalTiming = "6:02am"
+            travelTime = "4 hr 57 min" types = {['walk', 'bus', 'walk', 'train', 'walk']}
+            isVisible = {isResultVisible}
+            setIsVisible= {setIsResultVisible}
+            />
+        </View>
       </View>
-    </View>
+    </GestureHandlerRootView>
   );
 }
 
