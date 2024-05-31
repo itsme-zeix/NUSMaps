@@ -1,62 +1,47 @@
-import React from "react";
-import {
-  View,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  StatusBar,
-} from "react-native";
+import React, { useEffect } from "react";
+import { View, StyleSheet, SafeAreaView, ScrollView, Text } from "react-native";
 import BusStopSearchBar from "@/components/BusStopSearchBar";
+
+async function fetchBusTimings(busStops: BusStop[]) {
+  try {
+    const response = await fetch(
+      "https://nusmaps.onrender.com/busArrivalTimes", // TODO: add authentication
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(busStops),
+      }
+    );
+    const apiReply = await response.json();
+    console.log(apiReply);
+    return apiReply; // return back busStops array with 'timings' in BusService filled in
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+}
 
 interface BusService {
   busNumber: string;
-  timings: number[];
+  timings: string[]; // ISO format
 }
 
 interface BusStop {
   busStopName: string;
+  busId: string;
   distanceAway: string;
   savedBuses: BusService[];
 }
 
-const ClementiMRT: BusStop = {
-  busStopName: "Clementi MRT",
-  distanceAway: "~20m away",
-  savedBuses: [
-    {
-      busNumber: "96",
-      timings: [2, 17],
-    },
-    {
-      busNumber: "96A",
-      timings: [2, 6],
-    },
-  ],
-};
-
-const KRMRT: BusStop = {
-  busStopName: "Kent Ridge MRT",
-  distanceAway: "~1500m away",
-  savedBuses: [
-    {
-      busNumber: "D1",
-      timings: [2, 7],
-    },
-    {
-      busNumber: "A1",
-      timings: [3, 9],
-    },
-    {
-      busNumber: "K",
-      timings: [1, 12],
-    },
-  ],
-};
-
-const busStops: BusStop[] = [ClementiMRT, KRMRT];
+const busStops: BusStop[] = [];
 
 const busCard = (bus: BusService) => {
+  // Calculate the arrival times in minutes
+  const arrivalTimesInMinutes = bus.timings.map((timing: string) =>
+    calculateMinutesDifference(timing)
+  );
+
   return (
     <View style={styles.busCard}>
       <Text style={{ fontSize: 24 }}> {bus.busNumber} </Text>
@@ -64,13 +49,13 @@ const busCard = (bus: BusService) => {
       <View style={styles.busTimings}>
         <View style={styles.busTiming}>
           <Text style={{ color: "#30B800", fontSize: 22 }}>
-            {bus.timings[0]}
+            {arrivalTimesInMinutes[0]}
           </Text>
           <Text style={{ color: "#30B800", fontSize: 12 }}>min</Text>
         </View>
         <View style={styles.busTiming}>
           <Text style={{ color: "#DE8500", fontSize: 22 }}>
-            {bus.timings[1]}
+            {arrivalTimesInMinutes[1]}
           </Text>
           <Text style={{ color: "#DE8500", fontSize: 12 }}>min</Text>
         </View>
@@ -98,6 +83,33 @@ const busStopCard = (busStop: BusStop) => {
       </View>
     </View>
   );
+};
+
+// Use effect to set up interval to fetch bus timings every 30 seconds
+useEffect(() => {
+  fetchBusTimings(busStops); // initial fetch
+
+  const interval = setInterval(() => {
+    fetchBusTimings(busStops);
+  }, 30000); // 30000 milliseconds = 30 seconds
+
+  // Cleanup interval on component unmount
+  return () => clearInterval(interval);
+}, []);
+
+// Calculate the difference in minutes between the current time and the given ISO time
+const calculateMinutesDifference = (isoTime: string): string | number => {
+  const now = new Date();
+  const busTime = new Date(isoTime);
+
+  if (isNaN(busTime.getTime())) {
+    // If busTime is invalid, return a default value or handle the error
+    return "N/A";
+  }
+
+  const differenceInMilliseconds = busTime.getTime() - now.getTime();
+  const differenceInMinutes = Math.round(differenceInMilliseconds / 1000 / 60);
+  return differenceInMinutes >= 0 ? differenceInMinutes : 0;
 };
 
 export default function HomeScreen() {
