@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 import MapView, { PROVIDER_GOOGLE, Marker, Region } from "react-native-maps";
 import * as Location from "expo-location";
@@ -6,7 +6,12 @@ import RouteSearchBar from "@/components/RouteSearchBar";
 import Toast from "react-native-toast-message";
 import ResultScreen from "@/components/ResultsScreen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { GooglePlacesAutocompleteRef } from "react-native-google-places-autocomplete";
 
+type destinationLocation = {
+  address: string;
+  placeId: string;
+};
 export default function App() {
   const [currentLocation, setCurrentLocation] =
     useState<Location.LocationObjectCoords>({
@@ -26,7 +31,21 @@ export default function App() {
   });
   const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
   const [locationErrorMsg, setLocationErrorMsg] = useState("");
-  const [isResultVisible, setIsResultVisible] = useState(true);
+  const [isResultAttained, setisResultAttained] = useState(false);
+  const [destination, setDestination] = useState<destinationLocation>({
+    address: "DEFAULT",
+    placeId: "DEFAULT",
+  });
+  // const searchBarRef = useRef<GooglePlacesAutocompleteRef>(null); // used to manage the ref so that it can be passed to the results modal
+  const getDestinationResult = (data) => {
+    setDestination({ address: data.description, placeId: data.place_id });
+  };
+  //to change when the destination changes
+  useEffect(() => {
+    if (destination.address !== "DEFAULT") {
+      setisResultAttained(true);
+    }
+  }, [destination]);
 
   useEffect(() => {
     const getLocation = async () => {
@@ -98,15 +117,10 @@ export default function App() {
         <View style={styles.overlay}>
           <RouteSearchBar
             location={currentLocation}
-            isResultVisible={isResultVisible}
-            changeResultVisiblity={setIsResultVisible}
+            getDestinationResult={getDestinationResult}
           />
           <ResultScreen
             origin={{
-              latitude: currentLocation.latitude,
-              longitude: currentLocation.longitude,
-            }}
-            destination={{
               latitude: currentLocation.latitude,
               longitude: currentLocation.longitude,
             }}
@@ -114,8 +128,9 @@ export default function App() {
             arrivalTiming="6:02am"
             travelTime="4 hr 57 min"
             types={["walk", "bus", "walk", "train", "walk"]}
-            isVisible={isResultVisible}
-            setIsVisible={setIsResultVisible}
+            isVisible={isResultAttained}
+            setIsVisible={setisResultAttained}
+            destination={destination}
           />
         </View>
       </View>

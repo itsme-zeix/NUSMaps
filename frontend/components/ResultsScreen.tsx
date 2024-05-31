@@ -5,7 +5,6 @@ import {
   SafeAreaView,
   ScrollView,
   Text,
-  TextInput,
   View,
   ViewStyle,
   TextStyle,
@@ -13,6 +12,7 @@ import {
   Image,
 } from "react-native";
 import { ImageSourcePropType } from "react-native";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import Modal from "react-native-modal";
 
 interface Coords {
@@ -20,9 +20,14 @@ interface Coords {
   longitude: number;
 }
 
+type destinationLocation = {
+  address: string;
+  placeId: string;
+};
+
 interface ResultObject {
   origin: Coords;
-  destination: Coords;
+  destination: destinationLocation;
   departureTiming: string;
   arrivalTiming: string;
   travelTime: string; // format of 1 hr 29 min
@@ -43,6 +48,7 @@ const iconList: IconCatalog = {
   rchevron: require(`../assets/images/chevron_right_icon.png`),
 };
 
+const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY;
 const resultCard: React.FC<ResultObject> = ({
   departureTiming,
   arrivalTiming,
@@ -75,6 +81,8 @@ const ResultScreen: React.FC<
   ResultObject & {
     isVisible: boolean;
     setIsVisible: (isVisible: boolean) => void;
+    origin: Coords; //should contain a name to display ideally
+    destination: destinationLocation;
   }
 > = ({
   origin,
@@ -86,6 +94,20 @@ const ResultScreen: React.FC<
   isVisible,
   setIsVisible,
 }) => {
+  const queryParams = {
+    key: apiKey,
+    language: "en",
+    // location: {
+    // latitude: current_origin.latitude,
+    // longitude: current_origin.longitude,
+    // },
+    radius: 5000,
+    components: "country:sg",
+    // locationbias: `circle:1000@${current_origin.latitude},${current_origin.longitude}`,
+    //might need current location to work more effectively
+    //ideal is to click on result and for changeResultVisiblity to alter it
+  };
+  const [originText, onChangeOrigin] = React.useState(""); //should change the default value
   if (isVisible) {
     return (
       <SafeAreaView>
@@ -96,9 +118,34 @@ const ResultScreen: React.FC<
             onBackdropPress={() => setIsVisible(false)}
             onBackButtonPress={() => setIsVisible(false)}
             hideModalContentWhileAnimating={true}
-            backdropColor="green"
+            backdropOpacity={1.0}
+            backdropColor="white"
             style={styles.resultContainer}
           >
+            <GooglePlacesAutocomplete
+              placeholder="Current location"
+              query={{ queryParams }}
+              styles={{
+                container: styles.googleSearchBarContainer,
+                textInputContainer: {
+                  borderWidth: 1,
+                  borderColor: "black",
+                  backgroundColor: "green",
+                },
+              }}
+            />
+            <GooglePlacesAutocomplete
+              placeholder={destination.address}
+              query={{ queryParams }}
+              styles={{
+                container: styles.googleSearchBarContainer,
+                textInputContainer: {
+                  borderWidth: 1,
+                  borderColor: "black",
+                  backgroundColor: "green",
+                },
+              }}
+            />
             <View style={{ flex: 1, direction: "ltr", alignItems: "center" }}>
               {resultCard({
                 origin,
@@ -117,8 +164,14 @@ const ResultScreen: React.FC<
     return;
   }
 };
-
+//weird glitch
 const styles = StyleSheet.create({
+  googleSearchBarContainer: {
+    marginTop: 5,
+    backgroundColor: "red",
+    height: 0,
+    flex: 0.1,
+  },
   resultContainer: {
     width: "100%",
     height: "100%",
