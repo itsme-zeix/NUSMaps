@@ -1,7 +1,23 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { View, StyleSheet, SafeAreaView, ScrollView, Text } from "react-native";
 import BusStopSearchBar from "@/components/BusStopSearchBar";
 
+// Define interfaces for BusService and BusStop
+interface BusService {
+  busNumber: string;
+  timings: string[]; // ISO format
+}
+
+interface BusStop {
+  busStopName: string;
+  busId: string;
+  distanceAway: string;
+  savedBuses: BusService[];
+}
+
+const busStops: BusStop[] = [];
+
+// Function to fetch bus timings
 async function fetchBusTimings(busStops: BusStop[]) {
   try {
     const response = await fetch(
@@ -18,23 +34,24 @@ async function fetchBusTimings(busStops: BusStop[]) {
     console.log(apiReply);
     return apiReply; // return back busStops array with 'timings' in BusService filled in
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("Error fetching data: ", error);
   }
 }
 
-interface BusService {
-  busNumber: string;
-  timings: string[]; // ISO format
-}
+// Calculate the difference in minutes between the current time and the given ISO time
+const calculateMinutesDifference = (isoTime: string): string | number => {
+  const now = new Date();
+  const busTime = new Date(isoTime);
 
-interface BusStop {
-  busStopName: string;
-  busId: string;
-  distanceAway: string;
-  savedBuses: BusService[];
-}
+  if (isNaN(busTime.getTime())) {
+    // If busTime is invalid, return a default value or handle the error
+    return "N/A";
+  }
 
-const busStops: BusStop[] = [];
+  const differenceInMilliseconds = busTime.getTime() - now.getTime();
+  const differenceInMinutes = Math.round(differenceInMilliseconds / 1000 / 60);
+  return differenceInMinutes >= 0 ? differenceInMinutes : 0;
+};
 
 const busCard = (bus: BusService) => {
   // Calculate the arrival times in minutes
@@ -69,53 +86,41 @@ const busStopCard = (busStop: BusStop) => {
     <View style={styles.busStopCard}>
       <View>
         <Text style={{ fontSize: 20 }}> {busStop.busStopName} </Text>
-        <Text style={{ color: "626262", fontSize: 10 }}>
-          {" "}
-          {busStop.distanceAway}{" "}
+        <Text style={{ color: "#626262", fontSize: 10 }}>
+          {busStop.distanceAway}
         </Text>
       </View>
       <View style={styles.busTimings}>
-        <Text>
-          {busStop.savedBuses.map((bus: BusService, index: number) => (
-            <View key={index}>{busCard(bus)}</View>
-          ))}
-        </Text>
+        {busStop.savedBuses.map((bus: BusService, index: number) => (
+          <View key={index}>{busCard(bus)}</View>
+        ))}
       </View>
     </View>
   );
 };
 
-// Use effect to set up interval to fetch bus timings every 30 seconds
-useEffect(() => {
-  fetchBusTimings(busStops); // initial fetch
-
-  const interval = setInterval(() => {
-    fetchBusTimings(busStops);
-  }, 30000); // 30000 milliseconds = 30 seconds
-
-  // Cleanup interval on component unmount
-  return () => clearInterval(interval);
-}, []);
-
-// Calculate the difference in minutes between the current time and the given ISO time
-const calculateMinutesDifference = (isoTime: string): string | number => {
-  const now = new Date();
-  const busTime = new Date(isoTime);
-
-  if (isNaN(busTime.getTime())) {
-    // If busTime is invalid, return a default value or handle the error
-    return "N/A";
-  }
-
-  const differenceInMilliseconds = busTime.getTime() - now.getTime();
-  const differenceInMinutes = Math.round(differenceInMilliseconds / 1000 / 60);
-  return differenceInMinutes >= 0 ? differenceInMinutes : 0;
-};
-
 export default function HomeScreen() {
+  const [busStopsData, setBusStopsData] = useState<BusStop[]>([]);
+
+  useEffect(() => {
+    const fetchAndSetBusTimings = async () => {
+      const updatedBusStops = await fetchBusTimings(busStops);
+      setBusStopsData(updatedBusStops);
+    };
+
+    fetchAndSetBusTimings(); // Initial fetch
+
+    const interval = setInterval(() => {
+      fetchAndSetBusTimings();
+    }, 30000); // 30000 milliseconds = 30 seconds
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <SafeAreaView style={styles.safeAreaViewContainer}>
-      <BusStopSearchBar></BusStopSearchBar>
+      <BusStopSearchBar />
       <ScrollView style={styles.scrollView}>
         {busStops.map((busStop, index) => (
           <View key={index}>{busStopCard(busStop)}</View>
