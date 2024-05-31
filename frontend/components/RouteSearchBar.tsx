@@ -20,10 +20,9 @@ const REVERSEGEOCODINGURI = "https://maps.googleapis.com/maps/api/geocode/json";
 
 const RouteSearchBar: React.FC<
   RouteSearchBarInput & {
-    getDestinationResult: (data) => void
+    getDestinationResult: (data) => void;
   }
 > = ({ location, getDestinationResult }) => {
-
   const [currLocation, setCurrLocation] = useState<Coords>({
     latitude: 1.3521,
     longitude: 103.8198,
@@ -32,12 +31,11 @@ const RouteSearchBar: React.FC<
   useEffect(() => {
     if (location && Object.keys(location).length !== 0) {
       setCurrLocation({
-        latitude:location.latitude,
-        longitude: location.longitude
-    })
-  }
-}, [""]);
-
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
+    }
+  }, [""]);
 
   const queryParams = {
     key: apiKey,
