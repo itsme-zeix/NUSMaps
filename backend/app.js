@@ -6,8 +6,10 @@ const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000; // defaults to 3000
-app.listen(PORT, () => {
-  console.log("Server Listening on PORT:", PORT);
+const HOST = "0.0.0.0"; // Bind to 0.0.0.0 as required by Render server
+
+app.listen(PORT, HOST, () => {
+  console.log(`Server Listening on http://${HOST}:${PORT}`);
 });
 
 // Routing
@@ -15,7 +17,7 @@ const busArrivalTimesRouter = require("./routes/busArrivalTimes");
 const transportRoutesRouter = require("./routes/transportRoutes");
 
 app.use("/transportRoutes", transportRoutesRouter);
-//attaining destination place id 
+//attaining destination place id
 app.use("/busArrivalTimes", busArrivalTimesRouter);
 
 // catch 404 and forward to error handler
