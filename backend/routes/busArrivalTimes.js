@@ -33,10 +33,10 @@ async function getArrivalTime(busStopCodes, serviceNos) {
   }
 }
 
-// Example usage
-const busStopCodes = ["43009"];
-const serviceNos = [["106", "852"]];
-getArrivalTime(busStopCodes, serviceNos);
+// // Example usage
+// const busStopCodes = ["43009"];
+// const serviceNos = [["106", "852"]];
+// getArrivalTime(busStopCodes, serviceNos);
 
 /* GET busArrivalTimes at the list of bus stops */
 router.get("/busArrivaltimes", async (req, res) => {
