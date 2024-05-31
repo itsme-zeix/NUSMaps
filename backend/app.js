@@ -12,7 +12,7 @@ app.listen(PORT, () => {
 
 // Routing
 const busArrivalTimesRouter = require("./routes/busArrivalTimes");
-const transportRoutesRouter = require("./routes/transportroutes");
+const transportRoutesRouter = require("./routes/transportRoutes");
 
 app.use("/transportRoutes", transportRoutesRouter);
 //attaining destination place id 
