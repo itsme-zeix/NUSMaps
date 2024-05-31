@@ -4,7 +4,6 @@ const path = require("path");
 
 const app = express();
 app.use(express.json());
-app.use(logger("dev"));
 
 const PORT = process.env.PORT || 3000; // defaults to 3000
 app.listen(PORT, () => {
