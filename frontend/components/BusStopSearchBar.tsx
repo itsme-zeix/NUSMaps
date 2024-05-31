@@ -1,35 +1,12 @@
 import React, { useState } from "react";
 import {
-  Modal,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
-  View,
 } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
-import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 
 export default function BusStopSearchBar() {
   const [Query, setQuery] = useState("");
-  //   return (
-  //     <View>
-  //       <TextInput
-  //         style={{height: 40, color : 'blue', backgroundColor:'red', paddingLeft: 50}}
-  //         placeholder="Search here"
-  //         onChangeText={newText => {
-  //           setQuery(newText);
-  //           console.log(newText);}}
-  //         defaultValue = {Query}
-  //         />
-  //     </View>
-
-  // )
-  const resultScreen = () => {
-    <Modal animationType="slide" presentationStyle="pageSheet">
-      <ScrollView></ScrollView>
-    </Modal>;
-  };
 
   const handlePress = () => {
     console.log("Search bar pressed (to expand)");
