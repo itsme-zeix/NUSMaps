@@ -7,7 +7,7 @@ router.get("/transportRoutes", function (req, res, next) {
 });
 
 const url = "https://routes.googleapis.com/directions/v2:computeRoutes";
-app.post("/getRoute", (req, res) => {
+app.post("/transportRoutes", (req, res) => {
   //include a way to read the request as a json object to get the latitude and longitude
   var payload = {
     origin: {
