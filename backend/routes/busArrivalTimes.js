@@ -1,6 +1,28 @@
 var express = require("express");
 var router = express.Router();
-const db = require("./db");
+
+// Retrieve arrival info from datamall. To be migrated to database querying/read and write (caching).
+function getArrivalTime(busStopCodes, serviceNos) {
+  for (const busStopCode of busStopCodes) {
+    for (const serviceNo of serviceNos) {
+      async (busStopCode, serviceNo) => {
+        const response = await fetch(
+          "http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2",
+          {
+            method: "GET",
+            headers: {
+              AccountKey: "***REMOVED***",
+              BusStopCode: busStopCode,
+              ServiceNo: serviceNo,
+            },
+          }
+        );
+        const datamallReply = await response.json();
+        print(datamallReply);
+      };
+    }
+  }
+}
 
 /* GET busArrivalTimes at the list of bus stops */
 router.get("/busArrivaltimes", async (req, res) => {
@@ -29,15 +51,13 @@ router.get("/busArrivaltimes", async (req, res) => {
       .status(400)
       .send("Bus-Stop-Ids and Bus-Names headers are required");
   }
+
   const busStopIdsArray = busStopIds.split(",");
   const busNamesArray = busNames.split(",");
 
-  // Handle database querying
+  // Function call to query datamall API and return processed json
   try {
-    const result = await db.query(
-      "SELECT * FROM bus_arrival_times WHERE bus_stop_id = ANY($1) AND bus_name = ANY($2)",
-      [busStopIdsArray, busNamesArray]
-    );
+    getArrivalTime(busStopIdsArray, busNamesArray);
     res.json(result.rows); // sends the json as response
   } catch (err) {
     console.error(err);
