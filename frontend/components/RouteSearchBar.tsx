@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import {
   GooglePlacesAutocomplete,
-  GooglePlacesAutocompleteRef,
+  GooglePlaceData,
 } from "react-native-google-places-autocomplete";
 import * as Location from "expo-location";
 
@@ -20,7 +20,7 @@ const REVERSEGEOCODINGURI = "https://maps.googleapis.com/maps/api/geocode/json";
 
 const RouteSearchBar: React.FC<
   RouteSearchBarInput & {
-    getDestinationResult: (data) => void;
+    getDestinationResult: (data: GooglePlaceData) => void;
   }
 > = ({ location, getDestinationResult }) => {
   const [currLocation, setCurrLocation] = useState<Coords>({

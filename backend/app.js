@@ -17,6 +17,7 @@ const transportRoutesRouter = require("./routes/transportroutes");
 
 app.use("/transportRoutes", transportRoutesRouter);
 //attaining destination place id 
+
 app.use("/busArrivalTimes", busArrivalTimesRouter);
 
 // catch 404 and forward to error handler

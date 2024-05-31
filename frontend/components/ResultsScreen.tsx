@@ -25,37 +25,38 @@ type destinationLocation = {
   placeId: string;
 };
 
+interface baseResultsCardType {
+  types: string[];
+  journeyTiming: string;
+  wholeJourneyTiming: string;
+};
+
 interface ResultObject {
   origin: Coords;
   destination: destinationLocation;
-  departureTiming: string;
-  arrivalTiming: string;
-  travelTime: string; // format of 1 hr 29 min
-  types: string[]; //format of ['walk', 'train', 'walk']
-}
+  baseResultsData: baseResultsCardType;
+};
+
 
 interface IconCatalog {
-  walk: ImageSourcePropType;
-  train: ImageSourcePropType;
-  bus: ImageSourcePropType;
-  rchevron: ImageSourcePropType;
+  WALK: ImageSourcePropType;
+  SUBWAY: ImageSourcePropType;
+  BUS: ImageSourcePropType;
+  RCHEVRON: ImageSourcePropType;
 }
 
 const iconList: IconCatalog = {
-  walk: require("../assets/images/walk_icon.png"),
-  train: require("../assets/images/subway_icon.png"),
-  bus: require("../assets/images/bus_icon.png"),
-  rchevron: require(`../assets/images/chevron_right_icon.png`),
+  WALK: require("../assets/images/walk_icon.png"),
+  SUBWAY: require("../assets/images/subway_icon.png"),
+  BUS: require("../assets/images/bus_icon.png"),
+  RCHEVRON: require(`../assets/images/chevron_right_icon.png`),
 };
 
 const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY;
 const resultCard: React.FC<ResultObject> = ({
-  departureTiming,
-  arrivalTiming,
-  travelTime,
-  types,
+  baseResultsData
 }) => {
-  types = types.flatMap((icon) => [icon, "rchevron"]);
+  const types = baseResultsData.types.flatMap((icon) => [icon, "RCHEVRON"]);
   types.splice(types.length - 1, 1); // remove the last chevron
   console.log(types);
   return (
@@ -69,10 +70,10 @@ const resultCard: React.FC<ResultObject> = ({
           />
         ))}
         <Text>
-          {departureTiming} - {arrivalTiming}
+          {baseResultsData.wholeJourneyTiming}
         </Text>
       </View>
-      <Text style={styles.travelTimings}>{travelTime}</Text>
+      <Text style={styles.travelTimings}>{baseResultsData.journeyTiming}</Text>
     </View>
   );
 };
@@ -87,10 +88,7 @@ const ResultScreen: React.FC<
 > = ({
   origin,
   destination,
-  departureTiming,
-  arrivalTiming,
-  travelTime,
-  types,
+  baseResultsData,
   isVisible,
   setIsVisible,
 }) => {
@@ -150,10 +148,7 @@ const ResultScreen: React.FC<
               {resultCard({
                 origin,
                 destination,
-                departureTiming,
-                arrivalTiming,
-                travelTime,
-                types,
+                baseResultsData
               })}
             </View>
           </Modal>
