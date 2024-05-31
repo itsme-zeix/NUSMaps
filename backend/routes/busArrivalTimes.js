@@ -2,27 +2,41 @@ var express = require("express");
 var router = express.Router();
 
 // Retrieve arrival info from datamall. To be migrated to database querying/read and write (caching).
-function getArrivalTime(busStopCodes, serviceNos) {
-  for (const busStopCode of busStopCodes) {
-    for (const serviceNo of serviceNos) {
-      async (busStopCode, serviceNo) => {
-        const response = await fetch(
-          "http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2",
-          {
-            method: "GET",
-            headers: {
-              AccountKey: "***REMOVED***",
-              BusStopCode: busStopCode,
-              ServiceNo: serviceNo,
-            },
-          }
-        );
-        const datamallReply = await response.json();
-        print(datamallReply);
-      };
+async function getArrivalTime(busStopCodes, serviceNos) {
+  for (let i = 0; i < busStopCodes.length; i++) {
+    for (const serviceNo of serviceNos[i]) {
+      await (async (stop, bus) => {
+        try {
+          const response = await fetch(
+            "http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=" +
+              stop +
+              "&ServiceNo=" +
+              bus,
+            {
+              method: "GET",
+              headers: {
+                AccountKey: "***REMOVED***",
+              },
+            }
+          );
+          const datamallReply = await response.json();
+          const firstArrivalTime =
+            datamallReply.Services[0].NextBus.EstimatedArrival;
+          const secondArrivalTime =
+            datamallReply.Services[0].NextBus2.EstimatedArrival;
+          return;
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      })(busStopCodes[i], serviceNo);
     }
   }
 }
+
+// Example usage
+const busStopCodes = ["43009"];
+const serviceNos = [["106", "852"]];
+getArrivalTime(busStopCodes, serviceNos);
 
 /* GET busArrivalTimes at the list of bus stops */
 router.get("/busArrivaltimes", async (req, res) => {
