@@ -6,7 +6,7 @@ import RouteSearchBar from "@/components/RouteSearchBar";
 import Toast from "react-native-toast-message";
 import ResultScreen from "@/components/ResultsScreen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { GooglePlacesAutocompleteRef } from "react-native-google-places-autocomplete";
+import { GooglePlaceData } from "react-native-google-places-autocomplete";
 
 type destinationLocation = {
   address: string;
@@ -37,7 +37,7 @@ export default function App() {
     placeId: "DEFAULT",
   });
   // const searchBarRef = useRef<GooglePlacesAutocompleteRef>(null); // used to manage the ref so that it can be passed to the results modal
-  const getDestinationResult = (data) => {
+  const getDestinationResult = (data: GooglePlaceData) => {
     setDestination({ address: data.description, placeId: data.place_id });
   };
   //to change when the destination changes
