@@ -1,29 +1,12 @@
 import React, { useState } from "react";
-import { Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
-import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import {
+  Pressable,
+  StyleSheet,
+  TextInput,
+} from "react-native";
 
 export default function BusStopSearchBar() {
-  const [Query, setQuery] = useState('');
-//   return (
-//     <View>
-//       <TextInput
-//         style={{height: 40, color : 'blue', backgroundColor:'red', paddingLeft: 50}}
-//         placeholder="Search here"
-//         onChangeText={newText => {
-//           setQuery(newText);
-//           console.log(newText);}}
-//         defaultValue = {Query}
-//         />
-//     </View>
-
-// )
-  const resultScreen = () => {
-    <Modal animationType="slide" presentationStyle="pageSheet">
-      <ScrollView>
-      </ScrollView>
-    </Modal>
-  }
+  const [Query, setQuery] = useState("");
 
   const handlePress = () => {
     console.log("Search bar pressed (to expand)");
@@ -37,21 +20,20 @@ export default function BusStopSearchBar() {
         },
         styles.wrapperCustom,
       ]}
-      >
+    >
       {/* {({ pressed }) => (
         <Text style={styles.text}>{pressed ? "Pressed!" : "Press Me"}</Text>
       )} */}
       <TextInput
         placeholder="Press me"
-        onChangeText={newText => {
+        onChangeText={(newText) => {
           setQuery(newText);
           console.log(newText);
         }}
         defaultValue={Query}
-        />
-        
+      />
     </Pressable>
-    );
+  );
 }
 
 const styles = StyleSheet.create({
@@ -67,4 +49,4 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "#828282",
   },
-  });
+});
