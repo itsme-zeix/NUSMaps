@@ -9,6 +9,26 @@ import {
 } from "react-native";
 import BusStopSearchBar from "@/components/BusStopSearchBar";
 
+async function getArrivalTime(busStops: BusStop[]) {
+  try {
+    const response = await fetch(
+      "https://nusmaps.onrender.com/busArrivalTimes", // TODO: add authentication
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(busStops),
+      }
+    );
+    const apiReply = await response.json();
+    console.log(apiReply);
+    return apiReply; // return back busStops array with 'timings' in BusService filled in
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+}
+
 interface BusService {
   busNumber: string;
   timings: number[];
@@ -16,12 +36,14 @@ interface BusService {
 
 interface BusStop {
   busStopName: string;
+  busId: string;
   distanceAway: string;
   savedBuses: BusService[];
 }
 
 const ClementiMRT: BusStop = {
   busStopName: "Clementi MRT",
+  busId: "",
   distanceAway: "~20m away",
   savedBuses: [
     {
@@ -37,6 +59,7 @@ const ClementiMRT: BusStop = {
 
 const KRMRT: BusStop = {
   busStopName: "Kent Ridge MRT",
+  busId: "",
   distanceAway: "~1500m away",
   savedBuses: [
     {
