@@ -1,17 +1,18 @@
-var express = require("express");
-var router = express.Router();
+const express = require("express");
+const router = express.Router();
+app.use(express.json());
 
 // Retrieve arrival info from datamall. To be migrated to database querying/read and write (caching).
-async function getArrivalTime(busStopCodes, serviceNos) {
-  for (let i = 0; i < busStopCodes.length; i++) {
-    for (const serviceNo of serviceNos[i]) {
-      await (async (stop, bus) => {
+async function getArrivalTime(busStopsArray) {
+  for (const busStop of busStopsArray) {
+    for (const bus of busStop.savedBus) {
+      await (async (stopId, serviceNo) => {
         try {
           const response = await fetch(
             "http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=" +
-              stop +
+              stopId +
               "&ServiceNo=" +
-              bus,
+              serviceNo,
             {
               method: "GET",
               headers: {
@@ -24,27 +25,21 @@ async function getArrivalTime(busStopCodes, serviceNos) {
             datamallReply.Services[0].NextBus.EstimatedArrival;
           const secondArrivalTime =
             datamallReply.Services[0].NextBus2.EstimatedArrival;
-          return;
+          bus.timings = [firstArrivalTime, secondArrivalTime];
         } catch (error) {
           console.error("Error fetching data:", error);
         }
-      })(busStopCodes[i], serviceNo);
+      })(busStop.id, bus.busNumber);
     }
   }
 }
 
-// // Example usage
-// const busStopCodes = ["43009"];
-// const serviceNos = [["106", "852"]];
-// getArrivalTime(busStopCodes, serviceNos);
-
 /* GET busArrivalTimes at the list of bus stops */
-router.get("/busArrivaltimes", async (req, res) => {
+router.post("/busArrivaltimes", async (req, res) => {
   const acceptHeader = req.get("Accept");
   const authorizationHeader = req.get("Authorization");
   const contentTypeHeader = req.get("content-type");
-  const busStopIds = req.get("Bus-Stop-Ids");
-  const busNames = req.get("Bus-Names");
+  const busStopsArray = req.json({ requestBody: req.body });
 
   // Handle Content-Type for incoming request body
   let busArrivalTimes;
@@ -66,12 +61,9 @@ router.get("/busArrivaltimes", async (req, res) => {
       .send("Bus-Stop-Ids and Bus-Names headers are required");
   }
 
-  const busStopIdsArray = busStopIds.split(",");
-  const busNamesArray = busNames.split(",");
-
   // Function call to query datamall API and return processed json
   try {
-    getArrivalTime(busStopIdsArray, busNamesArray);
+    getArrivalTime(busStopsArray);
     res.json(result.rows); // sends the json as response
   } catch (err) {
     console.error(err);
