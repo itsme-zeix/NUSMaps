@@ -15,16 +15,34 @@ interface BusStop {
   savedBuses: BusService[];
 }
 
-const busStops: BusStop[] = [];
+/* FOR TESTING PURPOSES */
+const bus106: BusService = {
+  busNumber: "106",
+  timings: [],
+};
+
+const bus852: BusService = {
+  busNumber: "852",
+  timings: [],
+};
+
+const bukitBatokInt: BusStop = {
+  busStopName: "Bukit Batok Int",
+  busId: "43009",
+  distanceAway: "~5m away",
+  savedBuses: [bus106, bus852],
+};
+/* END OF TESTING PURPOSES */
 
 // Function to fetch bus timings
 async function fetchBusTimings(busStops: BusStop[]) {
   try {
     const response = await fetch(
-      "https://nusmaps.onrender.com/busArrivalTimes", // TODO: add authentication
+      "http://localhost:3000/busArrivalTimes", // TODO: add authentication
       {
         method: "POST",
         headers: {
+          Accept: "application/json",
           "Content-Type": "application/json",
         },
         body: JSON.stringify(busStops),
@@ -51,6 +69,7 @@ const calculateMinutesDifference = (isoTime: string): string | number => {
   const differenceInMilliseconds = busTime.getTime() - now.getTime();
   const differenceInMinutes = Math.round(differenceInMilliseconds / 1000 / 60);
   return differenceInMinutes >= 0 ? differenceInMinutes : 0;
+  console.log(differenceInMinutes);
 };
 
 const busCard = (bus: BusService) => {
@@ -100,12 +119,13 @@ const busStopCard = (busStop: BusStop) => {
 };
 
 export default function HomeScreen() {
-  const [busStopsData, setBusStopsData] = useState<BusStop[]>([]);
+  const [busStops, setBusStopsData] = useState<BusStop[]>([bukitBatokInt]); // bukitBatokInt FOR TESTING PURPOSES, replace w local storage
 
   useEffect(() => {
     const fetchAndSetBusTimings = async () => {
       const updatedBusStops = await fetchBusTimings(busStops);
       setBusStopsData(updatedBusStops);
+      console.log(updatedBusStops[0].savedBuses[0]);
     };
 
     fetchAndSetBusTimings(); // Initial fetch
