@@ -33,7 +33,7 @@ interface ResultObject {
   baseResultsData: baseResultsCardType[];
 };
 
-interface SingleResultCardData {
+interface OneResultsCardData {
   origin:Coords;
   resultData : baseResultsCardType;
 }
@@ -54,7 +54,7 @@ const iconList: IconCatalog = {
 };
 
 const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY;
-const ResultCard: React.FC<SingleResultCardData> = ({ origin, resultData }) => {
+const ResultCard: React.FC<OneResultsCardData> = ({ origin, resultData }) => {
   const types = resultData.types.flatMap((icon) => [icon, "RCHEVRON"]);
   types.splice(types.length - 1, 1); // remove the last chevron
   return (
