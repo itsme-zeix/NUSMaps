@@ -6,6 +6,8 @@ import {
   Text,
   View,
   Image,
+  StatusBar,
+  Platform,
 } from "react-native";
 import { ImageSourcePropType } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
@@ -25,19 +27,18 @@ interface baseResultsCardType {
   types: string[];
   journeyTiming: string;
   wholeJourneyTiming: string;
-};
+}
 
 interface ResultObject {
   origin: Coords;
   destination: destinationLocation;
   baseResultsData: baseResultsCardType[];
-};
-
-interface SingleResultCardData {
-  origin:Coords;
-  resultData : baseResultsCardType;
 }
 
+interface SingleResultCardData {
+  origin: Coords;
+  resultData: baseResultsCardType;
+}
 
 interface IconCatalog {
   WALK: ImageSourcePropType;
@@ -69,7 +70,7 @@ const ResultCard: React.FC<SingleResultCardData> = ({ origin, resultData }) => {
         ))}
         <Text>{resultData.wholeJourneyTiming}</Text>
       </View>
-      <Text style={styles.travelTimings}>{resultData.journeyTiming}</Text>
+      <Text style={styles.travelDuration}>{resultData.journeyTiming}</Text>
     </View>
   );
 };
@@ -78,15 +79,8 @@ const ResultScreen: React.FC<
   ResultObject & {
     isVisible: boolean;
     setIsVisible: (isVisible: boolean) => void;
-
   }
-> = ({
-  origin,
-  destination,
-  baseResultsData,
-  isVisible,
-  setIsVisible,
-}) => {
+> = ({ origin, destination, baseResultsData, isVisible, setIsVisible }) => {
   const queryParams = {
     key: apiKey,
     language: "en",
@@ -103,44 +97,46 @@ const ResultScreen: React.FC<
   const [originText, onChangeOrigin] = React.useState(""); //should change the default value
   if (isVisible) {
     return (
-      <SafeAreaView>
-        <ScrollView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView>
           <Modal
             isVisible={isVisible}
             animationInTiming={200}
             onBackdropPress={() => setIsVisible(false)}
             onBackButtonPress={() => setIsVisible(false)}
             hideModalContentWhileAnimating={true}
-            backdropOpacity={1.0}
+            backdropOpacity={1}
             backdropColor="white"
-            style={styles.resultContainer}
           >
-            <GooglePlacesAutocomplete
-              placeholder="Current location"
-              query={{ queryParams }}
-              styles={{
-                container: styles.googleSearchBarContainer,
-                textInputContainer: {
-                  borderWidth: 1,
-                  borderColor: "black",
-                },
-              }}
-            />
-            <GooglePlacesAutocomplete
-              placeholder={destination.address}
-              query={{ queryParams }}
-              styles={{
-                container: styles.googleSearchBarContainer,
-                textInputContainer: {
-                  borderWidth: 1,
-                  borderColor: "black",
-                },
-              }}
-            />
-            <View style={{ flex: 1, direction: "ltr", alignItems: "center", }}>
-            {baseResultsData.map((data, index) => (
-              <ResultCard key={index} origin={origin} resultData={data}/>
-            ))}
+            <View style={{ flex: 1 }}>
+              <StatusBar></StatusBar>
+              <View style={styles.doubleSearchBarsContainer}>
+                <View style={{ flex: 1, alignItems: "center" }}>
+                  <GooglePlacesAutocomplete
+                    placeholder="Current location"
+                    query={{ queryParams }}
+                    styles={{
+                      container: styles.googleSearchBar,
+                      textInputContainer: styles.googleSearchBarTextContainer,
+                    }}
+                  />
+                </View>
+                <View style={{ flex: 1, alignItems: "center" }}>
+                  <GooglePlacesAutocomplete
+                    placeholder={destination.address}
+                    query={{ queryParams }}
+                    styles={{
+                      container: styles.googleSearchBar,
+                      textInputContainer: styles.googleSearchBarTextContainer,
+                    }}
+                  />
+                </View>
+              </View>
+              <View style={styles.resultContainer}>
+                {baseResultsData.map((data, index) => (
+                  <ResultCard key={index} origin={origin} resultData={data} />
+                ))}
+              </View>
             </View>
           </Modal>
         </ScrollView>
@@ -152,33 +148,55 @@ const ResultScreen: React.FC<
 };
 //weird glitch
 const styles = StyleSheet.create({
-  googleSearchBarContainer: {
+  googleSearchBar: {
     marginTop: 5,
-    height: 0,
-    flex: 0.1,
+    marginBottom: 5,
+    paddingTop: 5,
+    paddingBottom: 5,
+    width: "100%",
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#828282",
+  },
+  googleSearchBarTextContainer: {
+    textAlign: "center",
+  },
+  doubleSearchBarsContainer: {
+    height: 150,
+    marginTop: Platform.OS === "ios" ? 20 : StatusBar.currentHeight,
+    paddingTop: 18,
+    width: "100%",
+    justifyContent: "center",
+    alignContent: "flex-start",
   },
   resultContainer: {
     width: "100%",
-    height: "100%",
+    height: "60%",
+    top: 1,
     flex: 1,
-    margin: 0,
+    marginTop: 50,
+    marginBottom: 50,
     justifyContent: "flex-start",
+    alignContent: "flex-start",
+    alignItems: "center",
   },
   resultCard: {
     //has two children, transport routes, and the timing on the end
-    height: 80,
-    width: "95%",
-    borderBottomColor: "black",
-    borderWidth: 1,
+    height: 150,
+    width: "100%",
+    marginTop: 30,
     justifyContent: "space-evenly",
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#828282",
   },
   icons: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
   },
-  travelTimings: {
-    fontSize: 12,
+  travelDuration: {
+    fontSize: 16,
     fontWeight: "bold",
   },
 });
