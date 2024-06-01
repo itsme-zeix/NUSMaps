@@ -7,11 +7,27 @@ import Toast from "react-native-toast-message";
 import ResultScreen from "@/components/ResultsScreen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { GooglePlaceData } from "react-native-google-places-autocomplete";
+import { format } from "date-fns";
 
 type destinationLocation = {
   address: string;
   placeId: string;
 };
+
+interface Coords {
+  latitude: number;
+  longitude: number;
+};
+
+interface baseResultsCardType {
+  types: string[];
+  journeyTiming: string;
+  wholeJourneyTiming: string;
+};
+
+const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY;
+const oneMapsApiKey = process.env.EXPO_PUBLIC_ONEMAPS_API_KEY;
+
 export default function App() {
   const [currentLocation, setCurrentLocation] =
     useState<Location.LocationObjectCoords>({
@@ -36,17 +52,96 @@ export default function App() {
     address: "DEFAULT",
     placeId: "DEFAULT",
   });
-  // const searchBarRef = useRef<GooglePlacesAutocompleteRef>(null); // used to manage the ref so that it can be passed to the results modal
-  const getDestinationResult = (data: GooglePlaceData) => {
-    setDestination({ address: data.description, placeId: data.place_id });
-  };
+  const [baseResultsCardData, setbaseResultsCardData] = useState<baseResultsCardType[]>([]);
   //to change when the destination changes
   useEffect(() => {
     if (destination.address !== "DEFAULT") {
       setisResultAttained(true);
     }
   }, [destination]);
+  
+  async function getDestinationResult(data: GooglePlaceData) {
+    //slight delay
+    await getBestRoute({latitude:currentLocation.latitude, longitude:currentLocation.longitude}, await getCoordsFromId(data.place_id)); //this will return back the gps coordinates which are then sent to the api
+    setDestination({ address: data.description, placeId: data.place_id });
+  };
+  
+  
+  async function getCoordsFromId(placeId: string) {
+    const response = await fetch(`https://places.googleapis.com/v1/places/${placeId}?fields=location&key=${apiKey}`);
+    if (response.status === 200) {
+      const jsonObject = await response.json();
+      const result = {
+        latitude:jsonObject.location.latitude,
+        longitude: jsonObject.location.longitude
+      };
+      // console.log(result);
+      return result;
+    } else {
+      throw new Error(`Error fetching destination's coordinates: ${response.status}`)
+    }
+  };
+  
+  async function getBestRoute(origin:Coords, destination:Coords) {
+    // console.log('ok');
+    const dateObject = new Date();
+    let date = format(dateObject, "MM-dd-yyyy");
+    let time = format(dateObject, "HH:MM:SS");
+    const routesUrl = encodeURI(`https://www.onemap.gov.sg/api/public/routingsvc/route?start=${origin.latitude},${origin.longitude}&end=${destination.latitude},${destination.longitude}&routeType=pt&date=${date}&time=${time}&mode=TRANSIT&maxWalkDistance=1000&numItineraries=3`);
+    console.log(routesUrl);
 
+    const headers = {
+      "Authorization": `${oneMapsApiKey}`,
+    };
+
+    const response = await fetch(routesUrl, {
+      method: "GET",
+      headers: headers,
+    })
+    const route = await response.json();
+    //to populate types, ideal will be to add more
+    
+    const bestPaths = route.plan.itineraries;
+    const baseCardResultsDataStorage:baseResultsCardType[] = [];
+    for (let index = 0; index < bestPaths.length; index++) {
+      let currPath = bestPaths[index];
+      let typesArr:string[] = [];
+      console.log('ok');
+      console.log(currPath.legs[0].mode);
+      typesArr = currPath.legs.map((leg) => leg.mode);
+      const rightSideTiming = formatBeginningEndingTime(currPath.startTime, currPath.endTime);
+      const leftSideTiming = formatJourneyTime(currPath.duration);
+      baseCardResultsDataStorage.push(
+        {
+        types:typesArr,
+        wholeJourneyTiming:rightSideTiming,
+        journeyTiming:leftSideTiming
+        }
+        );
+    };
+    setbaseResultsCardData(baseCardResultsDataStorage);
+    console.log(baseResultsCardData);
+  };
+
+  const formatBeginningEndingTime = (startTiming:number, endTiming:number) => {
+    const formattedStartTiming = format(new Date(startTiming), "hh:mm a");
+    const formattedEndTiming = format(new Date(endTiming), "hh:mm a");
+    return `${formattedStartTiming} - ${formattedEndTiming}`;
+  };
+
+  const formatJourneyTime = (time:number) => {
+    console.log(time);
+    const intermediate = Math.floor(time / 60);
+    const hours = Math.floor(intermediate / 60);
+    const minutes = Math.floor(intermediate % 60);
+    if (hours < 1) {
+      return `${minutes} min`
+    }
+    return `${hours} hrs ${minutes}min `
+    //weird visual bug
+  };
+
+  //
   useEffect(() => {
     const getLocation = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -124,13 +219,10 @@ export default function App() {
               latitude: currentLocation.latitude,
               longitude: currentLocation.longitude,
             }}
-            departureTiming="1:05am"
-            arrivalTiming="6:02am"
-            travelTime="4 hr 57 min"
-            types={["walk", "bus", "walk", "train", "walk"]}
+            destination={destination}
+            baseResultsData = {baseResultsCardData}
             isVisible={isResultAttained}
             setIsVisible={setisResultAttained}
-            destination={destination}
           />
         </View>
       </View>
