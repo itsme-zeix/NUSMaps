@@ -64,12 +64,12 @@ const calculateMinutesDifference = (isoTime: string): string | number => {
   if (isNaN(busTime.getTime())) {
     // If busTime is invalid, return a default value or handle the error
     return "N/A";
-  }
+  };
 
   const differenceInMilliseconds = busTime.getTime() - now.getTime();
   const differenceInMinutes = Math.round(differenceInMilliseconds / 1000 / 60);
   return differenceInMinutes >= 0 ? differenceInMinutes : 0;
-  console.log(differenceInMinutes);
+  // console.log(differenceInMinutes);
 };
 
 const busCard = (bus: BusService) => {
