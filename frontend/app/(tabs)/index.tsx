@@ -38,7 +38,7 @@ const bukitBatokInt: BusStop = {
 async function fetchBusTimings(busStops: BusStop[]) {
   try {
     const response = await fetch(
-      "http://https://nusmaps.onrender.com/busArrivalTimes", // TODO: add authentication
+      "https://nusmaps.onrender.com/busArrivalTimes", // TODO: add authentication
       {
         method: "POST",
         headers: {
