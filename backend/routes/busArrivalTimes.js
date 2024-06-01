@@ -60,7 +60,7 @@ async function getArrivalTime(busStopsArray) {
 // getArrivalTime(busStopsArray);
 
 /* GET busArrivalTimes at the list of bus stops */
-router.post("/busArrivaltimes", async (req, res) => {
+router.post("/", async (req, res) => {
   const acceptHeader = req.get("Accept");
   const authorizationHeader = req.get("Authorization");
   const contentTypeHeader = req.get("content-type");
