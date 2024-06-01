@@ -2,9 +2,7 @@
   "name": "backend",
   "version": "0.0.0",
   "private": true,
-  "scripts": {
-    "start": "node ./bin/www"
-  },
+  "scripts": {},
   "dependencies": {
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
