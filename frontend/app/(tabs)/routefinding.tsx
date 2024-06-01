@@ -52,16 +52,18 @@ export default function App() {
     address: "DEFAULT",
     placeId: "DEFAULT",
   });
-  const [baseResultsCardData, setbaseResultsCardData] = useState<baseResultsCardType>(
-    {
-    types: [],
-    journeyTiming: "DEFAULT",
-    wholeJourneyTiming: "DEFAULT",
-  });
-
+  const [baseResultsCardData, setbaseResultsCardData] = useState<baseResultsCardType[]>([]);
+  //to change when the destination changes
+  useEffect(() => {
+    if (destination.address !== "DEFAULT") {
+      setisResultAttained(true);
+    }
+  }, [destination]);
+  
   async function getDestinationResult(data: GooglePlaceData) {
-    setDestination({ address: data.description, placeId: data.place_id });
+    //slight delay
     await getBestRoute({latitude:currentLocation.latitude, longitude:currentLocation.longitude}, await getCoordsFromId(data.place_id)); //this will return back the gps coordinates which are then sent to the api
+    setDestination({ address: data.description, placeId: data.place_id });
   };
   
   
@@ -86,7 +88,7 @@ export default function App() {
     let date = format(dateObject, "MM-dd-yyyy");
     let time = format(dateObject, "HH:MM:SS");
     const routesUrl = encodeURI(`https://www.onemap.gov.sg/api/public/routingsvc/route?start=${origin.latitude},${origin.longitude}&end=${destination.latitude},${destination.longitude}&routeType=pt&date=${date}&time=${time}&mode=TRANSIT&maxWalkDistance=1000&numItineraries=3`);
-    // console.log(routesUrl);
+    console.log(routesUrl);
 
     const headers = {
       "Authorization": `${oneMapsApiKey}`,
@@ -98,20 +100,26 @@ export default function App() {
     })
     const route = await response.json();
     //to populate types, ideal will be to add more
-    const bestPath = route.plan.itineraries[0];
-    let leyew:string[] = [];
-    console.log('ok');
-    console.log(bestPath.legs[0].mode);
-    leyew = bestPath.legs.map((leg) => leg.mode);
-    console.log('tan');
-    console.log(leyew);
-    const tan = formatBeginningEndingTime(bestPath.startTime, bestPath.endTime);
-    const gugu = formatJourneyTime(bestPath.duration);
-    setbaseResultsCardData({
-      types:leyew,
-      wholeJourneyTiming:tan,
-      journeyTiming:gugu
-    });
+    
+    const bestPaths = route.plan.itineraries;
+    const baseCardResultsDataStorage:baseResultsCardType[] = [];
+    for (let index = 0; index < bestPaths.length; index++) {
+      let currPath = bestPaths[index];
+      let typesArr:string[] = [];
+      console.log('ok');
+      console.log(currPath.legs[0].mode);
+      typesArr = currPath.legs.map((leg) => leg.mode);
+      const rightSideTiming = formatBeginningEndingTime(currPath.startTime, currPath.endTime);
+      const leftSideTiming = formatJourneyTime(currPath.duration);
+      baseCardResultsDataStorage.push(
+        {
+        types:typesArr,
+        wholeJourneyTiming:rightSideTiming,
+        journeyTiming:leftSideTiming
+        }
+        );
+    };
+    setbaseResultsCardData(baseCardResultsDataStorage);
     console.log(baseResultsCardData);
   };
 
@@ -122,21 +130,17 @@ export default function App() {
   };
 
   const formatJourneyTime = (time:number) => {
-    const hrs = Math.floor(time / 60);
-    const minutes = Math.floor(time % 60);
-    if (hrs > 0) {
+    console.log(time);
+    const intermediate = Math.floor(time / 60);
+    const hours = Math.floor(intermediate / 60);
+    const minutes = Math.floor(intermediate % 60);
+    if (hours < 1) {
       return `${minutes} min`
     }
-    return `${hrs} hrs ${minutes}min`
+    return `${hours} hrs ${minutes}min `
+    //weird visual bug
   };
 
-u
-  //to change when the destination changes
-  useEffect(() => {
-    if (destination.address !== "DEFAULT") {
-      setisResultAttained(true);
-    }
-  }, [destination]);
   //
   useEffect(() => {
     const getLocation = async () => {
@@ -216,10 +220,6 @@ u
               longitude: currentLocation.longitude,
             }}
             destination={destination}
-            // departureTiming="1:05am"
-            // arrivalTiming="6:02am"
-            // travelTime="4 hr 57 min"
-            // types={["walk", "bus", "walk", "train", "walk"]}
             baseResultsData = {baseResultsCardData}
             isVisible={isResultAttained}
             setIsVisible={setisResultAttained}

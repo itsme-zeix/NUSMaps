@@ -4,36 +4,46 @@ const path = require("path");
 
 const app = express();
 app.use(express.json());
-app.use(logger("dev"));
 
-const PORT = process.env.PORT || 3000; // defaults to 3000
-app.listen(PORT, () => {
-  console.log("Server Listening on PORT:", PORT);
+
+const PORT = process.env.PORT || 3000;
+const HOST = "0.0.0.0"; // Bind to 0.0.0.0 as required by Render server
+
+// Debug
+app.get("/", function (req, res) {
+  res.send("Hello World!");
+
 });
 
-// Routing
+// Import routes
 const busArrivalTimesRouter = require("./routes/busArrivalTimes");
-const transportRoutesRouter = require("./routes/transportroutes");
+const transportRoutesRouter = require("./routes/transportRoutes");
 
+// Use routes
 app.use("/transportRoutes", transportRoutesRouter);
-//attaining destination place id 
-
 app.use("/busArrivalTimes", busArrivalTimesRouter);
 
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
+// Catch 404 and forward to error handler
+app.use((req, res, next) => {
   next(createError(404));
 });
 
-// error handler
-app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
+// Error handler
+app.use((err, req, res, next) => {
+  // Set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
 
-  // render the error page
+  // Send the error response
   res.status(err.status || 500);
-  res.render("error");
+  res.json({
+    message: res.locals.message,
+    error: res.locals.error,
+  });
+});
+
+app.listen(PORT, HOST, () => {
+  console.log(`Server Listening on http://${HOST}:${PORT}`);
 });
 
 module.exports = app;

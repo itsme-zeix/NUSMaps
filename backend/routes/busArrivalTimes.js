@@ -1,47 +1,94 @@
-var express = require("express");
-var router = express.Router();
-const db = require("./db");
+const dotenv = require("dotenv").config();
+const express = require("express");
+const router = express.Router();
+
+async function getArrivalTime(busStopsArray) {
+  for (const busStop of busStopsArray) {
+    for (const bus of busStop.savedBuses) {
+      await (async (stopId, serviceNo) => {
+        try {
+          const response = await fetch(
+            `http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=${stopId}&ServiceNo=${serviceNo}`,
+            {
+              method: "GET",
+              headers: {
+                AccountKey: process.env.LTA_DATAMALL_KEY,
+              },
+            }
+          );
+
+          // Check if the response is ok and has a body
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const text = await response.text();
+          if (!text) {
+            throw new Error("Empty response body from datamall");
+          }
+
+          const datamallReply = JSON.parse(text);
+          if (!datamallReply.Services || !datamallReply.Services[0]) {
+            throw new Error("Unexpected response format from datamall");
+          }
+
+          const firstArrivalTime =
+            datamallReply.Services[0].NextBus.EstimatedArrival;
+          const secondArrivalTime =
+            datamallReply.Services[0].NextBus2.EstimatedArrival;
+          bus.timings = [firstArrivalTime, secondArrivalTime];
+          // console.log(bus);
+          // console.log(JSON.stringify(busStopsArray));
+        } catch (error) {
+          console.error("Error fetching data from datamall:", error);
+        }
+      })(busStop.busId, bus.busNumber);
+    }
+  }
+}
+
+// // Example body
+// const busStopsArray = [
+//   {
+//     id: "43009",
+//     savedBus: [
+//       { busNumber: "106", timings: [] },
+//       { busNumber: "852", timings: [] },
+//     ],
+//   },
+// ]
 
 /* GET busArrivalTimes at the list of bus stops */
-router.get("/busArrivaltimes", async (req, res) => {
+router.post("/", async (req, res) => {
   const acceptHeader = req.get("Accept");
   const authorizationHeader = req.get("Authorization");
-  const contentTypeHeader = req.get("content-type");
-  const busStopIds = req.get("Bus-Stop-Ids");
-  const busNames = req.get("Bus-Names");
+  const contentTypeHeader = req.get("Content-Type");
+  const busStopsArray = req.body;
 
-  // Handle Content-Type for incoming request body
-  let busArrivalTimes;
+  console.log("Received POST /busArrivalTimes, body:", req.body);
+
   if (contentTypeHeader !== "application/json") {
     return res.status(415).send("Unsupported Media Type");
   }
 
-  // Handle Accept to determine response format
   if (acceptHeader !== "application/json") {
-    res.status(406).send("Not Acceptable");
+    return res.status(406).send("Not Acceptable");
   }
 
-  // Add authorization check!!!
+  // Add authorization check
+  // if (!authorizationHeader || authorizationHeader !== 'expectedValue') {
+  //   return res.status(403).send("Forbidden");
+  // }
 
-  // Check for bus stop logic
-  if (!busStopIds || !busNames) {
-    return res
-      .status(400)
-      .send("Bus-Stop-Ids and Bus-Names headers are required");
-  }
-  const busStopIdsArray = busStopIds.split(",");
-  const busNamesArray = busNames.split(",");
-
-  // Handle database querying
   try {
-    const result = await db.query(
-      "SELECT * FROM bus_arrival_times WHERE bus_stop_id = ANY($1) AND bus_name = ANY($2)",
-      [busStopIdsArray, busNamesArray]
-    );
-    res.json(result.rows); // sends the json as response
+    if (!Array.isArray(busStopsArray)) {
+      throw new Error("Request body must be an array");
+    }
+    await getArrivalTime(busStopsArray);
+    res.json(busStopsArray);
   } catch (err) {
     console.error(err);
-    res.status(500).send("Database query error");
+    res.status(500).send("Internal server error");
   }
 });
 

@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from "react";
 import {
-  Pressable,
   StyleSheet,
   SafeAreaView,
   ScrollView,
   Text,
   View,
-  ViewStyle,
-  TextStyle,
-  ImageStyle,
   Image,
 } from "react-native";
 import { ImageSourcePropType } from "react-native";
@@ -34,8 +30,13 @@ interface baseResultsCardType {
 interface ResultObject {
   origin: Coords;
   destination: destinationLocation;
-  baseResultsData: baseResultsCardType;
+  baseResultsData: baseResultsCardType[];
 };
+
+interface OneResultsCardData {
+  origin:Coords;
+  resultData : baseResultsCardType;
+}
 
 
 interface IconCatalog {
@@ -53,12 +54,9 @@ const iconList: IconCatalog = {
 };
 
 const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY;
-const resultCard: React.FC<ResultObject> = ({
-  baseResultsData
-}) => {
-  const types = baseResultsData.types.flatMap((icon) => [icon, "RCHEVRON"]);
+const ResultCard: React.FC<OneResultsCardData> = ({ origin, resultData }) => {
+  const types = resultData.types.flatMap((icon) => [icon, "RCHEVRON"]);
   types.splice(types.length - 1, 1); // remove the last chevron
-  console.log(types);
   return (
     <View style={styles.resultCard}>
       <View style={styles.icons}>
@@ -69,11 +67,9 @@ const resultCard: React.FC<ResultObject> = ({
             style={{ flexDirection: "row", alignItems: "center" }}
           />
         ))}
-        <Text>
-          {baseResultsData.wholeJourneyTiming}
-        </Text>
+        <Text>{resultData.wholeJourneyTiming}</Text>
       </View>
-      <Text style={styles.travelTimings}>{baseResultsData.journeyTiming}</Text>
+      <Text style={styles.travelTimings}>{resultData.journeyTiming}</Text>
     </View>
   );
 };
@@ -82,8 +78,7 @@ const ResultScreen: React.FC<
   ResultObject & {
     isVisible: boolean;
     setIsVisible: (isVisible: boolean) => void;
-    origin: Coords; //should contain a name to display ideally
-    destination: destinationLocation;
+
   }
 > = ({
   origin,
@@ -128,7 +123,6 @@ const ResultScreen: React.FC<
                 textInputContainer: {
                   borderWidth: 1,
                   borderColor: "black",
-                  backgroundColor: "green",
                 },
               }}
             />
@@ -140,16 +134,13 @@ const ResultScreen: React.FC<
                 textInputContainer: {
                   borderWidth: 1,
                   borderColor: "black",
-                  backgroundColor: "green",
                 },
               }}
             />
-            <View style={{ flex: 1, direction: "ltr", alignItems: "center" }}>
-              {resultCard({
-                origin,
-                destination,
-                baseResultsData
-              })}
+            <View style={{ flex: 1, direction: "ltr", alignItems: "center", }}>
+            {baseResultsData.map((data, index) => (
+              <ResultCard key={index} origin={origin} resultData={data}/>
+            ))}
             </View>
           </Modal>
         </ScrollView>
@@ -163,7 +154,6 @@ const ResultScreen: React.FC<
 const styles = StyleSheet.create({
   googleSearchBarContainer: {
     marginTop: 5,
-    backgroundColor: "red",
     height: 0,
     flex: 0.1,
   },
@@ -181,7 +171,6 @@ const styles = StyleSheet.create({
     borderBottomColor: "black",
     borderWidth: 1,
     justifyContent: "space-evenly",
-    backgroundColor: "red",
   },
   icons: {
     flexDirection: "row",
