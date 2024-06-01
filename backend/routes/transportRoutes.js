@@ -2,7 +2,7 @@ var express = require("express");
 var router = express.Router();
 
 const url = "https://routes.googleapis.com/directions/v2:computeRoutes";
-router.post("/transportRoutes", (req, res) => {
+router.post("/", (req, res) => {
   //include a way to read the request as a json object to get the latitude and longitude
   var payload = {
     origin: {
