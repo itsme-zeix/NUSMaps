@@ -58,7 +58,8 @@
         {
           "fonts": ["./assets/fonts"]
         }
-      ]
+      ],
+      "./android-manifest.plugin.js"
     ],
     "experiments": {
       "typedRoutes": true
