@@ -100,15 +100,6 @@ const busCard = (bus: BusService) => {
     </View>
   );
 };
-
-const populateDBFirstTime = async () => {
-  const db =  SQLite.openDatabaseAsync("userData.db");
-  const data = fetch("https://nusmaps.onrender.com:3000/cacheData/", {
-    method: "GET",
-  });
-  const result = await (await data).json();
-  console.log(result)
-  };
  
 const busStopCard = (busStop: BusStop) => {
   return (
@@ -148,7 +139,6 @@ export default function HomeScreen() {
     return () => clearInterval(interval);
   }, []);
   
-  populateDBFirstTime();
   return (
     <SafeAreaView style={styles.safeAreaViewContainer}>
       <BusStopSearchBar />
