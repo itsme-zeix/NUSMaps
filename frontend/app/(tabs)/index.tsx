@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, SafeAreaView, ScrollView, Text } from "react-native";
+import * as SQLite from 'expo-sqlite';
 import BusStopSearchBar from "@/components/BusStopSearchBar";
 
 // Define interfaces for BusService and BusStop
@@ -13,7 +14,7 @@ interface BusStop {
   busId: string;
   distanceAway: string;
   savedBuses: BusService[];
-}
+};
 
 /* FOR TESTING PURPOSES */
 const bus106: BusService = {
@@ -49,7 +50,7 @@ async function fetchBusTimings(busStops: BusStop[]) {
       }
     );
     const apiReply = await response.json();
-    console.log(apiReply);
+    // console.log(apiReply);
     return apiReply; // return back busStops array with 'timings' in BusService filled in
   } catch (error) {
     console.error("Error fetching data: ", error);
@@ -69,7 +70,7 @@ const calculateMinutesDifference = (isoTime: string): string | number => {
   const differenceInMilliseconds = busTime.getTime() - now.getTime();
   const differenceInMinutes = Math.round(differenceInMilliseconds / 1000 / 60);
   return differenceInMinutes >= 0 ? differenceInMinutes : 0;
-  console.log(differenceInMinutes);
+  // console.log(differenceInMinutes);
 };
 
 const busCard = (bus: BusService) => {
@@ -100,6 +101,15 @@ const busCard = (bus: BusService) => {
   );
 };
 
+const populateDBFirstTime = async () => {
+  const db =  SQLite.openDatabaseAsync("userData.db");
+  const data = fetch("https://nusmaps.onrender.com:3000/cacheData/", {
+    method: "GET",
+  });
+  const result = await (await data).json();
+  console.log(result)
+  };
+ 
 const busStopCard = (busStop: BusStop) => {
   return (
     <View style={styles.busStopCard}>
@@ -120,24 +130,25 @@ const busStopCard = (busStop: BusStop) => {
 
 export default function HomeScreen() {
   const [busStops, setBusStopsData] = useState<BusStop[]>([bukitBatokInt]); // bukitBatokInt FOR TESTING PURPOSES, replace w local storage
-
+  const [isloadingFirstTime, setIsLoadingFirstTime] = useState(true); // to change
   useEffect(() => {
     const fetchAndSetBusTimings = async () => {
       const updatedBusStops = await fetchBusTimings(busStops);
       setBusStopsData(updatedBusStops);
-      console.log(updatedBusStops[0].savedBuses[0]);
+      // console.log(updatedBusStops[0].savedBuses[0]);
     };
-
+    
     fetchAndSetBusTimings(); // Initial fetch
-
+    
     const interval = setInterval(() => {
       fetchAndSetBusTimings();
     }, 30000); // 30000 milliseconds = 30 seconds
-
+    
     // Cleanup interval on component unmount
     return () => clearInterval(interval);
   }, []);
-
+  
+  populateDBFirstTime();
   return (
     <SafeAreaView style={styles.safeAreaViewContainer}>
       <BusStopSearchBar />

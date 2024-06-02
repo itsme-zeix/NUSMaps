@@ -7,7 +7,7 @@ app.use(express.json());
 
 
 const PORT = process.env.PORT || 3000;
-const HOST = "0.0.0.0"; // Bind to 0.0.0.0 as required by Render server
+const HOST = "localhost"; // Bind to 0.0.0.0 as required by Render server
 
 // Debug
 app.get("/", function (req, res) {
@@ -18,10 +18,13 @@ app.get("/", function (req, res) {
 // Import routes
 const busArrivalTimesRouter = require("./routes/busArrivalTimes");
 const transportRoutesRouter = require("./routes/transportRoutes");
+const cacheDataRouter = require("./routes/cacheData");
+
 
 // Use routes
 app.use("/transportRoutes", transportRoutesRouter);
 app.use("/busArrivalTimes", busArrivalTimesRouter);
+app.use("/cacheData", cacheDataRouter);
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
