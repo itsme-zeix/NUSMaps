@@ -3,13 +3,8 @@
     "version": ">= 9.0.7"
   },
   "build": {
-    "production": {
-      "android": {
-        "image": "latest"
-      },
-      "ios": {
-        "image": "latest"
-      }
+    "preview": {
+      "distribution": "internal"
     }
   }
 }
