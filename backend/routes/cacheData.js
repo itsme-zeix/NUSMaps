@@ -15,10 +15,8 @@ const client = new Client({
 });
 router.get("/busStops", async (req, res) => {
     await client.connect();
-    console.log('leyew');
     try {
         const result = await client.query('SELECT * from busstops');
-        console.log('leyew');
         return res.send(result.rows);
     } catch (err) {
         console.error(err);
