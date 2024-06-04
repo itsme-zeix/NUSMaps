@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   travelDuration: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
   },
 });
