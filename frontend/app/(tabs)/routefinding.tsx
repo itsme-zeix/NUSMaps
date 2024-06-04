@@ -8,6 +8,7 @@ import ResultScreen from "@/components/ResultsScreen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { GooglePlaceData } from "react-native-google-places-autocomplete";
 import { format } from "date-fns";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type destinationLocation = {
   address: string;
@@ -215,7 +216,7 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <MapView style={styles.map} provider={PROVIDER_GOOGLE} region={region}>
           {currentLocation && (
             <Marker
@@ -243,7 +244,7 @@ export default function App() {
             setIsVisible={setisResultAttained}
           />
         </View>
-      </View>
+      </SafeAreaView>
     </GestureHandlerRootView>
   );
 }
