@@ -12,7 +12,6 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface BusStop {
