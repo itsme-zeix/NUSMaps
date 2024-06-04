@@ -13,6 +13,7 @@ import { ImageSourcePropType } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import Modal from "react-native-modal";
 
+//interfaces and types
 interface Coords {
   latitude: number;
   longitude: number;
@@ -44,20 +45,28 @@ interface IconCatalog {
   WALK: ImageSourcePropType;
   SUBWAY: ImageSourcePropType;
   BUS: ImageSourcePropType;
+  TRAM: ImageSourcePropType;
   RCHEVRON: ImageSourcePropType;
 }
 
+//stores the paths of the chevrons
 const iconList: IconCatalog = {
   WALK: require("../assets/images/walk_icon.png"),
   SUBWAY: require("../assets/images/subway_icon.png"),
   BUS: require("../assets/images/bus_icon.png"),
+  TRAM: require("../assets/images/tram_icon.png"),
   RCHEVRON: require(`../assets/images/chevron_right_icon.png`),
 };
 
+//constant variables
 const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY;
+
+//result card(singular card)
 const ResultCard: React.FC<SingleResultCardData> = ({ origin, resultData }) => {
   const types = resultData.types.flatMap((icon) => [icon, "RCHEVRON"]);
   types.splice(types.length - 1, 1); // remove the last chevron
+  console.log('ok');
+  console.log(types);
   return (
     <View style={styles.resultCard}>
       <View style={styles.icons}>
@@ -75,7 +84,8 @@ const ResultCard: React.FC<SingleResultCardData> = ({ origin, resultData }) => {
   );
 };
 
-const ResultScreen: React.FC<
+// result screen 
+export const ResultScreen: React.FC<
   ResultObject & {
     isVisible: boolean;
     setIsVisible: (isVisible: boolean) => void;
@@ -84,15 +94,8 @@ const ResultScreen: React.FC<
   const queryParams = {
     key: apiKey,
     language: "en",
-    // location: {
-    // latitude: current_origin.latitude,
-    // longitude: current_origin.longitude,
-    // },
     radius: 5000,
     components: "country:sg",
-    // locationbias: `circle:1000@${current_origin.latitude},${current_origin.longitude}`,
-    //might need current location to work more effectively
-    //ideal is to click on result and for changeResultVisiblity to alter it
   };
   const [originText, onChangeOrigin] = React.useState(""); //should change the default value
   if (isVisible) {
@@ -146,7 +149,8 @@ const ResultScreen: React.FC<
     return;
   }
 };
-//weird glitch
+
+//stylesheet
 const styles = StyleSheet.create({
   googleSearchBar: {
     marginTop: 5,
@@ -200,4 +204,4 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
-export default ResultScreen;
+

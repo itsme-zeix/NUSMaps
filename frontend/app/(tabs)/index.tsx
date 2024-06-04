@@ -35,8 +35,9 @@ const bukitBatokInt: BusStop = {
 };
 /* END OF TESTING PURPOSES */
 
-// Function to fetch bus timings
-async function fetchBusTimings(busStops: BusStop[]) {
+// Asynchronous functions
+async function fetchBusTimings(busStops: BusStop[]) { 
+  // Function to fetch bus timings
   try {
     const response = await fetch(
       "https://nusmaps.onrender.com/busArrivalTimes", // TODO: add authentication
@@ -57,8 +58,8 @@ async function fetchBusTimings(busStops: BusStop[]) {
   }
 }
 
+const calculateMinutesDifference = (isoTime: string): string | number => { // Calculate the difference in minutes between the current time and the given ISO time
 // Calculate the difference in minutes between the current time and the given ISO time
-const calculateMinutesDifference = (isoTime: string): string | number => {
   const now = new Date();
   const busTime = new Date(isoTime);
 
@@ -66,11 +67,11 @@ const calculateMinutesDifference = (isoTime: string): string | number => {
     // If busTime is invalid, return a default value or handle the error
     return "N/A";
   }
-
+  
   const differenceInMilliseconds = busTime.getTime() - now.getTime();
   const differenceInMinutes = Math.round(differenceInMilliseconds / 1000 / 60);
-  return differenceInMinutes >= 0 ? differenceInMinutes : 0;
   console.log(differenceInMinutes);
+  return differenceInMinutes >= 0 ? differenceInMinutes : 0;
 };
 
 const busCard = (bus: BusService) => {

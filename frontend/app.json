@@ -16,7 +16,11 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.NUSMaps",
       "infoPlist": {
-        "UIBackgroundModes": ["location", "fetch", "remote-notification"],
+        "UIBackgroundModes": [
+          "location",
+          "fetch",
+          "remote-notification"
+        ],
         "NSLocationWhenInUseUsageDescription": "This app requires access to your location when open.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "This app requires access to your location even when closed.",
         "NSLocationAlwaysUsageDescription": "This app requires access to your location when open."
@@ -34,7 +38,12 @@
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_LOCATION"
       ],
-      "package": "com.NUSMaps"
+      "package": "com.NUSMaps",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyBebj_t1eOUT4Rv1Kd2Q60UX9SW_pY99ik"
+        }
+      }
     },
     "web": {
       "bundler": "metro",
@@ -56,7 +65,9 @@
       [
         "expo-font",
         {
-          "fonts": ["./assets/fonts"]
+          "fonts": [
+            "./assets/fonts"
+          ]
         }
       ]
     ],
@@ -68,7 +79,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "d1edafc1-d6d0-4cb4-a316-8b79e8aa292e"
+        "projectId": "7c6d0b5b-f9eb-43e5-9bf5-ef7349af0fe3"
       }
     }
   }
