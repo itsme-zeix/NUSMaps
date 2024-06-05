@@ -16,11 +16,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.NUSMaps",
       "infoPlist": {
-        "UIBackgroundModes": [
-          "location",
-          "fetch",
-          "remote-notification"
-        ],
+        "UIBackgroundModes": ["location", "fetch", "remote-notification"],
         "NSLocationWhenInUseUsageDescription": "This app requires access to your location when open.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "This app requires access to your location even when closed.",
         "NSLocationAlwaysUsageDescription": "This app requires access to your location when open."
@@ -40,9 +36,7 @@
       ],
       "package": "com.NUSMaps",
       "config": {
-        "googleMaps": {
-          "apiKey": "AIzaSyBebj_t1eOUT4Rv1Kd2Q60UX9SW_pY99ik"
-        }
+        "googleMaps": {}
       }
     },
     "web": {
@@ -65,9 +59,7 @@
       [
         "expo-font",
         {
-          "fonts": [
-            "./assets/fonts"
-          ]
+          "fonts": ["./assets/fonts"]
         }
       ]
     ],
