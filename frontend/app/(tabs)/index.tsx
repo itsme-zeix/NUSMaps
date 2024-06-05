@@ -11,7 +11,7 @@ interface BusService {
 
 interface BusStop {
   busStopName: string;
-  busId: string;
+  busStopId: string;
   distanceAway: string;
   savedBuses: BusService[];
 }
@@ -29,7 +29,7 @@ const bus852: BusService = {
 
 const bukitBatokInt: BusStop = {
   busStopName: "Bukit Batok Int",
-  busId: "43009",
+  busStopId: "43009",
   distanceAway: "~5m away",
   savedBuses: [bus106, bus852],
 };
