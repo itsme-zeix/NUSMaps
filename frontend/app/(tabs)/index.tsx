@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, SafeAreaView, ScrollView, Text } from "react-native";
-import * as SQLite from 'expo-sqlite';
+import { View, StyleSheet, ScrollView, Text } from "react-native"
 import BusStopSearchBar from "@/components/BusStopSearchBar";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // Define interfaces for BusService and BusStop
 interface BusService {
@@ -141,7 +141,7 @@ export default function HomeScreen() {
   }, []);
   
   return (
-    <SafeAreaView style={styles.safeAreaViewContainer}>
+    <SafeAreaView style={styles.tabContent}>
       <BusStopSearchBar />
       <ScrollView style={styles.scrollView}>
         {busStops.map((busStop, index) => (
@@ -153,7 +153,7 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeAreaViewContainer: {
+  tabContent: {
     flex: 1,
     flexDirection: "column",
   },
