@@ -119,7 +119,8 @@ export default function App() {
         let currPath = bestPaths[index];
         let typesArr: string[] = [];
         console.log(currPath.legs[0].mode);
-        typesArr = currPath.legs.map((leg) => leg.mode);
+        // Only way to not use 'any' type here is to define an interface for the const routes (the json reply above)
+        typesArr = currPath.legs.map((leg: any) => leg.mode);
         const rightSideTiming = formatBeginningEndingTime(
           currPath.startTime,
           currPath.endTime
