@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import MapView, { PROVIDER_GOOGLE, Marker, Region } from "react-native-maps";
 import * as Location from "expo-location";
-import RouteSearchBar from "@/components/RouteSearchBar";
+import { RouteSearchBar } from "@/components/RouteSearchBar";
 import Toast from "react-native-toast-message";
 import { ResultScreen } from "@/components/ResultsScreen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
