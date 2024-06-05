@@ -4,12 +4,12 @@ import BusStopSearchBar from "@/components/BusStopSearchBar";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // Define interfaces for BusService and BusStop
-export interface BusService { // exported for use in busservices.tsx
+interface BusService {
   busNumber: string;
   timings: string[]; // ISO format
 }
 
-export interface BusStop { // exported for use in busservices.tsx
+interface BusStop {
   busStopName: string;
   busId: string;
   distanceAway: string;
