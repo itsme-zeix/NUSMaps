@@ -13,15 +13,12 @@
     "preview": {
       "distribution": "internal"
     },
-    "production": { 
+    "production": {
       "android": {
         "buildType": "apk"
-    },
-    "env": {
-      "EXPO_PUBLIC_ONEMAPS_API_KEY": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzMmQzYWE5MTc3OWEwYzZlOGFhMDVlNjM5NzM1YTk5NiIsImlzcyI6Imh0dHA6Ly9pbnRlcm5hbC1hbGItb20tcHJkZXppdC1pdC0xMjIzNjk4OTkyLmFwLXNvdXRoZWFzdC0xLmVsYi5hbWF6b25hd3MuY29tL2FwaS92Mi91c2VyL3Bhc3N3b3JkIiwiaWF0IjoxNzE3MzU3NzI3LCJleHAiOjE3MTc2MTY5MjcsIm5iZiI6MTcxNzM1NzcyNywianRpIjoicVVmbVlaNlNlaEszaE5MciIsInVzZXJfaWQiOjM2ODksImZvcmV2ZXIiOmZhbHNlfQ.WPFlu0ZY5O3GVDnmhNHL4cfDCqjaRuytYoBTkL8F19M",
-      "EXPO_PUBLIC_MAPS_API_KEY": "AIzaSyBebj_t1eOUT4Rv1Kd2Q60UX9SW_pY99ik"
-      }
-  }
+      },
+      "env": {}
+    }
   },
   "submit": {
     "production": {}
