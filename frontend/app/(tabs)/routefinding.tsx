@@ -1,15 +1,16 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import MapView, { PROVIDER_GOOGLE, Marker, Region } from "react-native-maps";
 import * as Location from "expo-location";
 import RouteSearchBar from "@/components/RouteSearchBar";
 import Toast from "react-native-toast-message";
-import ResultScreen from "@/components/ResultsScreen";
+import { ResultScreen } from "@/components/ResultsScreen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { GooglePlaceData } from "react-native-google-places-autocomplete";
 import { format } from "date-fns";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+//interface and types
 type destinationLocation = {
   address: string;
   placeId: string;
@@ -26,10 +27,13 @@ interface baseResultsCardType {
   wholeJourneyTiming: string;
 }
 
+//constants and variables
 const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY;
 const oneMapsApiKey = process.env.EXPO_PUBLIC_ONEMAPS_API_KEY;
 
+//exporter
 export default function App() {
+  //hooks
   const [currentLocation, setCurrentLocation] =
     useState<Location.LocationObjectCoords>({
       latitude: 1.3521,
@@ -49,6 +53,7 @@ export default function App() {
   const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
   const [locationErrorMsg, setLocationErrorMsg] = useState("");
   const [isResultAttained, setisResultAttained] = useState(false);
+  const [routeErrorMsg, setRouteErrorMsg] = useState("");
   const [destination, setDestination] = useState<destinationLocation>({
     address: "DEFAULT",
     placeId: "DEFAULT",
@@ -56,13 +61,84 @@ export default function App() {
   const [baseResultsCardData, setbaseResultsCardData] = useState<
     baseResultsCardType[]
   >([]);
-  //to change when the destination changes
-  useEffect(() => {
+  
+  //effects
+  useEffect(() => {   
+    //to change when the destination changes
     if (destination.address !== "DEFAULT") {
       setisResultAttained(true);
     }
   }, [destination]);
+  
+  useEffect(() => {
+    //shows toast when onemap api doesn't return a result
+    if (routeErrorMsg !== "") {
+      setisResultAttained(false);
+      Toast.show({
+        type: "error",
+        text1: permissionErrorMsg,
+        text2: "Please try again later when public transport is available",
+        position: "top",
+        autoHide: true,
+      });
+    }
+  });
 
+  useEffect(() => {
+      //to query for location permission
+      const getLocation = async () => {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          console.log("Permission to access location was denied");
+          setPermissionErrorMsg("Permission to access location was denied.");
+          return;
+        }
+  
+        try {
+          let location = await Location.getCurrentPositionAsync({});
+          console.log(location);
+          setCurrentLocation(location.coords);
+          setRegion({
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+            latitudeDelta: 0.005,
+            longitudeDelta: 0.005,
+          });
+        } catch (error) {
+          setLocationErrorMsg(`Failed to obtain location, ${error}`);
+          console.error("Failed to obtain location.", error);
+        }
+      };
+      getLocation();
+    }, []);
+  
+    useEffect(() => {
+      // Toast to display error from denial of gps permission
+      if (permissionErrorMsg != "") {
+        Toast.show({
+          type: "error",
+          text1: permissionErrorMsg,
+          text2: "Please try again later",
+          position: "top",
+          autoHide: true,
+        });
+      }
+    }, [permissionErrorMsg]);
+  
+    useEffect(() => {
+      //Toast to display error from inability to fetch location even with gps permission
+      if (locationErrorMsg != "") {
+        Toast.show({
+          type: "error",
+          text1: locationErrorMsg,
+          text2: "Please try again later",
+          position: "top",
+          autoHide: true,
+        });
+      }
+    }, [locationErrorMsg]);
+
+  //async functions
   async function getDestinationResult(data: GooglePlaceData) {
     //slight delay
     await getBestRoute(
@@ -76,6 +152,7 @@ export default function App() {
   }
 
   async function getCoordsFromId(placeId: string) {
+    //reverses geocoding 
     const response = await fetch(
       `https://places.googleapis.com/v1/places/${placeId}?fields=location&key=${apiKey}`
     );
@@ -93,8 +170,9 @@ export default function App() {
       );
     }
   }
-
+  
   async function getBestRoute(origin: Coords, destination: Coords) {
+    //fetches best route between two points, can pass a check to see if 
     try {
       const dateObject = new Date();
       let date = format(dateObject, "MM-dd-yyyy");
@@ -136,9 +214,11 @@ export default function App() {
       console.log(baseResultsCardData);
     } catch (error) {
       console.error("Error fetching data: ", error);
+      setRouteErrorMsg(`Error fetching data: ${error}`);
     }
-  }
+  };
 
+  //synchronous functions
   const formatBeginningEndingTime = (
     startTiming: number,
     endTiming: number
@@ -160,60 +240,6 @@ export default function App() {
     //weird visual bug
   };
 
-  //
-  useEffect(() => {
-    const getLocation = async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        console.log("Permission to access location was denied");
-        setPermissionErrorMsg("Permission to access location was denied.");
-        return;
-      }
-
-      try {
-        let location = await Location.getCurrentPositionAsync({});
-        console.log(location);
-        setCurrentLocation(location.coords);
-        setRegion({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.005,
-          longitudeDelta: 0.005,
-        });
-      } catch (error) {
-        setLocationErrorMsg(`Failed to obtain location, ${error}`);
-        console.error("Failed to obtain location.", error);
-      }
-    };
-    getLocation();
-  }, []);
-
-  // Toast to display error from denial of gps permission
-  useEffect(() => {
-    if (permissionErrorMsg != "") {
-      Toast.show({
-        type: "error",
-        text1: permissionErrorMsg,
-        text2: "Please try again later",
-        position: "top",
-        autoHide: true,
-      });
-    }
-  }, [permissionErrorMsg]);
-
-  //Toast to display error from inability to fetch location even with gps permission
-  useEffect(() => {
-    if (locationErrorMsg != "") {
-      Toast.show({
-        type: "error",
-        text1: locationErrorMsg,
-        text2: "Please try again later",
-        position: "top",
-        autoHide: true,
-      });
-    }
-  }, [locationErrorMsg]);
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={styles.container}>
@@ -233,7 +259,7 @@ export default function App() {
             location={currentLocation}
             getDestinationResult={getDestinationResult}
           />
-          <ResultScreen
+        <ResultScreen
             origin={{
               latitude: currentLocation.latitude,
               longitude: currentLocation.longitude,
@@ -249,6 +275,7 @@ export default function App() {
   );
 }
 
+//stylesheet  
 const styles = StyleSheet.create({
   container: {
     flex: 1,

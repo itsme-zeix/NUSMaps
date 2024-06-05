@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView, Text } from "react-native";
+import { View, StyleSheet, ScrollView, Text } from "react-native"
 import BusStopSearchBar from "@/components/BusStopSearchBar";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -14,7 +14,7 @@ interface BusStop {
   busId: string;
   distanceAway: string;
   savedBuses: BusService[];
-}
+};
 
 /* FOR TESTING PURPOSES */
 const bus106: BusService = {
@@ -35,8 +35,9 @@ const bukitBatokInt: BusStop = {
 };
 /* END OF TESTING PURPOSES */
 
-// Function to fetch bus timings
-async function fetchBusTimings(busStops: BusStop[]) {
+// Asynchronous functions
+async function fetchBusTimings(busStops: BusStop[]) { 
+  // Function to fetch bus timings
   try {
     const response = await fetch(
       "https://nusmaps.onrender.com/busArrivalTimes", // TODO: add authentication
@@ -57,8 +58,8 @@ async function fetchBusTimings(busStops: BusStop[]) {
   }
 }
 
+const calculateMinutesDifference = (isoTime: string): string | number => { // Calculate the difference in minutes between the current time and the given ISO time
 // Calculate the difference in minutes between the current time and the given ISO time
-const calculateMinutesDifference = (isoTime: string): string | number => {
   const now = new Date();
   const busTime = new Date(isoTime);
 
@@ -66,11 +67,11 @@ const calculateMinutesDifference = (isoTime: string): string | number => {
     // If busTime is invalid, return a default value or handle the error
     return "N/A";
   }
-
+  
   const differenceInMilliseconds = busTime.getTime() - now.getTime();
   const differenceInMinutes = Math.round(differenceInMilliseconds / 1000 / 60);
-  return differenceInMinutes >= 0 ? differenceInMinutes : 0;
   console.log(differenceInMinutes);
+  return differenceInMinutes >= 0 ? differenceInMinutes : 0;
 };
 
 const busCard = (bus: BusService) => {
@@ -100,7 +101,7 @@ const busCard = (bus: BusService) => {
     </View>
   );
 };
-
+ 
 const busStopCard = (busStop: BusStop) => {
   return (
     <View style={styles.busStopCard}>
@@ -121,24 +122,24 @@ const busStopCard = (busStop: BusStop) => {
 
 export default function HomeScreen() {
   const [busStops, setBusStopsData] = useState<BusStop[]>([bukitBatokInt]); // bukitBatokInt FOR TESTING PURPOSES, replace w local storage
-
+  const [isloadingFirstTime, setIsLoadingFirstTime] = useState(true); // to change
   useEffect(() => {
     const fetchAndSetBusTimings = async () => {
       const updatedBusStops = await fetchBusTimings(busStops);
       setBusStopsData(updatedBusStops);
       console.log(updatedBusStops[0].savedBuses[0]);
     };
-
+    
     fetchAndSetBusTimings(); // Initial fetch
-
+    
     const interval = setInterval(() => {
       fetchAndSetBusTimings();
     }, 30000); // 30000 milliseconds = 30 seconds
-
+    
     // Cleanup interval on component unmount
     return () => clearInterval(interval);
   }, []);
-
+  
   return (
     <SafeAreaView style={styles.tabContent}>
       <BusStopSearchBar />
