@@ -46,4 +46,4 @@ def populateBusServices():
   with open("public_bus_stops.json", "w") as f:
     json.dump(bus_stops, f, indent=4)
 
-populateBusServices();
+populateBusServices()
