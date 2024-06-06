@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,27 +6,42 @@ import {
   TouchableWithoutFeedback,
   LayoutChangeEvent,
 } from "react-native";
-import BusStopSearchBar from "@/components/BusStopSearchBar";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
+import * as Location from "expo-location";
+import Toast from "react-native-toast-message";
+import BusStopSearchBar from "@/components/BusStopSearchBar";
 
+// INTERFACES
+interface BusService {
+  busNumber: string;
+  timings: string[]; // ISO format
+}
 interface BusStop {
   busStopName: string;
+  busStopId: string;
   distanceAway: string;
-  details: string[][];
+  savedBuses: BusService[];
+}
+interface Coords {
+  latitude: number | null;
+  longitude: number | null;
 }
 
+// EXAMPLES
 const changiAirport: BusStop = {
   busStopName: "Changi Airport",
   distanceAway: "~200m away",
-  details: [
-    ["name", "time1", "time2"],
-    ["name", "time1", "time2"],
-  ],
+  savedBuses = [],
 };
 
 const tanahMerahMRT: BusStop = {
@@ -40,7 +55,8 @@ const tanahMerahMRT: BusStop = {
 
 const busStops: BusStop[] = [changiAirport, tanahMerahMRT];
 
-export const CollapsibleContainer = ({
+// UI COMPONENTS
+const CollapsibleContainer = ({
   children,
   expanded,
 }: {
@@ -75,7 +91,7 @@ export const CollapsibleContainer = ({
   );
 };
 
-export const ColouredCircle = ({
+const ColouredCircle = ({
   color,
   size = 50,
 }: {
@@ -96,7 +112,7 @@ export const ColouredCircle = ({
   );
 };
 
-export const ListItem = ({ item }: { item: any }) => {
+const ListItem = ({ item }: { item: any }) => {
   //Used to render details for 1 bus stop
   const [expanded, setExpanded] = useState(false);
 
@@ -137,14 +153,97 @@ export const ListItem = ({ item }: { item: any }) => {
   );
 };
 
+// OBTAIN USER LOCATION
+const userLocation: Coords = {
+  latitude: null,
+  longitude: null,
+};
+
+function updateUserLocation() {
+  // Hooks
+  const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
+  const [locationErrorMsg, setLocationErrorMsg] = useState("");
+
+  // Toast to display error from denial of gps permission
+  useEffect(() => {
+    if (permissionErrorMsg != "") {
+      Toast.show({
+        type: "error",
+        text1: permissionErrorMsg,
+        text2: "Please enable location permissions for NUSMaps.",
+        position: "top",
+        autoHide: true,
+      });
+    }
+  }, [permissionErrorMsg]);
+
+  //Toast to display error from inability to fetch location even with gps permission
+  useEffect(() => {
+    if (locationErrorMsg != "") {
+      Toast.show({
+        type: "error",
+        text1: locationErrorMsg,
+        text2: "Please try again later",
+        position: "top",
+        autoHide: true,
+      });
+    }
+  }, [locationErrorMsg]);
+
+  // try to obtain gps location
+  async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      console.log("Permission to access location was denied");
+      setPermissionErrorMsg("Permission to access location was denied.");
+      return;
+    }
+
+    try {
+      let location = await Location.getCurrentPositionAsync({});
+      // process location
+    } catch (error) {
+      setLocationErrorMsg(`Failed to obtain location, ${error}`);
+      console.error("Failed to obtain location.", error);
+    }
+  };
+}
+
+// PERFORM API QUERY
+const queryClient = new QueryClient();
+// Get nearest bus stops by location. Backend API will return an busStops object with updated bus timings.
+function queryBusStops() {
+  const {
+    isPending,
+    error,
+    data: busStops,
+  } = useQuery({
+    queryKey: ["busStopsByLocation", userLocation],
+    queryFn: () =>
+      fetch("https://nusmaps.onrender.com/busStopsByLocation").then((res) =>
+        res.json()
+      ),
+  });
+
+  if (isPending) return "Loading...";
+
+  if (error) return "An error has occurred: " + error.message;
+
+  return busStops.map((busStop: BusStop, index: number) => (
+    <ListItem key={index} item={busStop} />
+  ));
+}
+
 export default function BusStopsScreen() {
   return (
-    <SafeAreaView>
-      <BusStopSearchBar></BusStopSearchBar>
-      {busStops.map((busStop, index) => (
-        <ListItem key={index} item={busStop} />
-      ))}
-    </SafeAreaView>
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaView>
+        <BusStopSearchBar></BusStopSearchBar>
+        {busStops.map((busStop, index) => (
+          <ListItem key={index} item={busStop} />
+        ))}
+      </SafeAreaView>
+    </QueryClientProvider>
   );
 }
 
