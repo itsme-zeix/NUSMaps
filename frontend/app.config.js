@@ -43,7 +43,7 @@ export default {
         "package": "com.NUSMaps",
         "config": {
           "googleMaps": {
-            "apiKey": "AIzaSyBxD7k9OplpOM3-uZEPXOyN9yq8PXlNxCk",
+            "apiKey": process.env.EXPO_PUBLIC_MAPS_API_KEY,
           }
         }
       },
