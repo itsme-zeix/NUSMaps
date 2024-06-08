@@ -5,19 +5,21 @@ import {
   GooglePlaceData,
 } from "react-native-google-places-autocomplete";
 import * as Location from "expo-location";
+import Constants  from "expo-constants";
 
 //interfaces
 interface Coords {
   latitude: number;
   longitude: number;
-}
+};
 
 interface RouteSearchBarInput {
   location: Location.LocationObjectCoords;
-}
+};
 
 //constants
-const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY;
+const apiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
+//USE THIS FOR PRODUCTION BUILDS Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
 
 //The search bar itself
 export const RouteSearchBar: React.FC<

@@ -12,6 +12,7 @@ import {
 import { ImageSourcePropType } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import Modal from "react-native-modal";
+import Constants  from "expo-constants";
 
 //interfaces and types
 interface Coords {
@@ -59,7 +60,8 @@ const iconList: IconCatalog = {
 };
 
 //constant variables
-const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY;
+const apiKey = Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
+
 
 //result card(singular card)
 const ResultCard: React.FC<SingleResultCardData> = ({ origin, resultData }) => {

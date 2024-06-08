@@ -7,8 +7,9 @@ import Toast from "react-native-toast-message";
 import { ResultScreen } from "@/components/ResultsScreen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { GooglePlaceData } from "react-native-google-places-autocomplete";
-import { format } from "date-fns";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import Constants from 'expo-constants';
 
 //interface and types
 type destinationLocation = {
@@ -19,18 +20,41 @@ type destinationLocation = {
 interface Coords {
   latitude: number;
   longitude: number;
-}
+};
 
 interface baseResultsCardType {
   types: string[];
   journeyTiming: string;
   wholeJourneyTiming: string;
+};
+
+interface RouteLegInfo {
+  //the info displayed in each leg of each result card
+  startingStopName: string;
+  destinationStopName: string;
+  intermediateStopCount: number;
+  totalTimeTaken: number;
+  intermediateStopNames: string[];
+  intermediateStopGPSCoords: Coords[];
+};
+
+interface RouteInfo{
+  //the info displayed in each result card
+  start: {
+    address: string;
+    Coords: Coords;
+  };
+  intermediateInfo: RouteLegInfo[];
+  destination: {
+    address: string;
+    Coords: Coords;
+  };
+
 }
 
 //constants and variables
-const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY;
-const oneMapsApiKey = process.env.EXPO_PUBLIC_ONEMAPS_API_KEY;
-
+const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY
+//USE THIS FOR PRODUCTION BUILDS Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
 //exporter
 export default function App() {
   //hooks
@@ -141,7 +165,7 @@ export default function App() {
   //async functions
   async function getDestinationResult(data: GooglePlaceData) {
     //slight delay
-    await getBestRoute(
+    fetchBestRoute(
       {
         latitude: currentLocation.latitude,
         longitude: currentLocation.longitude,
@@ -154,7 +178,7 @@ export default function App() {
   async function getCoordsFromId(placeId: string) {
     //reverses geocoding 
     const response = await fetch(
-      `https://places.googleapis.com/v1/places/${placeId}?fields=location&key=${apiKey}`
+      `https://places.googleapis.com/v1/places/${placeId}?fields=location&key=${mapsApiKey}`
     );
     if (response.status === 200) {
       const jsonObject = await response.json();
@@ -171,74 +195,39 @@ export default function App() {
     }
   }
   
-  async function getBestRoute(origin: Coords, destination: Coords) {
-    //fetches best route between two points, can pass a check to see if 
-    try {
-      const dateObject = new Date();
-      let date = format(dateObject, "MM-dd-yyyy");
-      let time = format(dateObject, "HH:MM:SS");
-      const routesUrl = encodeURI(
-        `https://www.onemap.gov.sg/api/public/routingsvc/route?start=${origin.latitude},${origin.longitude}&end=${destination.latitude},${destination.longitude}&routeType=pt&date=${date}&time=${time}&mode=TRANSIT&maxWalkDistance=1000&numItineraries=3`
-      );
 
-      const headers = {
-        Authorization: `${oneMapsApiKey}`,
-      };
-
-      const response = await fetch(routesUrl, {
-        method: "GET",
-        headers: headers,
+  async function fetchRoutesFromServer(origin:Coords, destination: Coords): Promise<baseResultsCardType[]> {
+    if (process.env.EXPO_PUBLIC_ONEMAPAPITOKEN) {
+      const data = await fetch("https://nusmaps.onrender.com/fetchRoute", {
+        method:'POST',
+        body: JSON.stringify({
+          origin:origin,
+          destination: destination
+        }),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": process.env.EXPO_PUBLIC_ONEMAPAPITOKEN,
+          //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
+        },
       });
-      const route = await response.json();
-      //to populate types, ideal will be to add more
-
-      const bestPaths = route.plan.itineraries;
-      const baseCardResultsDataStorage: baseResultsCardType[] = [];
-      for (let index = 0; index < bestPaths.length; index++) {
-        let currPath = bestPaths[index];
-        let typesArr: string[] = [];
-        console.log(currPath.legs[0].mode);
-        // Only way to not use 'any' type here is to define an interface for the const routes (the json reply above)
-        typesArr = currPath.legs.map((leg: any) => leg.mode);
-        const rightSideTiming = formatBeginningEndingTime(
-          currPath.startTime,
-          currPath.endTime
-        );
-        const leftSideTiming = formatJourneyTime(currPath.duration);
-        baseCardResultsDataStorage.push({
-          types: typesArr,
-          wholeJourneyTiming: rightSideTiming,
-          journeyTiming: leftSideTiming,
-        });
-      }
-      setbaseResultsCardData(baseCardResultsDataStorage);
-      console.log(baseResultsCardData);
-    } catch (error) {
-      console.error("Error fetching data: ", error);
-      setRouteErrorMsg(`Error fetching data: ${error}`);
+      return data.json();
+    } else {
+      console.error("api token for OneMap not declared. Check server settings");
+      throw new Error("api token for OneMap not declared. Check server settings");
     }
   };
 
-  //synchronous functions
-  const formatBeginningEndingTime = (
-    startTiming: number,
-    endTiming: number
-  ) => {
-    const formattedStartTiming = format(new Date(startTiming), "hh:mm a");
-    const formattedEndTiming = format(new Date(endTiming), "hh:mm a");
-    return `${formattedStartTiming} - ${formattedEndTiming}`;
-  };
-
-  const formatJourneyTime = (time: number) => {
-    console.log(time);
-    const intermediate = Math.floor(time / 60);
-    const hours = Math.floor(intermediate / 60);
-    const minutes = Math.floor(intermediate % 60);
-    if (hours < 1) {
-      return `${minutes} min`;
+  function fetchBestRoute(origin: Coords, destination: Coords) {
+    //fetches best route between two points, can pass a check to see if 
+    const {data, error, isLoading} = useQuery({queryKey:['routeData', origin, destination], queryFn:() => fetchRoutesFromServer(origin, destination)});
+    if (isLoading) {
+      console.log("loading...");
+    };
+    if (error) {
+      console.error("Couldn't fetch best route from server");
+    } else if (data) {
+      setbaseResultsCardData(data);
     }
-    return `${hours} hrs ${minutes}min `;
-    //weird visual bug
   };
 
   return (
