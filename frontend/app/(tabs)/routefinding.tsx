@@ -22,38 +22,36 @@ interface Coords {
   longitude: number;
 };
 
-interface baseResultsCardType {
-  types: string[];
-  journeyTiming: string;
-  wholeJourneyTiming: string;
+interface LegBase {
+  //base template for the info that is displayed in the leg
+  type: string;
+}
+interface WalkLeg extends LegBase {
+  walkInfo: {
+    "distance":string,
+    "direction":string;
+  }[],
 };
-
-interface RouteLegInfo {
-  //the info displayed in each leg of each result card
+interface PublicTransportLeg extends LegBase {
+  //used to display the routes info
+  serviceType: string;
   startingStopName: string;
   destinationStopName: string;
   intermediateStopCount: number;
   totalTimeTaken: number;
   intermediateStopNames: string[];
-  intermediateStopGPSCoords: Coords[];
+  intermediateStopGPSCoords:Coords[];
+};
+type Leg = PublicTransportLeg | WalkLeg;
+interface baseResultsCardType {
+  types: string[];
+  journeyTiming: string;
+  wholeJourneyTiming: string;
+  journeyLegs: Leg[] //an array of all the legs in 1 route
 };
 
-interface RouteInfo{
-  //the info displayed in each result card
-  start: {
-    address: string;
-    Coords: Coords;
-  };
-  intermediateInfo: RouteLegInfo[];
-  destination: {
-    address: string;
-    Coords: Coords;
-  };
-
-}
-
 //constants and variables
-const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY
+const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
 //USE THIS FOR PRODUCTION BUILDS Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
 //exporter
 export default function App() {
