@@ -47,7 +47,7 @@ interface baseResultsCardType {
   types: string[];
   journeyTiming: string;
   wholeJourneyTiming: string;
-  journeyLegs: Leg[] //an array of all the legs in 1 route
+  journeyLegs: Leg[]; //an array of all the legs in 1 route
 };
 
 //constants and variables
@@ -114,7 +114,7 @@ export default function App() {
           console.log("Permission to access location was denied");
           setPermissionErrorMsg("Permission to access location was denied.");
           return;
-        }
+        };
   
         try {
           let location = await Location.getCurrentPositionAsync({});
@@ -144,7 +144,7 @@ export default function App() {
           position: "top",
           autoHide: true,
         });
-      }
+      };
     }, [permissionErrorMsg]);
   
     useEffect(() => {
