@@ -9,10 +9,8 @@ async function _processData(response) {
   1. Types of legs
   2. Travel time and departure and arrival time
   3. Legs themselves for each route in an array
-
-
   */
-  const route = await response.json();
+  const route = response;
   const bestPaths = route.plan.itineraries;
   const baseCardResultsDataStorage = [];
   for (let index = 0; index < bestPaths.length; index++) {
@@ -60,15 +58,16 @@ const formatLeg = (legArray) => {
   //general function to format legs, which consists of 3 distinct types, start intermediate, destination
   //and 4 distinct subtypes for intermediate: 
   //walk, bus, mrt, tram
+  formatted_legArray = [];
   for (leg of legArray) {
     if (leg.mode === "WALK") {
-      formatWalkLeg(leg);
+      formatted_legArray.push(formatWalkLeg(leg));
     } else if (leg.mode in PUBLICTRANSPORTTYPES) {
-      formatPublicTransportLeg(leg);
+      formatted_legArray.push(formatPublicTransportLeg(leg));
     }
-  }
-
-}
+  };
+  return formatted_legArray;
+};
 
 const formatWalkLeg = (leg) => {
   //assumption that there are no intermediate stops
@@ -136,7 +135,7 @@ router.post("/", async (req, res) => {
           headers: headers,
         });
         const route = await response.json();
-        _processData(route);
+        return _processData(route);
       } catch (err) {
         console.error(err); //log the error from "route not found"
         return res.status(401).send("Error retrieving route.");
@@ -145,4 +144,8 @@ router.post("/", async (req, res) => {
       return res.status(403).send("Incorrect or missing authorization token.");
     }
 });
+
+// router.post("/getRouteDetails", async (req, res) => {
+//   const 
+// })
 module.exports = router;
