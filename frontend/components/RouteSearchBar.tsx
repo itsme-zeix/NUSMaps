@@ -1,34 +1,41 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import {
   GooglePlacesAutocomplete,
   GooglePlaceData,
 } from "react-native-google-places-autocomplete";
 import * as Location from "expo-location";
+import Constants  from "expo-constants";
 
+//interfaces
 interface Coords {
   latitude: number;
   longitude: number;
-}
+};
 
 interface RouteSearchBarInput {
   location: Location.LocationObjectCoords;
-}
+};
 
-const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY;
-const REVERSEGEOCODINGURI = "https://maps.googleapis.com/maps/api/geocode/json";
+//constants
+const apiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
+//USE THIS FOR PRODUCTION BUILDS Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
 
-const RouteSearchBar: React.FC<
+//The search bar itself
+export const RouteSearchBar: React.FC<
   RouteSearchBarInput & {
     getDestinationResult: (data: GooglePlaceData) => void;
   }
 > = ({ location, getDestinationResult }) => {
+  //hooks
   const [currLocation, setCurrLocation] = useState<Coords>({
     latitude: 1.3521,
     longitude: 103.8198,
   });
-  //shouldnt reverse the current location, just refer to current location as such
+
+  //effects
   useEffect(() => {
+    //shouldnt reverse the current location, just refer to current location as such
     if (location && Object.keys(location).length !== 0) {
       setCurrLocation({
         latitude: location.latitude,
@@ -37,6 +44,7 @@ const RouteSearchBar: React.FC<
     }
   }, [""]);
 
+  //vars
   const queryParams = {
     key: apiKey,
     language: "en",
@@ -47,8 +55,6 @@ const RouteSearchBar: React.FC<
     radius: 5000,
     components: "country:sg",
     locationbias: `circle:1000@${currLocation.latitude},${currLocation.longitude}`,
-    //might need current location to work more effectively
-    //ideal is to click on result and for changeResultVisiblity to alter it
   };
 
   return (
@@ -66,6 +72,7 @@ const RouteSearchBar: React.FC<
   );
 };
 
+//stylesheet
 const styles = StyleSheet.create({
   text: {
     fontSize: 14,
@@ -84,4 +91,3 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
 });
-export default RouteSearchBar;

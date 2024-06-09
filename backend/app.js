@@ -16,15 +16,14 @@ app.get("/", function (req, res) {
 });
 
 // Import routes
-const busArrivalTimesRouter = require("./routes/busArrivalTimes");
-const transportRoutesRouter = require("./routes/transportRoutes");
 const cacheDataRouter = require("./routes/cacheData");
+const transportRouteRouter = require("./fetchRoute");
 
 
 // Use routes
-app.use("/transportRoutes", transportRoutesRouter);
 app.use("/busArrivalTimes", busArrivalTimesRouter);
 app.use("/cacheData", cacheDataRouter);
+app.use("/transportRouteRouter", transportRouteRouter);
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
@@ -36,7 +35,7 @@ app.use((err, req, res, next) => {
   // Set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
-
+  
   // Send the error response
   res.status(err.status || 500);
   res.json({

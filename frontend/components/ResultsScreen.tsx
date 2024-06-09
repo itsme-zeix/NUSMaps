@@ -12,6 +12,7 @@ import {
 import { ImageSourcePropType } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import Modal from "react-native-modal";
+import Constants  from "expo-constants";
 
 //interfaces and types
 interface Coords {
@@ -24,11 +25,38 @@ type destinationLocation = {
   placeId: string;
 };
 
+interface LegBase {
+  //base template for the info that is displayed in the leg
+  type: string;
+}
+interface WalkLeg extends LegBase {
+  walkInfo: {
+    "distance":string,
+    "direction":string;
+  }[],
+};
+interface PublicTransportLeg extends LegBase {
+  //used to display the routes info
+  serviceType: string;
+  startingStopName: string;
+  destinationStopName: string;
+  intermediateStopCount: number;
+  totalTimeTaken: number;
+  intermediateStopNames: string[];
+  intermediateStopGPSCoords:Coords[];
+};
+type Leg = PublicTransportLeg | WalkLeg;
+
 interface baseResultsCardType {
   types: string[];
   journeyTiming: string;
   wholeJourneyTiming: string;
-}
+  journeyLegs: Leg[] //an array of all the legs in 1 route
+};
+
+const processResultsCardData = () => {
+  //processes the resultData for 1 card
+};
 
 interface ResultObject {
   origin: Coords;
@@ -38,6 +66,7 @@ interface ResultObject {
 
 interface SingleResultCardData {
   origin: Coords;
+  destination: destinationLocation;
   resultData: baseResultsCardType;
 }
 
@@ -59,10 +88,12 @@ const iconList: IconCatalog = {
 };
 
 //constant variables
-const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY;
+const apiKey = Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
+
 
 //result card(singular card)
-const ResultCard: React.FC<SingleResultCardData> = ({ origin, resultData }) => {
+const ResultCard: React.FC<SingleResultCardData> = ({ origin, destination, resultData }) => {
+  //Put in a pressable that when expanded, will 
   const types = resultData.types.flatMap((icon) => [icon, "RCHEVRON"]);
   types.splice(types.length - 1, 1); // remove the last chevron
   console.log('ok');
@@ -137,7 +168,7 @@ export const ResultScreen: React.FC<
               </View>
               <View style={styles.resultContainer}>
                 {baseResultsData.map((data, index) => (
-                  <ResultCard key={index} origin={origin} resultData={data} />
+                  <ResultCard key={index} origin={origin} resultData={data} destination={destination}/>
                 ))}
               </View>
             </View>
