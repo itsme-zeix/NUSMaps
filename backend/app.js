@@ -17,7 +17,8 @@ app.get("/", function (req, res) {
 
 // Import routes
 const cacheDataRouter = require("./routes/cacheData");
-const transportRouteRouter = require("./fetchRoute");
+const transportRouteRouter = require("./routes/fetchRoute");
+const busArrivalTimesRouter = require("./routes/busArrivalTimes");
 
 
 // Use routes
