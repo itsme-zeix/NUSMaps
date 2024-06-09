@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+const { format } = require('date-fns');
 const dotenv = require("dotenv").config();
 var express = require("express");
 
