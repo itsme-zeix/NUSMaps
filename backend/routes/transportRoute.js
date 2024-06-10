@@ -15,6 +15,7 @@ async function _processData(response) {
     // console.log(currPath.legs[0].mode);
     // Only way to not use 'any' type here is to define an interface for the const routes (the json reply above)
     const legsArray = currPath.legs;
+    console.log("legs array: ", legsArray);
     const { typesArr, formattedLegsArray } = formatLeg(legsArray);
     const rightSideTiming = formatBeginningEndingTime(
       currPath.startTime,
@@ -52,11 +53,13 @@ const formatJourneyTime = (time) => {
   //weird visual bug
 };
 
-const formatLeg = (typesArr, legArray) => {
+const formatLeg = (legArray) => {
   //general function to format legs, which consists of 3 distinct types, start intermediate, destination
   //and 4 distinct subtypes for intermediate: 
   //walk, bus, mrt, tram
-  formatted_legArray = [];
+  console.log("received leg array ", legArray);
+  const formatted_legArray = [];
+  const typesArr = [];
   for (leg of legArray) {
     leg.mode === "WALK" ?  formatted_legArray.push(formatWalkLeg(leg)) : formatted_legArray.push(formatPublicTransportLeg(leg));
     typesArr.push(leg.mode);
