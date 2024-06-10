@@ -17,6 +17,8 @@ async function _processData(response) {
     const legsArray = currPath.legs;
     // console.log("legs array: ", legsArray);
     const { typesArr, formattedLegsArray } = formatLeg(legsArray);
+    console.log("types array: ", typesArr);
+    console.log("formattedLegsArray: ", formattedLegsArray);
     const rightSideTiming = formatBeginningEndingTime(
       currPath.startTime,
       currPath.endTime
@@ -65,6 +67,7 @@ const formatLeg = (legArray) => {
     leg.mode === "WALK" ?  formatted_legArray.push(formatWalkLeg(leg)) : formatted_legArray.push(formatPublicTransportLeg(leg));
     typesArr.push(leg.mode);
   };
+  console.log("typesArr before sending: ", typesArr);
   return typesArr, formatted_legArray;
 };
 
