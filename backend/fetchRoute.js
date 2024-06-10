@@ -113,6 +113,8 @@ router.post("/", async (req, res) => {
     auth_token = req.headers.Authorization;
     let origin;
     let destination;
+    console.log(process.env.ONEMAPITOKEN);
+    console.log(auth_token);
     if (auth_token === process.env.ONEMAPAPITOKEN) {
       origin = req.body.origin;
       destination = req.body.destination;
