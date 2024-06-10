@@ -110,7 +110,7 @@ const formatPublicTransportLeg = (leg) => {
 
 router.post("/", async (req, res) => {
     const dateObject = new Date();
-    auth_token = req.headers.Authorization;
+    auth_token = req.headers['authorization'];
     console.log("Token received ", auth_token);
     let origin;
     let destination;
@@ -137,7 +137,7 @@ router.post("/", async (req, res) => {
         return res.status(401).send("Error retrieving route.");
       }
     } else {
-      return res.status(403).send(`Incorrect or missing authorization token. Your token: ${auth.token}`);
+      return res.status(403).send(`Incorrect or missing authorization token. Your token: ${auth_token}`);
     }
 });
 
