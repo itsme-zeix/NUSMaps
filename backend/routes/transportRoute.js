@@ -18,7 +18,7 @@ async function _processData(response) {
     // console.log("legs array: ", legsArray);
     const [typesArr, formatted_legArray] = formatLeg(legsArray);
     console.log("types array: ", typesArr);
-    console.log("formattedLegsArray: ", formattedLegsArray);
+    console.log("formatted_legArray: ", formatted_legArray);
     const rightSideTiming = formatBeginningEndingTime(
       currPath.startTime,
       currPath.endTime
@@ -28,7 +28,7 @@ async function _processData(response) {
       types: typesArr,
       journeyTiming: leftSideTiming,
       wholeJourneyTiming: rightSideTiming,
-      journeyLegs: formattedLegsArray
+      journeyLegs: formatted_legArray
     });
   }
   console.log('finished :', baseCardResultsDataStorage);
