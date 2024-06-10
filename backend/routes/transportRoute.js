@@ -140,7 +140,8 @@ router.post("/", async (req, res) => {
           headers: headers,
         });
         const route = await response.json();
-        return res.json(_processData(route));
+        const result = await _processData(route);
+        return res.json(result);
       } catch (err) {
         console.error(err); //log the error from "route not found"
         return res.status(401).send("Error retrieving route.");
