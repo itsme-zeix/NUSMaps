@@ -16,7 +16,7 @@ async function _processData(response) {
     // Only way to not use 'any' type here is to define an interface for the const routes (the json reply above)
     const legsArray = currPath.legs;
     // console.log("legs array: ", legsArray);
-    const { typesArr, formatted_legArray } = formatLeg(legsArray);
+    const [typesArr, formatted_legArray] = formatLeg(legsArray);
     console.log("types array: ", typesArr);
     console.log("formatted_legArray: ", formatted_legArray);
     const rightSideTiming = formatBeginningEndingTime(
@@ -69,7 +69,7 @@ const formatLeg = (legArray) => {
   };
   console.log("typesArr before sending: ", typesArr);
   console.log("formatted leg array", formatted_legArray);
-  return {typesArr, formatted_legArray};
+  return [typesArr, formatted_legArray];
 };
 
 const formatWalkLeg = (leg) => {
