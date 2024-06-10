@@ -17,14 +17,14 @@ app.get("/", function (req, res) {
 
 // Import routes
 const cacheDataRouter = require("./routes/cacheData");
-const transportRouteRouter = require("./routes/fetchRoute");
+const transportRouteRouter = require("./routes/transportRoute");
 const busArrivalTimesRouter = require("./routes/busArrivalTimes");
 
 
 // Use routes
 app.use("/busArrivalTimes", busArrivalTimesRouter);
 app.use("/cacheData", cacheDataRouter);
-app.use("/transportRouteRouter", transportRouteRouter);
+app.use("/transportRoute", transportRouteRouter);
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
