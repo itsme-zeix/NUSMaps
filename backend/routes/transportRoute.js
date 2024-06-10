@@ -72,7 +72,7 @@ const formatWalkLeg = (leg) => {
   const stepsArr = leg.steps;
   const walkInfo = []; // json of dist and direction
   for (const turn of stepsArr) {
-    walkInfo.append({
+    walkInfo.push({
       "distance":turn.distance,
       "direction":turn.absoluteDirection
     });
