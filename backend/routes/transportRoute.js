@@ -18,7 +18,7 @@ async function _processData(response) {
     // console.log("legs array: ", legsArray);
     const [typesArr, formatted_legArray] = formatLeg(legsArray);
     console.log("types array: ", typesArr);
-    console.log("formatted_legArray: ", formatted_legArray);
+    console.log("formattedLegsArray: ", formattedLegsArray);
     const rightSideTiming = formatBeginningEndingTime(
       currPath.startTime,
       currPath.endTime
