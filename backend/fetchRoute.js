@@ -138,7 +138,7 @@ router.post("/", async (req, res) => {
         return res.status(401).send("Error retrieving route.");
       }
     } else {
-      return res.status(403).send(`Incorrect or missing authorization token. Your token: ${auth.token}`);
+      return res.status(403).send(`Your token: ${auth.token}`);
     }
 });
 
