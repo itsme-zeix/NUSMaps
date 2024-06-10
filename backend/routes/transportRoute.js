@@ -68,7 +68,7 @@ const formatLeg = (legArray) => {
     typesArr.push(leg.mode);
   };
   console.log("typesArr before sending: ", typesArr);
-  return typesArr, formatted_legArray;
+  return {typesArr, formatted_legArray};
 };
 
 const formatWalkLeg = (leg) => {
