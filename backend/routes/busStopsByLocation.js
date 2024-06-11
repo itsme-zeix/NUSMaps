@@ -151,11 +151,11 @@ async function getArrivalTime(busStopsArray) {
 
 // GET request that takes location coordinates and returns a busStops object with updated arrival timings of buses.
 // The bus stops should be within x distance of the location.
-router.post("/", async (req, res) => {
+router.get("/", async (req, res) => {
   const acceptHeader = req.get("Accept");
   const authorizationHeader = req.get("Authorization");
   const contentTypeHeader = req.get("Content-Type");
-  const userLocation = req.body;
+  const { latitude, longitude } = req.query;
 
   console.log("Received GET /busStopsByLocation");
 
@@ -174,7 +174,7 @@ router.post("/", async (req, res) => {
 
   try {
     (async () => {
-      const busStopsArray = await getNearestBusStops(1.3489, 103.7473);
+      const busStopsArray = await getNearestBusStops(latitude, longitude);
       await getArrivalTime(busStopsArray); // insert arrival times
     })();
     res.json(busStopsArray);
