@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,41 +6,60 @@ import {
   TouchableWithoutFeedback,
   LayoutChangeEvent,
 } from "react-native";
-import BusStopSearchBar from "@/components/BusStopSearchBar";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
+import * as Location from "expo-location";
+import Toast from "react-native-toast-message";
+import BusStopSearchBar from "@/components/BusStopSearchBar";
 
+// INTERFACES
+interface BusService {
+  busNumber: string;
+  timings: string[]; // ISO format
+}
 interface BusStop {
   busStopName: string;
+  busStopId: string;
   distanceAway: string;
-  details: string[][];
+  savedBuses: BusService[];
+}
+interface Coords {
+  latitude: number | null;
+  longitude: number | null;
 }
 
-const changiAirport: BusStop = {
-  busStopName: "Changi Airport",
-  distanceAway: "~200m away",
-  details: [
-    ["name", "time1", "time2"],
-    ["name", "time1", "time2"],
-  ],
+// UI COMPONENTS
+const ColouredCircle = ({
+  color,
+  size = 50,
+}: {
+  color: string;
+  size?: number;
+}) => {
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: color,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    />
+  );
 };
 
-const tanahMerahMRT: BusStop = {
-  busStopName: "Tanah Merah MRT",
-  distanceAway: "~500m away",
-  details: [
-    ["name", "time1", "time2"],
-    ["name", "time1", "time2"],
-  ],
-};
-
-const busStops: BusStop[] = [changiAirport, tanahMerahMRT];
-
-export const CollapsibleContainer = ({
+const CollapsibleContainer = ({
   children,
   expanded,
 }: {
@@ -75,28 +94,7 @@ export const CollapsibleContainer = ({
   );
 };
 
-export const ColouredCircle = ({
-  color,
-  size = 50,
-}: {
-  color: string;
-  size?: number;
-}) => {
-  return (
-    <View
-      style={{
-        width: size,
-        height: size,
-        borderRadius: size / 2,
-        backgroundColor: color,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    />
-  );
-};
-
-export const ListItem = ({ item }: { item: any }) => {
+const ListItem = ({ item }: { item: any }) => {
   //Used to render details for 1 bus stop
   const [expanded, setExpanded] = useState(false);
 
@@ -137,14 +135,108 @@ export const ListItem = ({ item }: { item: any }) => {
   );
 };
 
-export default function BusStopsScreen() {
+// OBTAIN USER LOCATION
+const userLocation: Coords = {
+  latitude: null,
+  longitude: null,
+};
+
+function updateUserLocation() {
+  // Hooks
+  const [location, setLocation] = useState<Coords>({
+    latitude: null,
+    longitude: null,
+  });
+  const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
+  const [locationErrorMsg, setLocationErrorMsg] = useState("");
+
+  // try to obtain gps location
+  useEffect(() => {
+    const getLocation = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setPermissionErrorMsg("Permission to access location was denied.");
+        return;
+      }
+
+      try {
+        let location = await Location.getCurrentPositionAsync({});
+        setLocation({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+      } catch (error) {
+        setLocationErrorMsg(`Failed to obtain location, ${error}`);
+      }
+    };
+
+    getLocation();
+  }, []);
+
+  // TOASTS
+  // Toast to display error from denial of gps permission
+  useEffect(() => {
+    if (permissionErrorMsg != "") {
+      Toast.show({
+        type: "error",
+        text1: permissionErrorMsg,
+        text2: "Please enable location permissions for NUSMaps.",
+        position: "top",
+        autoHide: true,
+      });
+    }
+  }, [permissionErrorMsg]);
+
+  //Toast to display error from inability to fetch location even with gps permission
+  useEffect(() => {
+    if (locationErrorMsg != "") {
+      Toast.show({
+        type: "error",
+        text1: locationErrorMsg,
+        text2: "Please try again later",
+        position: "top",
+        autoHide: true,
+      });
+    }
+  }, [locationErrorMsg]);
+
+  return location;
+}
+
+// PERFORM API QUERY
+const queryClient = new QueryClient();
+// Get nearest bus stops by location and render it. Backend API will return an busStops object with updated bus timings.
+function BusStops() {
+  const userLocation = updateUserLocation();
+  const { isPending, error, data: busStops } = useQuery({
+    queryKey: ["busStopsByLocation", userLocation],
+    queryFn: () =>
+      fetch(
+        `https://nusmaps.onrender.com/busStopsByLocation?latitude=${userLocation.latitude}&longitude=${userLocation.longitude}`
+      ).then((res) => res.json()),
+    enabled: !!userLocation.latitude && !!userLocation.longitude, // Only run query if location is available
+  });
+
+  if (isPending) return <Text>Loading...</Text>;
+  if (error) return <Text>An error has occurred: {error.message}</Text>;
+
   return (
-    <SafeAreaView>
-      <BusStopSearchBar></BusStopSearchBar>
-      {busStops.map((busStop, index) => (
+    <>
+      {busStops.map((busStop: BusStop, index: number) => (
         <ListItem key={index} item={busStop} />
       ))}
-    </SafeAreaView>
+    </>
+  );
+}
+
+export default function BusStopsScreen() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaView>
+        <BusStopSearchBar></BusStopSearchBar>
+        <BusStops />
+      </SafeAreaView>
+    </QueryClientProvider>
   );
 }
 
