@@ -85,14 +85,14 @@ async function getNearestBusStops(userLat, userLon) {
       })
       .sort((a, b) => a.distance - b.distance) // Sort by distance
       .slice(0, 10); // Get the 10 nearest stops
-    
+
     // Format the bus stops properly so that timings can be inserted easily once retrieved.
     const arrBusStops = [];
     for (stop of nearbyStops) {
       const busStopObject = await generateBusStopsObject(stop);
       arrBusStops.push(busStopObject);
     }
-    return arrBusStops
+    return arrBusStops;
   } catch (err) {
     console.error(err);
   } finally {
@@ -102,13 +102,13 @@ async function getNearestBusStops(userLat, userLon) {
 }
 
 // Insert the arrival times (retrieved from API) into the bus stops array.
-// Functionally the same as calling /busStopArrivalTimes, but we avoid calling the internal API, despite the abstraction, as it will mean that we have to wait 
+// Functionally the same as calling /busStopArrivalTimes, but we avoid calling the internal API, despite the abstraction, as it will mean that we have to wait
 // for multiple calls to complete synchronously, increasing our API's response time.
 async function getArrivalTime(busStopsArray) {
   for (const busStop of busStopsArray) {
     for (const bus of busStop.savedBuses) {
       await (async (stopId, serviceNo) => {
-        console.log(stopId, serviceNo)
+        console.log(stopId, serviceNo);
         try {
           const response = await fetch(
             `http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=${stopId}&ServiceNo=${serviceNo}`,
@@ -131,7 +131,7 @@ async function getArrivalTime(busStopsArray) {
           }
 
           const datamallReply = JSON.parse(text);
-          console.log(datamallReply)
+          console.log(datamallReply);
           if (!datamallReply.Services) {
             throw new Error("Unexpected response format from datamall");
           }
@@ -148,7 +148,6 @@ async function getArrivalTime(busStopsArray) {
     }
   }
 }
-
 
 // GET request that takes location coordinates and returns a busStops object with updated arrival timings of buses.
 // The bus stops should be within x distance of the location.
@@ -174,11 +173,11 @@ router.post("/", async (req, res) => {
   // }
 
   try {
-  (async () => {
-    const temp = await getNearestBusStops(1.3489, 103.7473);
-    await getArrivalTime(temp)
-    console.log(temp)  
-  })();
+    (async () => {
+      const busStopsArray = await getNearestBusStops(1.3489, 103.7473);
+      await getArrivalTime(busStopsArray); // insert arrival times
+    })();
+    res.json(busStopsArray);
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal server error");
