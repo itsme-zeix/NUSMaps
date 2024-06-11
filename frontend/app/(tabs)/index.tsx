@@ -51,7 +51,6 @@ async function fetchBusTimings(busStops: BusStop[]) {
       }
     );
     const apiReply = await response.json();
-    console.log(apiReply);
     return apiReply; // return back busStops array with 'timings' in BusService filled in
   } catch (error) {
     console.error("Error fetching data: ", error);
@@ -71,7 +70,6 @@ const calculateMinutesDifference = (isoTime: string): string | number => {
 
   const differenceInMilliseconds = busTime.getTime() - now.getTime();
   const differenceInMinutes = Math.round(differenceInMilliseconds / 1000 / 60);
-  console.log(differenceInMinutes);
   return differenceInMinutes >= 0 ? differenceInMinutes : 0;
 };
 
@@ -130,7 +128,6 @@ export default function HomeScreen() {
     const fetchAndSetBusTimings = async () => {
       const updatedBusStops = await fetchBusTimings(busStops);
       setBusStopsData(updatedBusStops);
-      console.log(updatedBusStops[0].savedBuses[0]);
     };
 
     fetchAndSetBusTimings(); // Initial fetch
