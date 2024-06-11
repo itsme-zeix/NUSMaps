@@ -42,7 +42,7 @@ async function getArrivalTime(busStopsArray) {
         } catch (error) {
           console.error("Error fetching data from datamall:", error);
         }
-      })(busStop.busId, bus.busNumber);
+      })(busStop.busStopId, bus.busNumber);
     }
   }
 }
