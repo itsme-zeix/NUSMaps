@@ -58,9 +58,9 @@ async function fetchBusTimings(busStops: BusStop[]) {
   }
 }
 
-const calculateMinutesDifference = (isoTime: string): string | number => {
-  // Calculate the difference in minutes between the current time and the given ISO time
-  // Calculate the difference in minutes between the current time and the given ISO time
+//helper functions
+const calculateMinutesDifference = (isoTime: string): string | number => { 
+// Calculate the difference in minutes between the current time and the given ISO time
   const now = new Date();
   const busTime = new Date(isoTime);
 
@@ -75,8 +75,9 @@ const calculateMinutesDifference = (isoTime: string): string | number => {
   return differenceInMinutes >= 0 ? differenceInMinutes : 0;
 };
 
+//components
 const busCard = (bus: BusService) => {
-  // Calculate the arrival times in minutes
+  // Calculate the arrival times in minutes for 1 bus service
   const arrivalTimesInMinutes = bus.timings.map((timing: string) =>
     calculateMinutesDifference(timing)
   );
@@ -104,6 +105,7 @@ const busCard = (bus: BusService) => {
 };
 
 const busStopCard = (busStop: BusStop) => {
+  //
   return (
     <View style={styles.busStopCard}>
       <View>
@@ -153,6 +155,7 @@ export default function HomeScreen() {
   );
 }
 
+//stylesheet
 const styles = StyleSheet.create({
   tabContent: {
     flex: 1,
