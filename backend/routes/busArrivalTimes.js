@@ -28,7 +28,7 @@ async function getArrivalTime(busStopsArray) {
           }
 
           const datamallReply = JSON.parse(text);
-          if (!datamallReply.Services || !datamallReply.Services[0]) {
+          if (!datamallReply.Services) {
             throw new Error("Unexpected response format from datamall");
           }
 
@@ -42,7 +42,7 @@ async function getArrivalTime(busStopsArray) {
         } catch (error) {
           console.error("Error fetching data from datamall:", error);
         }
-      })(busStop.busId, bus.busNumber);
+      })(busStop.busStopId, bus.busNumber);
     }
   }
 }
