@@ -37,25 +37,28 @@ interface Coords {
   longitude: number | null;
 }
 
-// EXAMPLES
-const changiAirport: BusStop = {
-  busStopName: "Changi Airport",
-  distanceAway: "~200m away",
-  savedBuses = [],
-};
-
-const tanahMerahMRT: BusStop = {
-  busStopName: "Tanah Merah MRT",
-  distanceAway: "~500m away",
-  details: [
-    ["name", "time1", "time2"],
-    ["name", "time1", "time2"],
-  ],
-};
-
-const busStops: BusStop[] = [changiAirport, tanahMerahMRT];
-
 // UI COMPONENTS
+const ColouredCircle = ({
+  color,
+  size = 50,
+}: {
+  color: string;
+  size?: number;
+}) => {
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: color,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    />
+  );
+};
+
 const CollapsibleContainer = ({
   children,
   expanded,
@@ -88,27 +91,6 @@ const CollapsibleContainer = ({
         {children}
       </View>
     </Animated.View>
-  );
-};
-
-const ColouredCircle = ({
-  color,
-  size = 50,
-}: {
-  color: string;
-  size?: number;
-}) => {
-  return (
-    <View
-      style={{
-        width: size,
-        height: size,
-        borderRadius: size / 2,
-        backgroundColor: color,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    />
   );
 };
 
@@ -161,9 +143,37 @@ const userLocation: Coords = {
 
 function updateUserLocation() {
   // Hooks
+  const [location, setLocation] = useState<Coords>({
+    latitude: null,
+    longitude: null,
+  });
   const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
   const [locationErrorMsg, setLocationErrorMsg] = useState("");
 
+  // try to obtain gps location
+  useEffect(() => {
+    const getLocation = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setPermissionErrorMsg("Permission to access location was denied.");
+        return;
+      }
+
+      try {
+        let location = await Location.getCurrentPositionAsync({});
+        setLocation({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+      } catch (error) {
+        setLocationErrorMsg(`Failed to obtain location, ${error}`);
+      }
+    };
+
+    getLocation();
+  }, []);
+
+  // TOASTS
   // Toast to display error from denial of gps permission
   useEffect(() => {
     if (permissionErrorMsg != "") {
@@ -190,48 +200,33 @@ function updateUserLocation() {
     }
   }, [locationErrorMsg]);
 
-  // try to obtain gps location
-  async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      console.log("Permission to access location was denied");
-      setPermissionErrorMsg("Permission to access location was denied.");
-      return;
-    }
-
-    try {
-      let location = await Location.getCurrentPositionAsync({});
-      // process location
-    } catch (error) {
-      setLocationErrorMsg(`Failed to obtain location, ${error}`);
-      console.error("Failed to obtain location.", error);
-    }
-  };
+  return location;
 }
 
 // PERFORM API QUERY
 const queryClient = new QueryClient();
-// Get nearest bus stops by location. Backend API will return an busStops object with updated bus timings.
-function queryBusStops() {
-  const {
-    isPending,
-    error,
-    data: busStops,
-  } = useQuery({
+// Get nearest bus stops by location and render it. Backend API will return an busStops object with updated bus timings.
+function BusStops() {
+  const userLocation = updateUserLocation();
+  const { isPending, error, data: busStops } = useQuery({
     queryKey: ["busStopsByLocation", userLocation],
     queryFn: () =>
-      fetch("https://nusmaps.onrender.com/busStopsByLocation").then((res) =>
-        res.json()
-      ),
+      fetch(
+        `https://nusmaps.onrender.com/busStopsByLocation?latitude=${userLocation.latitude}&longitude=${userLocation.longitude}`
+      ).then((res) => res.json()),
+    enabled: !!userLocation.latitude && !!userLocation.longitude, // Only run query if location is available
   });
 
-  if (isPending) return "Loading...";
+  if (isPending) return <Text>Loading...</Text>;
+  if (error) return <Text>An error has occurred: {error.message}</Text>;
 
-  if (error) return "An error has occurred: " + error.message;
-
-  return busStops.map((busStop: BusStop, index: number) => (
-    <ListItem key={index} item={busStop} />
-  ));
+  return (
+    <>
+      {busStops.map((busStop: BusStop, index: number) => (
+        <ListItem key={index} item={busStop} />
+      ))}
+    </>
+  );
 }
 
 export default function BusStopsScreen() {
@@ -239,9 +234,7 @@ export default function BusStopsScreen() {
     <QueryClientProvider client={queryClient}>
       <SafeAreaView>
         <BusStopSearchBar></BusStopSearchBar>
-        {busStops.map((busStop, index) => (
-          <ListItem key={index} item={busStop} />
-        ))}
+        <BusStops />
       </SafeAreaView>
     </QueryClientProvider>
   );
