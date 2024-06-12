@@ -94,7 +94,9 @@ async function getNearestBusStops(userLat, userLon) {
     }
     return arrBusStops;
   } catch (err) {
-    console.error(err);
+    console.error(
+      "busStopsByLocation encountered an error with PostgreSQL call:" + err
+    );
   } finally {
     await client.end();
   }
