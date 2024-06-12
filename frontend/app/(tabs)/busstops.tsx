@@ -211,7 +211,7 @@ function BusStops() {
     queryKey: ["busStopsByLocation"],
     queryFn: () =>
       fetch(
-        `http://localhost:3000/busStopsByLocation?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}`
+        `http://nusmaps.onrender.com/busStopsByLocation?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}`
       ).then((res) => res.json()),
   });
 
