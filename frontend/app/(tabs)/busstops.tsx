@@ -5,6 +5,7 @@ import {
   View,
   TouchableWithoutFeedback,
   LayoutChangeEvent,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
@@ -105,7 +106,11 @@ const ListItem = ({ item }: { item: BusStop }) => {
         <View style={styles.container}>
           <View style={styles.textContainer}>
             <Text style={styles.text}>{item.busStopName}</Text>
-            <Text style={styles.text}>{item.distanceAway}</Text>
+            <Text style={styles.text}>
+              {Number(item.distanceAway) < 1
+                ? `~${(Number(item.distanceAway) * 1000).toFixed(0)}m away`
+                : `~${Number(item.distanceAway).toFixed(2)}km away`}
+            </Text>
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -124,10 +129,14 @@ const ListItem = ({ item }: { item: BusStop }) => {
               </View>
               <View style={styles.rightContainer}>
                 <Text style={[styles.details, styles.text]}>
-                  {bus.timings[0]}
+                  {bus.timings[1] !== "N/A"
+                    ? `${bus.timings[0]} min`
+                    : bus.timings[0]}
                 </Text>
                 <Text style={[styles.details, styles.text]}>
-                  {bus.timings[1]}
+                  {bus.timings[1] !== "N/A"
+                    ? `${bus.timings[1]} min`
+                    : bus.timings[1]}
                 </Text>
               </View>
             </View>
@@ -194,7 +203,6 @@ const queryClient = new QueryClient();
 // Get nearest bus stops by location and render it. Backend API will return a busStops object with updated bus timings.
 function BusStops() {
   const location = useUserLocation();
-
   const {
     isPending,
     error,
@@ -211,16 +219,43 @@ function BusStops() {
   if (error) return <Text>An error has occurred: {error.message}</Text>;
   console.log(busStops);
 
+  // Logic to modify the timings in the BusService object from ISO time to minutes away from now.
+  const calculateMinutesDifference = (isoTime: string): string => {
+    // Calculate the difference in minutes between the current time and the given ISO time
+    const now = new Date();
+    const busTime = new Date(isoTime);
+
+    if (isNaN(busTime.getTime())) {
+      // If busTime is invalid, return a default value or handle the error
+      return "N/A";
+    }
+
+    const differenceInMilliseconds = busTime.getTime() - now.getTime();
+    const differenceInMinutes = Math.round(
+      differenceInMilliseconds / 1000 / 60
+    );
+    return String(differenceInMinutes >= 0 ? differenceInMinutes : 0);
+  };
+
+  busStops.map((busStop: BusStop) =>
+    busStop.savedBuses.map((bus: BusService) => {
+      bus.timings[0] = calculateMinutesDifference(bus.timings[0]);
+      bus.timings[1] = calculateMinutesDifference(bus.timings[1]);
+    })
+  );
+
   return (
-    <>
-      {busStops && Array.isArray(busStops) ? (
-        busStops.map((busStop: BusStop, index: number) => (
-          <ListItem key={index} item={busStop} />
-        ))
-      ) : (
-        <Text>{JSON.stringify(busStops)}</Text>
-      )}
-    </>
+    <ScrollView>
+      <>
+        {busStops && Array.isArray(busStops) ? (
+          busStops.map((busStop: BusStop, index: number) => (
+            <ListItem key={index} item={busStop} />
+          ))
+        ) : (
+          <Text>{JSON.stringify(busStops)}</Text>
+        )}
+      </>
+    </ScrollView>
   );
 }
 
