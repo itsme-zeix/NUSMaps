@@ -16,9 +16,9 @@ async function _processData(response) {
     // Only way to not use 'any' type here is to define an interface for the const routes (the json reply above)
     const legsArray = currPath.legs;
     // console.log("legs array: ", legsArray);
-    const [typesArr, formattedLegArray] = formatLeg(legsArray);
+    const [typesArr, formmatedLegArray] = formatLeg(legsArray);
     console.log("types array: ", typesArr);
-    console.log("formattedLegArray: ", formattedLegArray);
+    console.log("formmatedLegArray: ", formmatedLegArray);
     const rightSideTiming = formatBeginningEndingTime(
       currPath.startTime,
       currPath.endTime
@@ -28,7 +28,7 @@ async function _processData(response) {
       types: typesArr,
       journeyTiming: leftSideTiming,
       wholeJourneyTiming: rightSideTiming,
-      journeyLegs: formattedLegArray
+      journeyLegs: formmatedLegArray
     });
   }
   console.log('finished :', baseCardResultsDataStorage);
@@ -61,16 +61,15 @@ const formatLeg = (legArray) => {
   //and 4 distinct subtypes for intermediate: 
   //walk, bus, mrt, tram
   // console.log("received leg array ", legArray);
-  const formattedLegArray = [];
+  const formmatedLegArray = [];
   const typesArr = [];
   for (leg of legArray) {
-    console.log("leg: ", leg);
-    leg.mode === "WALK" ?  formattedLegArray.push(formatWalkLeg(leg)) : formattedLegArray.push(formatPublicTransportLeg(leg));
+    leg.mode === "WALK" ?  formmatedLegArray.push(formatWalkLeg(leg)) : formmatedLegArray.push(formatPublicTransportLeg(leg));
     typesArr.push(leg.mode);
   };
   console.log("typesArr before sending: ", typesArr);
-  console.log("formatted leg array", formattedLegArray);
-  return [typesArr, formattedLegArray];
+  console.log("formatted leg array", formmatedLegArray);
+  return [typesArr, formmatedLegArray];
 };
 
 const formatWalkLeg = (leg) => {
