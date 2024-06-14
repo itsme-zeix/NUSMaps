@@ -197,7 +197,7 @@ export default function App() {
   async function fetchRoutesFromServer(origin:Coords, destination: Coords): Promise<baseResultsCardType[]> {
     if (process.env.EXPO_PUBLIC_ONEMAPAPITOKEN) {
       try{
-        const data = await fetch("https://test-nusmaps.onrender.com/transportRoute", {
+        const data = await fetch("https://nusmaps.onrender.com/transportRoute", {
           method:'POST',
           body: JSON.stringify({
             origin:origin,
