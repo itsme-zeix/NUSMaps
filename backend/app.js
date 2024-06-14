@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
-const HOST = "localhost"; // Bind to 0.0.0.0 as required by Render server
+const HOST = "0.0.0.0"; // Bind to 0.0.0.0 as required by Render server
 
 // Debug
 app.get("/", function (req, res) {
