@@ -5,6 +5,7 @@ import {
   View,
   TouchableWithoutFeedback,
   LayoutChangeEvent,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
@@ -18,6 +19,7 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import * as Location from "expo-location";
+import { LocationObject } from "expo-location";
 import Toast from "react-native-toast-message";
 import BusStopSearchBar from "@/components/BusStopSearchBar";
 
@@ -31,10 +33,6 @@ interface BusStop {
   busStopId: string;
   distanceAway: string;
   savedBuses: BusService[];
-}
-interface Coords {
-  latitude: number | null;
-  longitude: number | null;
 }
 
 // UI COMPONENTS
@@ -94,7 +92,7 @@ const CollapsibleContainer = ({
   );
 };
 
-const ListItem = ({ item }: { item: any }) => {
+const ListItem = ({ item }: { item: BusStop }) => {
   //Used to render details for 1 bus stop
   const [expanded, setExpanded] = useState(false);
 
@@ -108,24 +106,38 @@ const ListItem = ({ item }: { item: any }) => {
         <View style={styles.container}>
           <View style={styles.textContainer}>
             <Text style={styles.text}>{item.busStopName}</Text>
-            <Text style={styles.text}>{item.distanceAway}</Text>
+            <Text style={styles.text}>
+              {Number(item.distanceAway) < 1
+                ? `~${(Number(item.distanceAway) * 1000).toFixed(0)}m away`
+                : `~${Number(item.distanceAway).toFixed(2)}km away`}
+            </Text>
           </View>
         </View>
       </TouchableWithoutFeedback>
 
       <CollapsibleContainer expanded={expanded}>
         <View style={styles.textContainer}>
-          {item.details.map((detail: string[], index: number) => (
+          {item.savedBuses.map((bus: BusService, index: number) => (
             <View key={index} style={styles.detailRow}>
               <View style={styles.leftContainer}>
                 {/* TODO: use conditional to assign colour to circle based on busStopName/tag */}
                 {/* Can consider moving this logic into the BusStop interface */}
                 <ColouredCircle color="blue" size={15} />
-                <Text style={[styles.details, styles.text]}>{detail[0]}</Text>
+                <Text style={[styles.details, styles.text]}>
+                  {bus.busNumber}
+                </Text>
               </View>
               <View style={styles.rightContainer}>
-                <Text style={[styles.details, styles.text]}>{detail[1]}</Text>
-                <Text style={[styles.details, styles.text]}>{detail[2]}</Text>
+                <Text style={[styles.details, styles.text]}>
+                  {bus.timings[1] !== "N/A"
+                    ? `${bus.timings[0]} min`
+                    : bus.timings[0]}
+                </Text>
+                <Text style={[styles.details, styles.text]}>
+                  {bus.timings[1] !== "N/A"
+                    ? `${bus.timings[1]} min`
+                    : bus.timings[1]}
+                </Text>
               </View>
             </View>
           ))}
@@ -135,22 +147,12 @@ const ListItem = ({ item }: { item: any }) => {
   );
 };
 
-// OBTAIN USER LOCATION
-const userLocation: Coords = {
-  latitude: null,
-  longitude: null,
-};
-
-function updateUserLocation() {
-  // Hooks
-  const [location, setLocation] = useState<Coords>({
-    latitude: null,
-    longitude: null,
-  });
+const useUserLocation = () => {
+  const [location, setLocation] = useState<LocationObject | null>(null);
   const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
   const [locationErrorMsg, setLocationErrorMsg] = useState("");
+  const [locationReady, setLocationReady] = useState(false); // this is to only allow querying is getting user's current location is completed.
 
-  // try to obtain gps location
   useEffect(() => {
     const getLocation = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -158,25 +160,19 @@ function updateUserLocation() {
         setPermissionErrorMsg("Permission to access location was denied.");
         return;
       }
-
       try {
         let location = await Location.getCurrentPositionAsync({});
-        setLocation({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        });
+        setLocation(location);
+        setLocationReady(true);
       } catch (error) {
         setLocationErrorMsg(`Failed to obtain location, ${error}`);
       }
     };
-
     getLocation();
   }, []);
 
-  // TOASTS
-  // Toast to display error from denial of gps permission
   useEffect(() => {
-    if (permissionErrorMsg != "") {
+    if (permissionErrorMsg) {
       Toast.show({
         type: "error",
         text1: permissionErrorMsg,
@@ -187,9 +183,8 @@ function updateUserLocation() {
     }
   }, [permissionErrorMsg]);
 
-  //Toast to display error from inability to fetch location even with gps permission
   useEffect(() => {
-    if (locationErrorMsg != "") {
+    if (locationErrorMsg) {
       Toast.show({
         type: "error",
         text1: locationErrorMsg,
@@ -200,32 +195,67 @@ function updateUserLocation() {
     }
   }, [locationErrorMsg]);
 
-  return location;
-}
+  return locationReady ? location : null;
+};
 
 // PERFORM API QUERY
 const queryClient = new QueryClient();
-// Get nearest bus stops by location and render it. Backend API will return an busStops object with updated bus timings.
+// Get nearest bus stops by location and render it. Backend API will return a busStops object with updated bus timings.
 function BusStops() {
-  const userLocation = updateUserLocation();
-  const { isPending, error, data: busStops } = useQuery({
-    queryKey: ["busStopsByLocation", userLocation],
+  const location = useUserLocation();
+  const {
+    isPending,
+    error,
+    data: busStops,
+  } = useQuery({
+    queryKey: ["busStopsByLocation"],
     queryFn: () =>
       fetch(
-        `https://nusmaps.onrender.com/busStopsByLocation?latitude=${userLocation.latitude}&longitude=${userLocation.longitude}`
+        `http://nusmaps.onrender.com/busStopsByLocation?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}`
       ).then((res) => res.json()),
-    enabled: !!userLocation.latitude && !!userLocation.longitude, // Only run query if location is available
   });
 
   if (isPending) return <Text>Loading...</Text>;
   if (error) return <Text>An error has occurred: {error.message}</Text>;
+  console.log(busStops);
+
+  // Logic to modify the timings in the BusService object from ISO time to minutes away from now.
+  const calculateMinutesDifference = (isoTime: string): string => {
+    // Calculate the difference in minutes between the current time and the given ISO time
+    const now = new Date();
+    const busTime = new Date(isoTime);
+
+    if (isNaN(busTime.getTime())) {
+      // If busTime is invalid, return a default value or handle the error
+      return "N/A";
+    }
+
+    const differenceInMilliseconds = busTime.getTime() - now.getTime();
+    const differenceInMinutes = Math.round(
+      differenceInMilliseconds / 1000 / 60
+    );
+    return String(differenceInMinutes >= 0 ? differenceInMinutes : 0);
+  };
+
+  busStops.map((busStop: BusStop) =>
+    busStop.savedBuses.map((bus: BusService) => {
+      bus.timings[0] = calculateMinutesDifference(bus.timings[0]);
+      bus.timings[1] = calculateMinutesDifference(bus.timings[1]);
+    })
+  );
 
   return (
-    <>
-      {busStops.map((busStop: BusStop, index: number) => (
-        <ListItem key={index} item={busStop} />
-      ))}
-    </>
+    <ScrollView>
+      <>
+        {busStops && Array.isArray(busStops) ? (
+          busStops.map((busStop: BusStop, index: number) => (
+            <ListItem key={index} item={busStop} />
+          ))
+        ) : (
+          <Text>{JSON.stringify(busStops)}</Text>
+        )}
+      </>
+    </ScrollView>
   );
 }
 
@@ -233,7 +263,7 @@ export default function BusStopsScreen() {
   return (
     <QueryClientProvider client={queryClient}>
       <SafeAreaView>
-        <BusStopSearchBar></BusStopSearchBar>
+        <BusStopSearchBar />
         <BusStops />
       </SafeAreaView>
     </QueryClientProvider>

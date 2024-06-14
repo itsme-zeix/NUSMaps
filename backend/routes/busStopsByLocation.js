@@ -40,8 +40,8 @@ async function getNearestBusStops(userLat, userLon) {
   // NOTE:
   // Since there are only ~5000 bus stops, we are able to skip optimizations such as adding buckets by 1km radius.
   // Instead, we can just calculate the euclidean distance synchronously (calculating asynchrononously doesn't speed up much here).
-
   // Connect to PostgreSQL server
+
   const client = new Client({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
@@ -84,7 +84,7 @@ async function getNearestBusStops(userLat, userLon) {
         return { id: stop.id, name, distance, services };
       })
       .sort((a, b) => a.distance - b.distance) // Sort by distance
-      .slice(0, 10); // Get the 10 nearest stops
+      .slice(0, 2); // Get the 10 nearest stops
 
     // Format the bus stops properly so that timings can be inserted easily once retrieved.
     const arrBusStops = [];
@@ -94,7 +94,9 @@ async function getNearestBusStops(userLat, userLon) {
     }
     return arrBusStops;
   } catch (err) {
-    console.error(err);
+    console.error(
+      "busStopsByLocation encountered an error with PostgreSQL call:" + err
+    );
   } finally {
     await client.end();
   }
@@ -135,12 +137,16 @@ async function getArrivalTime(busStopsArray) {
           if (!datamallReply.Services) {
             throw new Error("Unexpected response format from datamall");
           }
-
-          const firstArrivalTime =
-            datamallReply.Services[0].NextBus.EstimatedArrival;
-          const secondArrivalTime =
-            datamallReply.Services[0].NextBus2.EstimatedArrival;
-          bus.timings = [firstArrivalTime, secondArrivalTime];
+          if (datamallReply.Services.length == 0) {
+            bus.timings = ["N.A.", "N.A."];
+          } else {
+            const firstArrivalTime =
+              datamallReply.Services[0].NextBus.EstimatedArrival;
+            const secondArrivalTime =
+              datamallReply.Services[0].NextBus2.EstimatedArrival;
+            bus.timings = [firstArrivalTime, secondArrivalTime];
+          }
+          console.log(bus);
         } catch (error) {
           console.error("Error fetching data from datamall:", error);
         }
@@ -152,32 +158,22 @@ async function getArrivalTime(busStopsArray) {
 // GET request that takes location coordinates and returns a busStops object with updated arrival timings of buses.
 // The bus stops should be within x distance of the location.
 router.get("/", async (req, res) => {
-  const acceptHeader = req.get("Accept");
   const authorizationHeader = req.get("Authorization");
-  const contentTypeHeader = req.get("Content-Type");
   const { latitude, longitude } = req.query;
 
   console.log("Received GET /busStopsByLocation");
-
-  if (contentTypeHeader !== "application/json") {
-    return res.status(415).send("Unsupported Media Type");
-  }
-
-  if (acceptHeader !== "application/json") {
-    return res.status(406).send("Not Acceptable");
-  }
 
   // Add authorization check
   // if (!authorizationHeader || authorizationHeader !== 'expectedValue') {
   //   return res.status(403).send("Forbidden");
   // }
-
   try {
     (async () => {
       const busStopsArray = await getNearestBusStops(latitude, longitude);
+      console.log(busStopsArray);
       await getArrivalTime(busStopsArray); // insert arrival times
+      res.json(busStopsArray);
     })();
-    res.json(busStopsArray);
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal server error");
