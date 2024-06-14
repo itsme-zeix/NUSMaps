@@ -196,36 +196,47 @@ export default function App() {
 
   async function fetchRoutesFromServer(origin:Coords, destination: Coords): Promise<baseResultsCardType[]> {
     if (process.env.EXPO_PUBLIC_ONEMAPAPITOKEN) {
-      const data = await fetch("https://nusmaps.onrender.com/fetchRoute", {
-        method:'POST',
-        body: JSON.stringify({
-          origin:origin,
-          destination: destination
-        }),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": process.env.EXPO_PUBLIC_ONEMAPAPITOKEN,
-          //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
-        },
-      });
-      return data.json();
+      try{
+        const data = await fetch("https://nusmaps.onrender.com/transportRoute", {
+          method:'POST',
+          body: JSON.stringify({
+            origin:origin,
+            destination: destination
+          }),
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": process.env.EXPO_PUBLIC_ONEMAPAPITOKEN,
+            //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
+          },
+        });
+        return data.json();
+      } catch (error) {
+        setRouteErrorMsg("Server issues, please try again later.");
+        console.error("Route could not be found. Please try again later")
+        throw new Error("Route could not be found. Please try again later")
+      }
     } else {
+      setRouteErrorMsg("Server issues, please try again later.");
       console.error("api token for OneMap not declared. Check server settings");
-      throw new Error("api token for OneMap not declared. Check server settings");
+      throw new Error("API token could not be found. Please try again");
     }
   };
 
-  function fetchBestRoute(origin: Coords, destination: Coords) {
+  async function fetchBestRoute(origin: Coords, destination: Coords) {
     //fetches best route between two points, can pass a check to see if 
-    const {data, error, isLoading} = useQuery({queryKey:['routeData', origin, destination], queryFn:() => fetchRoutesFromServer(origin, destination)});
-    if (isLoading) {
-      console.log("loading...");
-    };
-    if (error) {
-      console.error("Couldn't fetch best route from server");
-    } else if (data) {
-      setbaseResultsCardData(data);
-    }
+    // const {data, error, isLoading} = useQuery({queryKey:['routeData', origin, destination], queryFn:() => fetchRoutesFromServer(origin, destination)});
+    // if (isLoading) {
+      // console.log("loading...");
+    // };
+    // if (error) {
+      // console.error("Couldn't fetch best route from server");
+    // } else if (data) {
+      // setbaseResultsCardData(data);
+    // }
+    //issue: Timing issue + 
+    const result = await fetchRoutesFromServer(origin, destination);
+    console.log("finally", result);
+    setbaseResultsCardData(result);
   };
 
   return (
