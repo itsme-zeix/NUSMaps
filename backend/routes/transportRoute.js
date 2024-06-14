@@ -103,7 +103,7 @@ const formatPublicTransportLeg = (leg) => {
     });
   };
   console.log('pt leg completed');
-  return { //returns this json which has all the data needed to render one leg
+  item = {
     type:leg.mode,
     serviceType: leg.route, //could be the bus number or the train
     startingStopName: startingStopName,
@@ -113,6 +113,8 @@ const formatPublicTransportLeg = (leg) => {
     intermediateStopNames: intermediateStopNames,
     intermediateStopGPSCoords: intermediateStopGPSCoords,
   };
+  console.log("item: ", item);
+  return item;
 };
 
 
