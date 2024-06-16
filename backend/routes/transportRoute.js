@@ -8,6 +8,7 @@ async function _processData(response) {
   /*processes the data and returns the following useful info:
   
   */
+  console.log("Response:", response);
   const bestPaths = response.plan.itineraries;
   const baseCardResultsDataStorage = [];
   for (let index = 0; index < bestPaths.length; index++) {
