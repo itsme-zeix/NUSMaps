@@ -277,7 +277,7 @@ export default function BusStopsScreen() {
     <QueryClientProvider client={queryClient}>
       <SafeAreaView>
         <BusStopSearchBar />
-        <Button title="Refresh API Call" onPress={refetchBusStops} />
+        <Button title="Refresh Timings" onPress={refetchBusStops} />
         <NearbyBusStops />
       </SafeAreaView>
     </QueryClientProvider>
