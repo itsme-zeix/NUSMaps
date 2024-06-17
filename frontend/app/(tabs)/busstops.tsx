@@ -211,13 +211,12 @@ function BusStops() {
     queryKey: ["busStopsByLocation"],
     queryFn: () =>
       fetch(
-        `http://nusmaps.onrender.com/busStopsByLocation?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}`
+        `http://localhost:3000/busStopsByLocation?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}`
       ).then((res) => res.json()),
   });
 
   if (isPending) return <Text>Loading...</Text>;
   if (error) return <Text>An error has occurred: {error.message}</Text>;
-  console.log(busStops);
 
   // Logic to modify the timings in the BusService object from ISO time to minutes away from now.
   const calculateMinutesDifference = (isoTime: string): string => {
