@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableWithoutFeedback,
   LayoutChangeEvent,
   ScrollView,
+  Button,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
@@ -203,8 +204,9 @@ const useUserLocation = () => {
 
 // PERFORM API QUERY
 const queryClient = new QueryClient();
+
 // Get nearest bus stops by location and render it. Backend API will return a busStops object with updated bus timings.
-function BusStops() {
+function NearbyBusStops() {
   const location = useUserLocation();
   const {
     isPending,
@@ -261,12 +263,22 @@ function BusStops() {
   );
 }
 
+// Get all NUS Bus Stops and its associated timings and render it.
+function NUSBusStops() {
+
+}
+
 export default function BusStopsScreen() {
+  const refetchBusStops = useCallback(() => {
+    queryClient.invalidateQueries();
+  }, [queryClient]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <SafeAreaView>
         <BusStopSearchBar />
-        <BusStops />
+        <Button title="Refresh API Call" onPress={refetchBusStops} />
+        <NearbyBusStops />
       </SafeAreaView>
     </QueryClientProvider>
   );
