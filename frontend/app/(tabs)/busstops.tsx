@@ -75,13 +75,16 @@ const CollapsibleContainer = ({
     }
   };
 
-  const collapsibleStyle = useAnimatedStyle(() => {
+  useEffect(() => {
     animatedHeight.value = withTiming(expanded ? height : 0);
+  }, [expanded, height]);
 
+  const collapsibleStyle = useAnimatedStyle(() => {
     return {
       height: animatedHeight.value,
     };
-  }, [expanded]);
+  });
+
 
   return (
     <Animated.View style={[collapsibleStyle, { overflow: "hidden" }]}>
