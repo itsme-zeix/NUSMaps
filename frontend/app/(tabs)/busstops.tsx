@@ -86,7 +86,6 @@ const CollapsibleContainer = ({
     };
   });
 
-
   return (
     <Animated.View style={[collapsibleStyle, { overflow: "hidden" }]}>
       <View style={{ position: "absolute" }} onLayout={onLayout}>
@@ -151,29 +150,30 @@ const ListItem = ({ item }: { item: BusStop }) => {
   );
 };
 
-const useUserLocation = () => {
+const useUserLocation = (refreshLocation: number) => {
   const [location, setLocation] = useState<LocationObject | null>(null);
   const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
   const [locationErrorMsg, setLocationErrorMsg] = useState("");
   const [locationReady, setLocationReady] = useState(false); // this is to only allow querying is getting user's current location is completed.
 
+  const getLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      setPermissionErrorMsg("Permission to access location was denied.");
+      return;
+    }
+    try {
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+      setLocationReady(true);
+    } catch (error) {
+      setLocationErrorMsg(`Failed to obtain location, ${error}`);
+    }
+  };
+
   useEffect(() => {
-    const getLocation = async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setPermissionErrorMsg("Permission to access location was denied.");
-        return;
-      }
-      try {
-        let location = await Location.getCurrentPositionAsync({});
-        setLocation(location);
-        setLocationReady(true);
-      } catch (error) {
-        setLocationErrorMsg(`Failed to obtain location, ${error}`);
-      }
-    };
     getLocation();
-  }, []);
+  }, [refreshLocation]);
 
   useEffect(() => {
     if (permissionErrorMsg) {
@@ -206,8 +206,8 @@ const useUserLocation = () => {
 const queryClient = new QueryClient();
 
 // Get nearest bus stops by location and render it. Backend API will return a busStops object with updated bus timings.
-function NearbyBusStops() {
-  const location = useUserLocation();
+function NearbyBusStops({ refreshLocation }: { refreshLocation: number }) {
+  const location = useUserLocation(refreshLocation);
   const {
     isPending,
     error,
@@ -264,21 +264,27 @@ function NearbyBusStops() {
 }
 
 // Get all NUS Bus Stops and its associated timings and render it.
-function NUSBusStops() {
-
-}
+function NUSBusStops() {}
 
 export default function BusStopsScreen() {
+  const [refreshLocation, setRefreshLocation] = useState(0);
+
   const refetchBusStops = useCallback(() => {
     queryClient.invalidateQueries();
   }, [queryClient]);
+
+  const refetchUserLocation = useCallback(() => {
+    setRefreshLocation((prevKey) => prevKey + 1);
+    refetchBusStops();
+  }, [refetchBusStops]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <SafeAreaView>
         <BusStopSearchBar />
         <Button title="Refresh Timings" onPress={refetchBusStops} />
-        <NearbyBusStops />
+        <Button title="Reset Location" onPress={refetchUserLocation} />
+        <NearbyBusStops refreshLocation={refreshLocation} />
       </SafeAreaView>
     </QueryClientProvider>
   );
