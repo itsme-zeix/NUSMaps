@@ -6,7 +6,8 @@ import {
   TouchableWithoutFeedback,
   LayoutChangeEvent,
   ScrollView,
-  Button,
+  TouchableOpacity,
+  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
@@ -108,8 +109,25 @@ const ListItem = ({ item }: { item: BusStop }) => {
       <TouchableWithoutFeedback onPress={onItemPress}>
         <View style={styles.container}>
           <View style={styles.textContainer}>
-            <Text style={styles.text}>{item.busStopName}</Text>
-            <Text style={styles.text}>
+            <Text
+              style={{
+                fontSize: 16,
+                fontFamily: "Inter-SemiBold",
+                paddingLeft: 14,
+                paddingBottom: 5,
+              }}
+            >
+              {item.busStopName}
+            </Text>
+            <Text
+              style={{
+                fontSize: 12,
+                fontFamily: "Inter-Medium",
+                color: "#626262",
+                paddingLeft: 14,
+                paddingBottom: 14,
+              }}
+            >
               {Number(item.distanceAway) < 1
                 ? `~${(Number(item.distanceAway) * 1000).toFixed(0)}m away`
                 : `~${Number(item.distanceAway).toFixed(2)}km away`}
@@ -206,7 +224,13 @@ const useUserLocation = (refreshLocation: number) => {
 const queryClient = new QueryClient();
 
 // Get nearest bus stops by location and render it. Backend API will return a busStops object with updated bus timings.
-function NearbyBusStops({ refreshLocation }: { refreshLocation: number }) {
+function NearbyBusStops({
+  refreshLocation,
+  refreshUserLocation,
+}: {
+  refreshLocation: number;
+  refreshUserLocation: () => void;
+}) {
   const location = useUserLocation(refreshLocation);
   const {
     isPending,
@@ -249,7 +273,14 @@ function NearbyBusStops({ refreshLocation }: { refreshLocation: number }) {
   );
 
   return (
-    <ScrollView>
+    <ScrollView
+      refreshControl={
+        <RefreshControl
+          refreshing={isPending}
+          onRefresh={refreshUserLocation} 
+        />
+      }
+    >
       <>
         {busStops && Array.isArray(busStops) ? (
           busStops.map((busStop: BusStop, index: number) => (
@@ -280,12 +311,15 @@ export default function BusStopsScreen() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SafeAreaView>
-        <BusStopSearchBar />
-        <Button title="Refresh Timings" onPress={refetchBusStops} />
-        <Button title="Reset Location" onPress={refetchUserLocation} />
-        <NearbyBusStops refreshLocation={refreshLocation} />
-      </SafeAreaView>
+      <View style={{ backgroundColor: "white", flex: 1 }}>
+        <SafeAreaView>
+          <BusStopSearchBar />
+          <NearbyBusStops
+            refreshLocation={refreshLocation}
+            refreshUserLocation={refetchUserLocation}
+          />
+        </SafeAreaView>
+      </View>
     </QueryClientProvider>
   );
 }
@@ -293,19 +327,25 @@ export default function BusStopsScreen() {
 const styles = StyleSheet.create({
   wrap: {
     borderColor: "#ccc",
-    borderWidth: 1,
+    borderWidth: 0.5,
     marginVertical: 5,
-    marginHorizontal: 10,
+    marginHorizontal: 14,
     borderRadius: 5,
     backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOffset: { width: 3, height: 3 },
     shadowOpacity: 0.2,
   },
-  container: { flexDirection: "row" },
+  container: {
+    flexDirection: "row",
+    paddingTop: 14,
+  },
   image: { width: 50, height: 50, margin: 10, borderRadius: 5 },
   textContainer: {
     justifyContent: "space-between",
+  },
+  text: {
+    opacity: 0.7,
   },
   details: { margin: 10 },
   detailRow: {
@@ -324,5 +364,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingRight: 16,
   },
-  text: { opacity: 0.7 },
 });
