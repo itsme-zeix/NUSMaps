@@ -8,11 +8,16 @@ import {
   Image,
   StatusBar,
   Platform,
+  Pressable,
+  Button
 } from "react-native";
 import { ImageSourcePropType } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import Modal from "react-native-modal";
 import Constants  from "expo-constants";
+import { SubwayTypeCard } from "@/app/(tabs)/SubwayType";
+import { BusNumberCard } from "@/app/(tabs)/BusNumber";
+import { Link } from 'expo-router';
 
 //interfaces and types
 interface Coords {
@@ -99,20 +104,35 @@ const ResultCard: React.FC<SingleResultCardData> = ({ origin, destination, resul
   console.log('ok');
   console.log(types);
   return (
-    <View style={styles.resultCard}>
-      <View style={styles.icons}>
-        {types.map((icon, index) => (
-          <Image
-            key={index}
-            source={iconList[icon as keyof IconCatalog]}
-            style={{ flexDirection: "row", alignItems: "center" }}
-          />
-        ))}
-        <Text>{resultData.wholeJourneyTiming}</Text>
-      </View>
-      <Text style={styles.travelDuration}>{resultData.journeyTiming}</Text>
-    </View>
-  );
+    <Link href = {{
+      pathname: "/DetailedRouteScreen",
+      params: {baseResultsCardData: JSON.stringify(resultData), destinationLocation: JSON.stringify(destination), origin:JSON.stringify(origin)}
+    }}
+    asChild style={styles.resultCard}>
+      <Pressable style = {{backgroundColor:"green"}} >
+        <View>
+          <View style={styles.icons}>
+            {types.map((icon, index) => {
+              if (icon === "BUS") {
+                let ptLeg = resultData.journeyLegs[index/2] as PublicTransportLeg;
+                return (<View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <BusNumberCard busNumber={ptLeg.serviceType}/>
+                  </View>)
+              } else if (icon === "SUBWAY") {
+                let ptLeg = resultData.journeyLegs[index/2] as PublicTransportLeg;
+                return (<View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <SubwayTypeCard serviceType={ptLeg.serviceType}/>
+                  </View>)
+              } else {
+                return( <Image key={index} source={iconList[icon as keyof IconCatalog]} style={{ flexDirection: "row", alignItems: "center" }}/>);
+              }})}
+            <Text>{resultData.wholeJourneyTiming}</Text>
+            </View>
+          <Text style={styles.travelDuration}>{resultData.journeyTiming}</Text>
+          </View>
+        </Pressable>
+    </Link>
+  )
 };
 
 // result screen 
@@ -229,6 +249,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
+    backgroundColor:"red"
   },
   travelDuration: {
     fontSize: 18,
