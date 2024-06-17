@@ -148,7 +148,7 @@ const WalkLegPart: React.FC<WalkLegProps> = ({walkLeg}) => {
   console.log('walk');
   const totalDistance  = walkLeg.walkInfo.reduce((sum, curr) =>sum + curr.distance, 0)
   return (
-    <View>
+    <View style = {{backgroundColor:"green"}}>
       <Pressable onPress = {() => console.log("Route pressed!")}>
         <Text>Walk for {totalDistance}m </Text>
       </Pressable>
@@ -168,29 +168,32 @@ const DetailedRoutingScreen:React.FC<baseResultsCardType & destinationLocation &
   //add a base current location and end flag
     console.log('gone here');
     const params = useLocalSearchParams();
-    let baseResultsCardData = params.baseResultsCardData;
-    let destinationData = JSON.parse(params.destinationLocation);
+    let destinationData = JSON.parse(params.destinationLocation as string);
     console.log("dest:", destinationData)
-    let origin = JSON.parse(params.origin);
+    let origin = JSON.parse(params.origin as string);
     console.log("origin:", origin);
-    if ((baseResultsCardData == undefined)) {
+    if ((params.baseResultsCardData == undefined)) {
       console.error("no base results received");
       return;
     }
-    baseResultsCardData = JSON.parse(baseResultsCardData);
+    let baseResultsCardData:baseResultsCardType = JSON.parse(params.baseResultsCardData as string);
     return (
       <SafeAreaView style = {stylesheet.SafeAreaView} >
         <MapView style = {stylesheet.MapView} provider={PROVIDER_GOOGLE}/>
         <ScrollView style = {{flex:1, backgroundColor:"white"}}>
-          <OriginRectangle/>
-          <Text>Starting position: {origin.latitude}, {origin.longitude}</Text>
+          <View style = {{flexDirection:"row"}}>
+            <OriginRectangle/>
+            <Text style = {{backgroundColor:"red"}} >Starting position: {origin.latitude}, {origin.longitude}</Text>
+          </View>
           {baseResultsCardData.journeyLegs.map((leg, index) => {
             console.log("leg type", leg.type);
             return (
             <React.Fragment key = {index}>
-            <LegRectangle/>
-            {(leg.type === "BUS" || leg.type === "SUBWAY") && <PublicTransportLegPart ptLeg = {leg as PublicTransportLeg}/>}
-            {leg.type === "WALK" && <WalkLegPart walkLeg={leg as WalkLeg}/>}
+              <View style = {{flexDirection:"row"}}>
+                <LegRectangle/>
+                {(leg.type === "BUS" || leg.type === "SUBWAY") && <PublicTransportLegPart ptLeg = {leg as PublicTransportLeg}/>}
+                {leg.type === "WALK" && <WalkLegPart walkLeg={leg as WalkLeg}/>}
+              </View>
             </React.Fragment>
           );
         }
@@ -224,9 +227,10 @@ const stylesheet = StyleSheet.create({
   barContainer: {
     justifyContent: 'flex-start',
     flexDirection: 'column',
-    flex:1,
+    width:25,
     height: '100%',
-    },
+
+  },
     circle: {
     width: 20,
     height: 20,

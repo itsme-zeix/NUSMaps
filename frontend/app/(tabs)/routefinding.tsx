@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Button, Pressable, StyleSheet, View } from "react-native";
 import MapView, { PROVIDER_GOOGLE, Marker, Region } from "react-native-maps";
 import * as Location from "expo-location";
 import { RouteSearchBar } from "@/components/RouteSearchBar";
@@ -10,6 +10,7 @@ import { GooglePlaceData } from "react-native-google-places-autocomplete";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import Constants from 'expo-constants';
+import { Link } from "expo-router";
 
 //interface and types
 type destinationLocation = {
