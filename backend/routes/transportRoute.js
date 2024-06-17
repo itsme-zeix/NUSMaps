@@ -8,7 +8,6 @@ async function _processData(response) {
   /*processes the data and returns the following useful info:
   
   */
-  console.log("Response:", response);
   const bestPaths = response.plan.itineraries;
   const baseCardResultsDataStorage = [];
   for (let index = 0; index < bestPaths.length; index++) {
@@ -92,7 +91,7 @@ const formatWalkLeg = (leg) => {
 const formatPublicTransportLeg = (leg) => {
   const startingStopName = leg.from.name;
   const destinationStopName = leg.to.name;
-  const intermediateStopCount = leg.numIntermediateStops;
+  let intermediateStopCount = 1;
   const totalTimeTaken = Math.ceil(leg.duration/60);//in minutes
   const intermediateStopNames = [];
   const intermediateStopGPSCoords = []; // json array
@@ -102,8 +101,10 @@ const formatPublicTransportLeg = (leg) => {
       latitude: stop.lat,
       longitude: stop.lon,
     });
+    intermediateStopCount += 1;
   };
   console.log('pt leg completed');
+  console.log('intermediate stop count: ', intermediateStopCount);
   item = {
     type:leg.mode,
     serviceType: leg.route, //could be the bus number or the train
