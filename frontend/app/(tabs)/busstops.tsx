@@ -89,6 +89,13 @@ const CollapsibleContainer = ({
   return (
     <Animated.View style={[collapsibleStyle, { overflow: "hidden" }]}>
       <View style={{ position: "absolute" }} onLayout={onLayout}>
+        <View
+          style={{
+            borderBottomColor: "#626262",
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            marginHorizontal: 16,
+          }}
+        />
         {children}
       </View>
     </Animated.View>
@@ -124,7 +131,7 @@ const ListItem = ({ item }: { item: BusStop }) => {
                 fontFamily: "Inter-Medium",
                 color: "#626262",
                 paddingLeft: 14,
-                paddingBottom: 14,
+
               }}
             >
               {Number(item.distanceAway) < 1
@@ -337,11 +344,11 @@ const styles = StyleSheet.create({
   },
   container: {
     flexDirection: "row",
-    paddingTop: 14,
   },
   image: { width: 50, height: 50, margin: 10, borderRadius: 5 },
   textContainer: {
     justifyContent: "space-between",
+    paddingVertical: 16,
   },
   text: {
     opacity: 0.7,
