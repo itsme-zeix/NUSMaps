@@ -115,25 +115,8 @@ const ListItem = ({ item }: { item: BusStop }) => {
       <TouchableWithoutFeedback onPress={onItemPress}>
         <View style={styles.container}>
           <View style={styles.textContainer}>
-            <Text
-              style={{
-                fontSize: 16,
-                fontFamily: "Inter-SemiBold",
-                paddingLeft: 14,
-                paddingBottom: 5,
-              }}
-            >
-              {item.busStopName}
-            </Text>
-            <Text
-              style={{
-                fontSize: 12,
-                fontFamily: "Inter-Medium",
-                color: "#626262",
-                paddingLeft: 14,
-
-              }}
-            >
+            <Text style={styles.busStopName}>{item.busStopName}</Text>
+            <Text style={styles.distanceAwayText}>
               {Number(item.distanceAway) < 1
                 ? `~${(Number(item.distanceAway) * 1000).toFixed(0)}m away`
                 : `~${Number(item.distanceAway).toFixed(2)}km away`}
@@ -150,17 +133,17 @@ const ListItem = ({ item }: { item: BusStop }) => {
                 {/* TODO: use conditional to assign colour to circle based on busStopName/tag */}
                 {/* Can consider moving this logic into the BusStop interface */}
                 <ColouredCircle color="blue" size={15} />
-                <Text style={[styles.details, styles.text]}>
+                <Text style={[styles.details, styles.busNumber]}>
                   {bus.busNumber}
                 </Text>
               </View>
               <View style={styles.rightContainer}>
-                <Text style={[styles.details, styles.text]}>
-                  {bus.timings[1] !== "N/A"
+                <Text style={[styles.details, styles.timingText]}>
+                  {bus.timings[0] !== "N/A"
                     ? `${bus.timings[0]} min`
                     : bus.timings[0]}
                 </Text>
-                <Text style={[styles.details, styles.text]}>
+                <Text style={[styles.details, styles.timingText]}>
                   {bus.timings[1] !== "N/A"
                     ? `${bus.timings[1]} min`
                     : bus.timings[1]}
@@ -350,8 +333,25 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingVertical: 16,
   },
-  text: {
-    opacity: 0.7,
+  busStopName: {
+    fontSize: 16,
+    fontFamily: "Inter-SemiBold",
+    paddingLeft: 14,
+    paddingBottom: 5,
+  },
+  distanceAwayText: {
+    fontSize: 12,
+    fontFamily: "Inter-Medium",
+    color: "#626262",
+    paddingLeft: 14,
+  },
+  busNumber: {
+    fontSize: 13,
+    fontFamily: "Inter-SemiBold",
+  },
+  timingText: {
+    fontSize: 13,
+    fontFamily: "Inter-Medium",
   },
   details: { margin: 10 },
   detailRow: {
