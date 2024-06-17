@@ -6,7 +6,6 @@ import {
   TouchableWithoutFeedback,
   LayoutChangeEvent,
   ScrollView,
-  TouchableOpacity,
   RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -277,7 +276,7 @@ function NearbyBusStops({
       refreshControl={
         <RefreshControl
           refreshing={isPending}
-          onRefresh={refreshUserLocation} 
+          onRefresh={refreshUserLocation}
         />
       }
     >
