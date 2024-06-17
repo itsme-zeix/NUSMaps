@@ -84,7 +84,7 @@ async function getNearestBusStops(userLat, userLon) {
         return { id: stop.id, name, distance, services };
       })
       .sort((a, b) => a.distance - b.distance) // Sort by distance
-      .slice(0, 10); // Get the 10 nearest stops
+      .slice(0, 2); // Get the 10 nearest stops
 
     // Format the bus stops properly so that timings can be inserted easily once retrieved.
     const arrBusStops = [];
@@ -108,135 +108,49 @@ async function getNearestBusStops(userLat, userLon) {
 // for multiple calls to complete synchronously, increasing our API's response time.
 async function getArrivalTime(busStopsArray) {
   for (const busStop of busStopsArray) {
-    if (busStop.busStopName.startsWith("NUSSTOP")) {
-      await (async (stopName) => {
+    for (const bus of busStop.savedBuses) {
+      await (async (stopId, serviceNo) => {
+        console.log(stopId, serviceNo);
         try {
-          const username = process.env.NUSNEXTBUS_USER;
-          const password = process.env.NUSNEXTBUS_PASSWORD;
-
-          // Encode the credentials
-          const credentials = `${username}:${password}`;
-          const encodedCredentials = btoa(credentials);
-
           const response = await fetch(
-            `https://nnextbus.nus.edu.sg/ShuttleService?busstopname=${stopName}`,
+            `http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=${stopId}&ServiceNo=${serviceNo}`,
             {
               method: "GET",
               headers: {
-                Authorization: `Basic ${encodedCredentials}`,
+                AccountKey: process.env.LTA_DATAMALL_KEY,
               },
             }
           );
 
           // Check if the response is ok and has a body
           if (!response.ok) {
-            throw new Error(
-              `HTTP error from NUSNextBus API! status: ${response.status}`
-            );
+            throw new Error(`HTTP error! status: ${response.status}`);
           }
 
           const text = await response.text();
           if (!text) {
-            throw new Error("Empty response body from NUSNextBus API");
+            throw new Error("Empty response body from datamall");
           }
 
-          const NUSReply = JSON.parse(text);
-          // We will process the NUSReply in a 2 step process:
-          // 1) reformat reply such that we can search the buses by name in a dict.
-          // 2) iterate through buses in our bus stop objects and retrieve the timings based on the name.
-
-          // REFORMAT
-          let shuttles = {};
-          for (let shuttle of NUSReply.ShuttleServiceResult.shuttles) {
-            shuttles[shuttle.name] = shuttle;
+          const datamallReply = JSON.parse(text);
+          console.log(datamallReply);
+          if (!datamallReply.Services) {
+            throw new Error("Unexpected response format from datamall");
           }
-          // ITERATE AND UPDATE BUS ARRIVAL TIMING
-          for (let busObject of busStop.savedBuses) {
-            const serviceName = busObject.busNumber;
-            if (shuttles[serviceName]) {
-              if (shuttles[serviceName]._etas) {
-                // These are NUS buses. Public buses do not have ._etas field in NUSNextBus API response.
-                // Handle the cases of differing sizes of etas returned due to 0/1/2 next buses.
-                const etaLength = shuttles[serviceName]._etas.length;
-                if (etaLength == 0) {
-                  busObject.timings = ["N.A.", "N.A."];
-                } else if (etaLength == 1) {
-                  const firstArrivalTime = shuttles[serviceName]._etas[0].ts;
-                  busObject.timings = [firstArrivalTime, "N.A."];
-                } else {
-                  const firstArrivalTime = shuttles[serviceName]._etas[0].ts;
-                  const secondArrivalTime = shuttles[serviceName]._etas[1].ts;
-                  busObject.timings = [firstArrivalTime, secondArrivalTime];
-                }
-              } else {
-                // Public bus timings obtained by NUSNextBus API is given in mins to arrival rather than ISO time.
-                // The code below converts arrival time in minutes to ISO time to maintain a standard response format.
-                const currentTime = new Date();
-
-                const firstArrivalTime = new Date(
-                  currentTime.getTime() +
-                    shuttles[serviceName].arrivalTime * 60000
-                ).toISOString();
-                const secondArrivalTime = new Date(
-                  currentTime.getTime() +
-                    shuttles[serviceName].nextArrivalTime * 60000
-                ).toISOString();
-
-                busObject.timings = [firstArrivalTime, secondArrivalTime];
-              }
-            }
+          if (datamallReply.Services.length == 0) {
+            bus.timings = ["N.A.", "N.A."];
+          } else {
+            const firstArrivalTime =
+              datamallReply.Services[0].NextBus.EstimatedArrival;
+            const secondArrivalTime =
+              datamallReply.Services[0].NextBus2.EstimatedArrival;
+            bus.timings = [firstArrivalTime, secondArrivalTime];
           }
+          console.log(bus);
         } catch (error) {
-          console.error("Error fetching data from NUSNextBus API:", error);
+          console.error("Error fetching data from datamall:", error);
         }
-      })(busStop.busStopName.substring(8)); // substring(8) skips the first 8 characters 'NUSSTOP_'
-    } else {
-      for (const bus of busStop.savedBuses) {
-        // logic is somewhat convoluted here, can be simplified by removing serviceNo to reduce the number of API calls.
-        // though that will require some gymnastics with inserting the timings (need to match serviceNo etc).
-        // Also, if we simply call the API by bus stop id, certain bus services will be missing because the api only responses for certain bus stops.
-        await (async (stopId, serviceNo) => {
-          try {
-            const response = await fetch(
-              `http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=${stopId}&ServiceNo=${serviceNo}`,
-              {
-                method: "GET",
-                headers: {
-                  AccountKey: process.env.LTA_DATAMALL_KEY,
-                },
-              }
-            );
-
-            // Check if the response is ok and has a body
-            if (!response.ok) {
-              throw new Error(
-                `HTTP error from datamall! status: ${response.status}`
-              );
-            }
-
-            const text = await response.text();
-            if (!text) {
-              throw new Error("Empty response body from datamall");
-            }
-
-            const datamallReply = JSON.parse(text);
-            if (!datamallReply.Services) {
-              throw new Error("Unexpected response format from datamall");
-            }
-            if (datamallReply.Services.length == 0) {
-              bus.timings = ["N.A.", "N.A."];
-            } else {
-              const firstArrivalTime =
-                datamallReply.Services[0].NextBus.EstimatedArrival;
-              const secondArrivalTime =
-                datamallReply.Services[0].NextBus2.EstimatedArrival;
-              bus.timings = [firstArrivalTime, secondArrivalTime];
-            }
-          } catch (error) {
-            console.error("Error fetching data from datamall:", error);
-          }
-        })(busStop.busStopId, bus.busNumber);
-      }
+      })(busStop.busStopId, bus.busNumber);
     }
   }
 }
@@ -253,10 +167,10 @@ router.get("/", async (req, res) => {
   // if (!authorizationHeader || authorizationHeader !== 'expectedValue') {
   //   return res.status(403).send("Forbidden");
   // }
-
   try {
     (async () => {
       const busStopsArray = await getNearestBusStops(latitude, longitude);
+      console.log(busStopsArray);
       await getArrivalTime(busStopsArray); // insert arrival times
       res.json(busStopsArray);
     })();
