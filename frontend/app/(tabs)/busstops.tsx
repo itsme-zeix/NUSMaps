@@ -7,6 +7,7 @@ import {
   LayoutChangeEvent,
   ScrollView,
   RefreshControl,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
@@ -23,6 +24,8 @@ import * as Location from "expo-location";
 import { LocationObject } from "expo-location";
 import Toast from "react-native-toast-message";
 import BusStopSearchBar from "@/components/BusStopSearchBar";
+import ChevronUpIcon from "../assets/images/chevron_up_blue_icon.png";
+import ChevronDownIcon from "../assets/images/chevron_down_blue_icon.png";
 
 // INTERFACES
 interface BusService {
@@ -113,14 +116,33 @@ const ListItem = ({ item }: { item: BusStop }) => {
   return (
     <View style={styles.wrap}>
       <TouchableWithoutFeedback onPress={onItemPress}>
-        <View style={styles.container}>
+        <View style={styles.cardContainer}>
           <View style={styles.textContainer}>
-            <Text style={styles.busStopName}>{item.busStopName}</Text>
+            <Text style={styles.busStopName}>
+              {item.busStopName.startsWith("NUSSTOP")
+                ? item.busStopName.slice(8)
+                : item.busStopName}
+            </Text>
             <Text style={styles.distanceAwayText}>
               {Number(item.distanceAway) < 1
                 ? `~${(Number(item.distanceAway) * 1000).toFixed(0)}m away`
                 : `~${Number(item.distanceAway).toFixed(2)}km away`}
             </Text>
+          </View>
+          <View style={styles.nusTagAndChevronContainer}>
+            {item.busStopName.startsWith("NUSSTOP") && (
+              <View style={styles.nusTag}>
+                <Text style={styles.nusTagText}>NUS</Text>
+              </View>
+            )}
+            <Image
+              source={
+                expanded
+                  ? require("../../assets/images/chevron_up_blue_icon.png")
+                  : require("../../assets/images/chevron_down_blue_icon.png")
+              }
+              style={styles.chevron}
+            />
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -325,8 +347,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 3, height: 3 },
     shadowOpacity: 0.2,
   },
-  container: {
+  cardContainer: {
     flexDirection: "row",
+    justifyContent: "space-between",
   },
   image: { width: 50, height: 50, margin: 10, borderRadius: 5 },
   textContainer: {
@@ -369,5 +392,28 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingRight: 16,
+  },
+  nusTagAndChevronContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    paddingRight: 16,
+    marginVertical: 20,
+  },
+  nusTag: {
+    backgroundColor: "#27187E",
+    alignContent: "center",
+    justifyContent: "center",
+    paddingHorizontal: 13,
+    paddingVertical: 7,
+    borderRadius: 20,
+  },
+  nusTagText: {
+    fontSize: 12,
+    fontFamily: "Inter-Bold",
+    color: "#EBF3FE",
+  },
+  chevron: {
+    width: 30,
+    height: 30,
   },
 });
