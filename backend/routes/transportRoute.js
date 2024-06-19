@@ -131,6 +131,7 @@ router.post("/", async (req, res) => {
     let destination;
     if (auth_token === process.env.ONEMAPAPITOKEN) {
       origin = req.body.origin;
+      console.log("origin received: ", origin);
       destination = req.body.destination;
       let date = format(dateObject, "MM-dd-yyyy");
       let time = format(dateObject, "HH:MM:SS");
