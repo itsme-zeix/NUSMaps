@@ -138,6 +138,7 @@ router.post("/", async (req, res) => {
       const routesUrl = encodeURI(
         `https://www.onemap.gov.sg/api/public/routingsvc/route?start=${origin.latitude},${origin.longitude}&end=${destination.latitude},${destination.longitude}&routeType=pt&date=${date}&time=${time}&mode=TRANSIT&maxWalkDistance=1000&numItineraries=3`
       );
+      console.log("routes url:", routesUrl);
       const headers = {
         Authorization: `${process.env.ONEMAPAPIKEY}`,
       };
