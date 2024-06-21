@@ -28,7 +28,6 @@ async function _processData(response) {
     );
     const leftSideTiming = formatJourneyTime(currPath.duration);
     console.log("combine geometry: ", combinedRouteGeometry);
-    console.log("final geometry array of a leg : ", polylineArray);
     baseCardResultsDataStorage.push({
       types: typesArr,
       journeyTiming: leftSideTiming,
@@ -84,8 +83,8 @@ const formatLeg = (legArray) => {
   };
   console.log("typesArr before sending: ", typesArr);
   console.log("formatted leg array", formattedLegArray);
-  const combinedRouteGeometry = geometryArr.join("");
-  console.log(combinedRouteGeometry);
+  const combinedRouteGeometry = geometryArr.flat(2);
+  console.log("returned total route geometry: ",combinedRouteGeometry);
   return [typesArr, formattedLegArray, combinedRouteGeometry];
 };
 
