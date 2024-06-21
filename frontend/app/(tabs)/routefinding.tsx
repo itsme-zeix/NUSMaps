@@ -231,7 +231,7 @@ export default function App() {
       try {
         console.log("Origin location:", origin);
         const data = await fetch(
-          "https://test-nusmaps.onrender.com/transportRoute",
+          "https://nusmaps.onrender.com/transportRoute",
           {
             method: "POST",
             body: JSON.stringify({
