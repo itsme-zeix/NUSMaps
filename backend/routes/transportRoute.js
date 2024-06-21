@@ -80,7 +80,7 @@ const formatLeg = (legArray) => {
     leg.mode === "WALK" ?  formattedLegArray.push(formatWalkLeg(leg)) : formattedLegArray.push(formatPublicTransportLeg(leg));
     typesArr.push(leg.mode);
     console.log("leg geometry:",leg.legGeometry);
-    geometryArr.push(formatPolylineArray(leg.legGeometry)); //returns an array which is then placed into an array
+    geometryArr.push(decodePolyLine(leg.legGeometry)); //returns an array which is then placed into an array
   };
   console.log("typesArr before sending: ", typesArr);
   console.log("formatted leg array", formattedLegArray);
