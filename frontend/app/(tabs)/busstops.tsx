@@ -350,8 +350,77 @@ function NearbyBusStops({
 }
 
 // Get all NUS Bus Stops and its associated timings and render it.
-function NUSBusStops() {
-  return <Text> PLACEHOLDER </Text>;
+function NUSBusStops({ refresh }: { refresh: () => void }) {
+  const {
+    isPending,
+    error,
+    data: busStops,
+  } = useQuery({
+    queryKey: ["nusBusStops"],
+    queryFn: () =>
+      fetch(`http://localhost:3000/nusBusStops`).then((res) => res.json()),
+  });
+
+  if (isPending)
+    return <ActivityIndicator size="large" style={{ margin: 20 }} />;
+  if (error)
+    return (
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={isPending} onRefresh={refresh} />
+        }
+      >
+        <View style={{ flex: 1, alignItems: "center", margin: 20 }}>
+          <Text>An error has occurred: {error.message}. </Text>
+          <Text>Pull down to try again.</Text>
+        </View>
+      </ScrollView>
+    );
+
+  // Logic to modify the timings in the BusService object from ISO time to minutes away from now.
+  const calculateMinutesDifference = (isoTime: string): string => {
+    // Calculate the difference in minutes between the current time and the given ISO time
+    const now = new Date();
+    const busTime = new Date(isoTime);
+
+    if (isNaN(busTime.getTime())) {
+      // If busTime is invalid, return a default value or handle the error
+      return "N/A";
+    }
+
+    const differenceInMilliseconds = busTime.getTime() - now.getTime();
+    const differenceInMinutes = Math.round(
+      differenceInMilliseconds / 1000 / 60
+    );
+    return String(
+      differenceInMinutes >= 0 ? differenceInMinutes : differenceInMinutes
+    );
+  };
+
+  busStops.map((busStop: BusStop) =>
+    busStop.savedBuses.map((bus: BusService) => {
+      bus.timings[0] = calculateMinutesDifference(bus.timings[0]);
+      bus.timings[1] = calculateMinutesDifference(bus.timings[1]);
+    })
+  );
+
+  return (
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={isPending} onRefresh={refresh} />
+      }
+    >
+      <View>
+        {busStops && Array.isArray(busStops) ? (
+          busStops.map((busStop: BusStop, index: number) => (
+            <ListItem key={index} item={busStop} />
+          ))
+        ) : (
+          <Text>{JSON.stringify(busStops)}</Text>
+        )}
+      </View>
+    </ScrollView>
+  );
 }
 
 export default function BusStopsScreen() {
@@ -388,7 +457,7 @@ export default function BusStopsScreen() {
                 refreshUserLocation={refetchUserLocation}
               />
             ) : (
-              <NUSBusStops />
+              <NUSBusStops refresh={refetchBusStops} />
             )}
           </View>
         </SafeAreaView>
