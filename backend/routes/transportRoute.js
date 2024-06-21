@@ -45,7 +45,7 @@ async function _processData(response) {
 const formatPolylineArray = (encodedInput) => {
   //takes in a string and converts it into points
   console.log("total input: ", encodedInput);
-  polyline.decode(encodedInput).map(point => {
+  return polyline.decode(encodedInput).map(point => {
     return {
     latitude:point[0],
     longitude: point[1],
