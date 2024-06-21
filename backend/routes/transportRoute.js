@@ -44,7 +44,7 @@ async function _processData(response) {
 
 const formatPolylineArray = (encodedInput) => {
   //takes in a string and converts it into points
-  return polyline.decode(encodedInput);
+  return polyline.decode(encodedInput.points);
 };
 
 const formatBeginningEndingTime = (
