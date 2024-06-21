@@ -28,21 +28,20 @@ async function _processData(response) {
     );
     const leftSideTiming = formatJourneyTime(currPath.duration);
     console.log("combine geometry: ", combinedRouteGeometry);
-    const polylineArray = formatPolylineArray(combinedRouteGeometry);
     console.log("final geometry array of a leg : ", polylineArray);
     baseCardResultsDataStorage.push({
       types: typesArr,
       journeyTiming: leftSideTiming,
       wholeJourneyTiming: rightSideTiming,
       journeyLegs: formattedLegArray,
-      polylineArray: polylineArray
+      polylineArray: combinedRouteGeometry
     });
   }
   console.log('finished :', baseCardResultsDataStorage);
   return baseCardResultsDataStorage;
 };
 
-const formatPolylineArray = (encodedInput) => {
+const decodePolyLine = (encodedInput) => {
   //takes in a string and converts it into points
   return polyline.decode(encodedInput.points);
 };
@@ -81,12 +80,12 @@ const formatLeg = (legArray) => {
     leg.mode === "WALK" ?  formattedLegArray.push(formatWalkLeg(leg)) : formattedLegArray.push(formatPublicTransportLeg(leg));
     typesArr.push(leg.mode);
     console.log("leg geometry:",leg.legGeometry);
-    geometryArr.push(formatPolylineArray(leg.legGeometry));
+    geometryArr.push(formatPolylineArray(leg.legGeometry)); //returns an array which is then placed into an array
   };
   console.log("typesArr before sending: ", typesArr);
   console.log("formatted leg array", formattedLegArray);
-  let combinedRouteGeometry = geometryArr.join('');
-  console.log("combined route geometry:", combinedRouteGeometry);
+  const combinedRouteGeometry = geometryArr.join("");
+  console.log(combinedRouteGeometry);
   return [typesArr, formattedLegArray, combinedRouteGeometry];
 };
 
