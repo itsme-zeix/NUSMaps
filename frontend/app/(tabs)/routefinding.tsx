@@ -1,6 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import { StyleSheet, View } from "react-native";
-import MapView, { PROVIDER_GOOGLE, Marker, Region, LatLng } from "react-native-maps";
+import MapView, {
+  PROVIDER_GOOGLE,
+  Marker,
+  Region,
+  LatLng,
+} from "react-native-maps";
 import * as Location from "expo-location";
 import { RouteSearchBar } from "@/components/RouteSearchBar";
 import Toast from "react-native-toast-message";
@@ -8,7 +13,7 @@ import { ResultScreen } from "@/components/ResultsScreen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { GooglePlaceData } from "react-native-google-places-autocomplete";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Constants from 'expo-constants';
+import Constants from "expo-constants";
 
 //interface and types
 
@@ -18,10 +23,10 @@ interface LegBase {
 }
 interface WalkLeg extends LegBase {
   walkInfo: {
-    "distance":string,
-    "direction":string;
-  }[],
-};
+    distance: string;
+    direction: string;
+  }[];
+}
 interface PublicTransportLeg extends LegBase {
   //used to display the routes info
   serviceType: string;
@@ -30,8 +35,8 @@ interface PublicTransportLeg extends LegBase {
   intermediateStopCount: number;
   totalTimeTaken: number;
   intermediateStopNames: string[];
-  intermediateStopGPSLatLng:LatLng[];
-};
+  intermediateStopGPSLatLng: LatLng[];
+}
 type Leg = PublicTransportLeg | WalkLeg;
 interface baseResultsCardType {
   types: string[];
@@ -39,10 +44,10 @@ interface baseResultsCardType {
   wholeJourneyTiming: string;
   journeyLegs: Leg[]; //an array of all the legs in 1 route
   polylineArray: number[];
-};
+}
 type DestinationResult = {
-  address:string;
-  placeId:string;
+  address: string;
+  placeId: string;
 } & LatLng;
 
 //constants and variables
@@ -76,14 +81,16 @@ export default function App() {
     longitude: NaN,
     address: "DEFAULT",
     placeId: "DEFAULT",
-    
   };
-  const [destination, setDestination] = useState<DestinationResult>(DEFAULTDESTINATIONLatLng);
-  const [baseResultsCardData, setbaseResultsCardData] = useState< //the results needed to be displayed
+  const [destination, setDestination] = useState<DestinationResult>(
+    DEFAULTDESTINATIONLatLng
+  );
+  const [baseResultsCardData, setbaseResultsCardData] = useState<
+    //the results needed to be displayed
     baseResultsCardType[]
   >([]);
   const isNotInitialExec = useRef(false);
-  
+
   //effects arranged in execution order
   //flow goes as follows: (1) Location Permissions + Denial error mesages
   //(2)Location error messages even when current permission is enabled
@@ -93,95 +100,95 @@ export default function App() {
   useEffect(() => {
     //to query for location permission
     const getLocation = async () => {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== "granted") {
-          console.log("Permission to access location was denied");
-          setPermissionErrorMsg("Permission to access location was denied.");
-          return;
-        };
-        
-        try {
-          let location = await Location.getCurrentPositionAsync({});
-          console.log(location);
-          setCurrentLocation(location.coords);
-          setRegion({
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-            latitudeDelta: 0.005,
-            longitudeDelta: 0.005,
-          });
-        } catch (error) {
-          setLocationErrorMsg(`Failed to obtain location, ${error}`);
-          console.error("Failed to obtain location.", error);
-        }
-      };
-      getLocation();
-    }, []);
-  
-    useEffect(() => {
-      // Toast to display error from denial of gps permission
-      if (permissionErrorMsg != "") {
-        Toast.show({
-          type: "error",
-          text1: permissionErrorMsg,
-          text2: "Please try again later",
-          position: "top",
-          autoHide: true,
-        });
-      };
-    }, [permissionErrorMsg]);
-      
-    useEffect(() => {
-      //Toast to display error from inability to fetch location even with gps permission
-      if (locationErrorMsg != "") {
-        Toast.show({
-          type: "error",
-          text1: locationErrorMsg,
-          text2: "Please try again later",
-          position: "top",
-          autoHide: true,
-        });
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        setPermissionErrorMsg("Permission to access location was denied.");
+        return;
       }
-    }, [locationErrorMsg]);
 
-    useEffect(() => {
-      //Toast to display error from inability to fetch route from backend
-      if (routeErrorMsg != "") {
-        Toast.show({
-          type: "error",
-          text1: routeErrorMsg,
-          text2: "Please try again later",
-          position: "top",
-          autoHide: true,
+      try {
+        let location = await Location.getCurrentPositionAsync({});
+        console.log(location);
+        setCurrentLocation(location.coords);
+        setRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.005,
+          longitudeDelta: 0.005,
         });
+      } catch (error) {
+        setLocationErrorMsg(`Failed to obtain location, ${error}`);
+        console.error("Failed to obtain location.", error);
       }
-    }, [routeErrorMsg]);
+    };
+    getLocation();
+  }, []);
 
-    useEffect(() => {   
-      //to change when the destination state changes due to search bar having user input
-      if (destination.address !== "DEFAULT") {
-        setisResultAttained(true);
-      }
-    }, [destination]);
-  
+  useEffect(() => {
+    // Toast to display error from denial of gps permission
+    if (permissionErrorMsg != "") {
+      Toast.show({
+        type: "error",
+        text1: permissionErrorMsg,
+        text2: "Please try again later",
+        position: "top",
+        autoHide: true,
+      });
+    }
+  }, [permissionErrorMsg]);
+
+  useEffect(() => {
+    //Toast to display error from inability to fetch location even with gps permission
+    if (locationErrorMsg != "") {
+      Toast.show({
+        type: "error",
+        text1: locationErrorMsg,
+        text2: "Please try again later",
+        position: "top",
+        autoHide: true,
+      });
+    }
+  }, [locationErrorMsg]);
+
+  useEffect(() => {
+    //Toast to display error from inability to fetch route from backend
+    if (routeErrorMsg != "") {
+      Toast.show({
+        type: "error",
+        text1: routeErrorMsg,
+        text2: "Please try again later",
+        position: "top",
+        autoHide: true,
+      });
+    }
+  }, [routeErrorMsg]);
+
+  useEffect(() => {
+    //to change when the destination state changes due to search bar having user input
+    if (destination.address !== "DEFAULT") {
+      setisResultAttained(true);
+    }
+  }, [destination]);
 
   useEffect(() => {
     //function that is executed when destination is changed (a new search result is attained)
     if (isNotInitialExec.current && destination !== DEFAULTDESTINATIONLatLng) {
-      fetchBestRoute({
-        latitude: currentLocation.latitude,
-        longitude: currentLocation.longitude,
-      },
-      {
-        latitude: destination.latitude, 
-        longitude: destination.longitude
-      }
-    ); //this will return back the gps coordinates which are then sent to the api
+      fetchBestRoute(
+        {
+          latitude: currentLocation.latitude,
+          longitude: currentLocation.longitude,
+        },
+        {
+          latitude: destination.latitude,
+          longitude: destination.longitude,
+        }
+      ); //this will return back the gps coordinates which are then sent to the api
       return;
     } else {
       isNotInitialExec.current = true;
     }
-  }, [destination])
+  }, [destination]);
 
   //async functions
   async function getDestinationResult(data: GooglePlaceData) {
@@ -193,12 +200,12 @@ export default function App() {
       latitude: reversedDestinationLatLng.latitude,
       longitude: reversedDestinationLatLng.longitude,
       address: data.description,
-      placeId: data.place_id
+      placeId: data.place_id,
     });
-  };
+  }
 
   async function getLatLngFromId(placeId: string) {
-    //reverses geocoding 
+    //reverses geocoding
     const response = await fetch(
       `https://places.googleapis.com/v1/places/${placeId}?fields=location&key=${mapsApiKey}`
     );
@@ -215,49 +222,54 @@ export default function App() {
       );
     }
   }
-  
 
-  async function fetchRoutesFromServer(origin:LatLng, destination: LatLng): Promise<baseResultsCardType[]> {
+  async function fetchRoutesFromServer(
+    origin: LatLng,
+    destination: LatLng
+  ): Promise<baseResultsCardType[]> {
     if (process.env.EXPO_PUBLIC_ONEMAPAPITOKEN) {
-      try{
+      try {
         console.log("Origin location:", origin);
-        const data = await fetch("https://test-nusmaps.onrender.com/transportRoute", {
-          method:'POST',
-          body: JSON.stringify({
-            origin:origin,
-            destination: destination
-          }),
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": process.env.EXPO_PUBLIC_ONEMAPAPITOKEN,
-            //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
-          },
-        });
+        const data = await fetch(
+          "https://test-nusmaps.onrender.com/transportRoute",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              origin: origin,
+              destination: destination,
+            }),
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: process.env.EXPO_PUBLIC_ONEMAPAPITOKEN,
+              //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
+            },
+          }
+        );
         return data.json();
       } catch (error) {
         setRouteErrorMsg("Server issues, please try again later.");
-        console.error("Route could not be found. Please try again later")
-        throw new Error("Route could not be found. Please try again later")
+        console.error("Route could not be found. Please try again later");
+        throw new Error("Route could not be found. Please try again later");
       }
     } else {
       setRouteErrorMsg("Server issues, please try again later.");
       console.error("api token for OneMap not declared. Check server settings");
       throw new Error("API token could not be found. Please try again");
     }
-  };
+  }
 
   async function fetchBestRoute(origin: LatLng, destination: LatLng) {
-    //fetches best route between two points, can pass a check to see if 
+    //fetches best route between two points, can pass a check to see if
     // const {data, error, isLoading} = useQuery({queryKey:['routeData', origin, destination], queryFn:() => fetchRoutesFromServer(origin, destination)});
     // if (isLoading) {
-      // console.log("loading...");
+    // console.log("loading...");
     // };
     // if (error) {
-      // console.error("Couldn't fetch best route from server");
+    // console.error("Couldn't fetch best route from server");
     // } else if (data) {
-      // setbaseResultsCardData(data);
+    // setbaseResultsCardData(data);
     // }
-    //issue: Timing issue + 
+    //issue: Timing issue +
     try {
       const result = await fetchRoutesFromServer(origin, destination);
       console.log("finally", result);
@@ -265,8 +277,8 @@ export default function App() {
     } catch (error) {
       console.error("parsing error: ", error);
       setRouteErrorMsg("service not available, please try again");
-    } 
-  };
+    }
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -287,7 +299,7 @@ export default function App() {
             location={currentLocation}
             getDestinationResult={getDestinationResult}
           />
-        <ResultScreen
+          <ResultScreen
             origin={{
               latitude: currentLocation.latitude,
               longitude: currentLocation.longitude,
@@ -303,7 +315,7 @@ export default function App() {
   );
 }
 
-//stylesheet  
+//stylesheet
 const styles = StyleSheet.create({
   container: {
     flex: 1,

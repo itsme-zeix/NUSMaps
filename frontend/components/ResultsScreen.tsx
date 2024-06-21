@@ -14,10 +14,10 @@ import { ImageSourcePropType } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { LatLng } from "react-native-maps";
 import Modal from "react-native-modal";
-import Constants  from "expo-constants";
+import Constants from "expo-constants";
 import { SubwayTypeCard } from "@/app/(tabs)/SubwayType";
 import { BusNumberCard } from "@/app/(tabs)/BusNumber";
-import { Link } from 'expo-router';
+import { Link } from "expo-router";
 
 //interfaces and types
 type destinationType = {
@@ -31,10 +31,10 @@ interface LegBase {
 }
 interface WalkLeg extends LegBase {
   walkInfo: {
-    "distance":string,
-    "direction":string;
-  }[],
-};
+    distance: string;
+    direction: string;
+  }[];
+}
 interface PublicTransportLeg extends LegBase {
   //used to display the routes info
   serviceType: string;
@@ -43,8 +43,8 @@ interface PublicTransportLeg extends LegBase {
   intermediateStopCount: number;
   totalTimeTaken: number;
   intermediateStopNames: string[];
-  intermediateStopGPSLatLng:LatLng[];
-};
+  intermediateStopGPSLatLng: LatLng[];
+}
 type Leg = PublicTransportLeg | WalkLeg;
 
 interface baseResultsCardType {
@@ -53,7 +53,7 @@ interface baseResultsCardType {
   wholeJourneyTiming: string;
   journeyLegs: Leg[]; //an array of all the legs in 1 route
   polylineArray: number[];
-};
+}
 
 interface ResultObject {
   origin: LatLng;
@@ -87,47 +87,78 @@ const iconList: IconCatalog = {
 //constant variables
 const apiKey = Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
 
-
 //result card(singular card)
-const ResultCard: React.FC<SingleResultCardData> = ({ origin, destination, resultData }) => {
-  //Put in a pressable that when expanded, will 
+const ResultCard: React.FC<SingleResultCardData> = ({
+  origin,
+  destination,
+  resultData,
+}) => {
+  //Put in a pressable that when expanded, will
   const types = resultData.types.flatMap((icon) => [icon, "RCHEVRON"]);
   types.splice(types.length - 1, 1); // remove the last chevron
-  console.log('ok');
+  console.log("ok");
   console.log(types);
   return (
-    <Link href = {{
-      pathname: "/DetailedRouteScreen",
-      params: {baseResultsCardData: JSON.stringify(resultData), destination: JSON.stringify(destination), origin:JSON.stringify(origin)}
-    }}
-    asChild style={styles.resultCard}>
-      <Pressable style = {{backgroundColor:"green"}} >
+    <Link
+      href={{
+        pathname: "/DetailedRouteScreen",
+        params: {
+          baseResultsCardData: JSON.stringify(resultData),
+          destination: JSON.stringify(destination),
+          origin: JSON.stringify(origin),
+        },
+      }}
+      asChild
+      style={styles.resultCard}
+    >
+      <Pressable style={{ backgroundColor: "green" }}>
         <View>
           <View style={styles.icons}>
             {types.map((icon, index) => {
               if (icon === "BUS") {
-                const ptLeg = resultData.journeyLegs[index/2] as PublicTransportLeg;
-                return (<View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <BusNumberCard busNumber={ptLeg.serviceType}/>
-                  </View>)
+                const ptLeg = resultData.journeyLegs[
+                  index / 2
+                ] as PublicTransportLeg;
+                return (
+                  <View
+                    key={index}
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <BusNumberCard busNumber={ptLeg.serviceType} />
+                  </View>
+                );
               } else if (icon === "SUBWAY") {
-                const ptLeg = resultData.journeyLegs[index/2] as PublicTransportLeg;
-                return (<View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <SubwayTypeCard serviceType={ptLeg.serviceType}/>
-                  </View>)
+                const ptLeg = resultData.journeyLegs[
+                  index / 2
+                ] as PublicTransportLeg;
+                return (
+                  <View
+                    key={index}
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <SubwayTypeCard serviceType={ptLeg.serviceType} />
+                  </View>
+                );
               } else {
-                return(<Image key={index} source={iconList[icon as keyof IconCatalog]} style={{ flexDirection: "row", alignItems: "center" }}/>);
-              }})}
+                return (
+                  <Image
+                    key={index}
+                    source={iconList[icon as keyof IconCatalog]}
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  />
+                );
+              }
+            })}
             <Text>{resultData.wholeJourneyTiming}</Text>
-            </View>
-          <Text style={styles.travelDuration}>{resultData.journeyTiming}</Text>
           </View>
-        </Pressable>
+          <Text style={styles.travelDuration}>{resultData.journeyTiming}</Text>
+        </View>
+      </Pressable>
     </Link>
-  )
+  );
 };
 
-// result screen 
+// result screen
 export const ResultScreen: React.FC<
   ResultObject & {
     isVisible: boolean;
@@ -179,7 +210,12 @@ export const ResultScreen: React.FC<
               </View>
               <View style={styles.resultContainer}>
                 {baseResultsData.map((data, index) => (
-                  <ResultCard key={index} origin={origin} resultData={data} destination = {destination}/>
+                  <ResultCard
+                    key={index}
+                    origin={origin}
+                    resultData={data}
+                    destination={destination}
+                  />
                 ))}
               </View>
             </View>
@@ -240,11 +276,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
-    backgroundColor:"red"
+    backgroundColor: "red",
   },
   travelDuration: {
     fontSize: 18,
     fontWeight: "bold",
   },
 });
-
