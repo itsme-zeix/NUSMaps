@@ -8,6 +8,7 @@ import {
   ScrollView,
   RefreshControl,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
@@ -24,6 +25,7 @@ import * as Location from "expo-location";
 import { LocationObject } from "expo-location";
 import Toast from "react-native-toast-message";
 import BusStopSearchBar from "@/components/BusStopSearchBar";
+import SegmentedControl from "@react-native-segmented-control/segmented-control";
 
 // INTERFACES
 interface BusService {
@@ -266,6 +268,7 @@ function NearbyBusStops({
   refreshUserLocation: () => void;
 }) {
   const location = useUserLocation(refreshLocation);
+
   const {
     isPending,
     error,
@@ -278,8 +281,24 @@ function NearbyBusStops({
       ).then((res) => res.json()),
   });
 
-  if (isPending) return <Text>Loading...</Text>;
-  if (error) return <Text>An error has occurred: {error.message}</Text>;
+  if (isPending)
+    return <ActivityIndicator size="large" style={{ margin: 20 }} />;
+  if (error)
+    return (
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={isPending}
+            onRefresh={refreshUserLocation}
+          />
+        }
+      >
+        <View style={{ flex: 1, alignItems: "center", margin: 20 }}>
+          <Text>An error has occurred: {error.message}. </Text>
+          <Text>Pull down to try again.</Text>
+        </View>
+      </ScrollView>
+    );
 
   // Logic to modify the timings in the BusService object from ISO time to minutes away from now.
   const calculateMinutesDifference = (isoTime: string): string => {
@@ -296,7 +315,9 @@ function NearbyBusStops({
     const differenceInMinutes = Math.round(
       differenceInMilliseconds / 1000 / 60
     );
-    return String(differenceInMinutes >= 0 ? differenceInMinutes : 0);
+    return String(
+      differenceInMinutes >= 0 ? differenceInMinutes : differenceInMinutes
+    );
   };
 
   busStops.map((busStop: BusStop) =>
@@ -315,7 +336,7 @@ function NearbyBusStops({
         />
       }
     >
-      <>
+      <View>
         {busStops && Array.isArray(busStops) ? (
           busStops.map((busStop: BusStop, index: number) => (
             <ListItem key={index} item={busStop} />
@@ -323,16 +344,19 @@ function NearbyBusStops({
         ) : (
           <Text>{JSON.stringify(busStops)}</Text>
         )}
-      </>
+      </View>
     </ScrollView>
   );
 }
 
 // Get all NUS Bus Stops and its associated timings and render it.
-function NUSBusStops() {}
+function NUSBusStops() {
+  return <Text> PLACEHOLDER </Text>;
+}
 
 export default function BusStopsScreen() {
   const [refreshLocation, setRefreshLocation] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0); // State to handle the logic of rendering nearby(0) or NUS(1) bus stops.
 
   const refetchBusStops = useCallback(() => {
     queryClient.invalidateQueries();
@@ -348,10 +372,25 @@ export default function BusStopsScreen() {
       <View style={{ backgroundColor: "white", flex: 1 }}>
         <SafeAreaView>
           <BusStopSearchBar />
-          <NearbyBusStops
-            refreshLocation={refreshLocation}
-            refreshUserLocation={refetchUserLocation}
-          />
+          <View style={styles.segmentedControlContainer}>
+            <SegmentedControl
+              values={["Nearby", "NUS Bus Stops"]}
+              selectedIndex={selectedIndex}
+              onChange={(event) => {
+                setSelectedIndex(event.nativeEvent.selectedSegmentIndex);
+              }}
+            />
+          </View>
+          <View>
+            {selectedIndex === 0 ? (
+              <NearbyBusStops
+                refreshLocation={refreshLocation}
+                refreshUserLocation={refetchUserLocation}
+              />
+            ) : (
+              <NUSBusStops />
+            )}
+          </View>
         </SafeAreaView>
       </View>
     </QueryClientProvider>
@@ -438,5 +477,9 @@ const styles = StyleSheet.create({
   chevron: {
     width: 30,
     height: 30,
+  },
+  segmentedControlContainer: {
+    marginVertical: 10,
+    marginHorizontal: 20,
   },
 });
