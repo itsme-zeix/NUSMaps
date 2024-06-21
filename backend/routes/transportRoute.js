@@ -83,7 +83,7 @@ const formatLeg = (legArray) => {
   };
   console.log("typesArr before sending: ", typesArr);
   console.log("formatted leg array", formattedLegArray);
-  const combinedRouteGeometry = geometryArr.flat(2);
+  const combinedRouteGeometry = geometryArr.flat(1);
   console.log("returned total route geometry: ",combinedRouteGeometry);
   return [typesArr, formattedLegArray, combinedRouteGeometry];
 };
