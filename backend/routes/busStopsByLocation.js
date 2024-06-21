@@ -141,6 +141,7 @@ async function getArrivalTime(busStopsArray) {
           }
 
           const NUSReply = JSON.parse(text);
+          console.log(NUSReply);
           // We will process the NUSReply in a 2 step process:
           // 1) reformat reply such that we can search the buses by name in a dict.
           // 2) iterate through buses in our bus stop objects and retrieve the timings based on the name.
@@ -157,29 +158,44 @@ async function getArrivalTime(busStopsArray) {
               if (shuttles[serviceName]._etas) {
                 // These are NUS buses. Public buses do not have ._etas field in NUSNextBus API response.
                 // Handle the cases of differing sizes of etas returned due to 0/1/2 next buses.
+                // ETA is not given in ISO time, so we have to calculate the ISO time based on mins till arrival.
                 const etaLength = shuttles[serviceName]._etas.length;
+                const currentTime = new Date();
                 if (etaLength == 0) {
                   busObject.timings = ["N.A.", "N.A."];
                 } else if (etaLength == 1) {
-                  const firstArrivalTime = shuttles[serviceName]._etas[0].ts;
+                  const arrivalTime = shuttles[serviceName]._etas[0].eta_s;
+                  const firstArrivalTime = new Date(
+                    currentTime.getTime() + arrivalTime * 1000
+                  ).toISOString();
                   busObject.timings = [firstArrivalTime, "N.A."];
                 } else {
-                  const firstArrivalTime = shuttles[serviceName]._etas[0].ts;
-                  const secondArrivalTime = shuttles[serviceName]._etas[1].ts;
+                  const arrivalTime = shuttles[serviceName]._etas[0].eta_s;
+                  const nextArrivalTime = shuttles[serviceName]._etas[1].eta_s;
+                  const firstArrivalTime = new Date(
+                    currentTime.getTime() + arrivalTime * 1000
+                  ).toISOString();
+                  const secondArrivalTime = new Date(
+                    currentTime.getTime() + nextArrivalTime * 1000
+                  ).toISOString();
                   busObject.timings = [firstArrivalTime, secondArrivalTime];
                 }
               } else {
                 // Public bus timings obtained by NUSNextBus API is given in mins to arrival rather than ISO time.
                 // The code below converts arrival time in minutes to ISO time to maintain a standard response format.
                 const currentTime = new Date();
+                let arrivalTime = shuttles[serviceName].arrivalTime;
+                let nextArrivalTime = shuttles[serviceName].nextArrivalTime;
+
+                // Check if arrivalTime and nextArrivalTime are numbers (they can be Arr), if not, set them to 0
+                arrivalTime = isNaN(arrivalTime) ? 0 : arrivalTime;
+                nextArrivalTime = isNaN(nextArrivalTime) ? 0 : nextArrivalTime;
 
                 const firstArrivalTime = new Date(
-                  currentTime.getTime() +
-                    shuttles[serviceName].arrivalTime * 60000
+                  currentTime.getTime() + arrivalTime * 60000
                 ).toISOString();
                 const secondArrivalTime = new Date(
-                  currentTime.getTime() +
-                    shuttles[serviceName].nextArrivalTime * 60000
+                  currentTime.getTime() + nextArrivalTime * 60000
                 ).toISOString();
 
                 busObject.timings = [firstArrivalTime, secondArrivalTime];
