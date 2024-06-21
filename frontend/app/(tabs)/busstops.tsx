@@ -177,7 +177,9 @@ const ListItem = ({ item }: { item: BusStop }) => {
                 {/* use conditional to assign colour to circle based on busStopName */}
                 <ColouredCircle color={getColor(bus.busNumber)} size={15} />
                 <Text style={[styles.details, styles.busNumber]}>
-                  {bus.busNumber}
+                  {bus.busNumber.startsWith("PUB:")
+                    ? bus.busNumber.slice(4)
+                    : bus.busNumber}
                 </Text>
               </View>
               <View style={styles.rightContainer}>
