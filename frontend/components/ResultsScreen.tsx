@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   StyleSheet,
   SafeAreaView,
@@ -9,10 +9,10 @@ import {
   StatusBar,
   Platform,
   Pressable,
-  Button
 } from "react-native";
 import { ImageSourcePropType } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import { LatLng } from "react-native-maps";
 import Modal from "react-native-modal";
 import Constants  from "expo-constants";
 import { SubwayTypeCard } from "@/app/(tabs)/SubwayType";
@@ -20,15 +20,10 @@ import { BusNumberCard } from "@/app/(tabs)/BusNumber";
 import { Link } from 'expo-router';
 
 //interfaces and types
-interface Coords {
-  latitude: number;
-  longitude: number;
-}
-
-type destinationLocation = {
+type destinationType = {
   address: string;
   placeId: string;
-};
+} & LatLng;
 
 interface LegBase {
   //base template for the info that is displayed in the leg
@@ -48,7 +43,7 @@ interface PublicTransportLeg extends LegBase {
   intermediateStopCount: number;
   totalTimeTaken: number;
   intermediateStopNames: string[];
-  intermediateStopGPSCoords:Coords[];
+  intermediateStopGPSLatLng:LatLng[];
 };
 type Leg = PublicTransportLeg | WalkLeg;
 
@@ -56,22 +51,19 @@ interface baseResultsCardType {
   types: string[];
   journeyTiming: string;
   wholeJourneyTiming: string;
-  journeyLegs: Leg[] //an array of all the legs in 1 route
-};
-
-const processResultsCardData = () => {
-  //processes the resultData for 1 card
+  journeyLegs: Leg[]; //an array of all the legs in 1 route
+  polylineArray: number[];
 };
 
 interface ResultObject {
-  origin: Coords;
-  destination: destinationLocation;
+  origin: LatLng;
+  destination: destinationType;
   baseResultsData: baseResultsCardType[];
 }
 
 interface SingleResultCardData {
-  origin: Coords;
-  destination: destinationLocation;
+  origin: LatLng;
+  destination: destinationType;
   resultData: baseResultsCardType;
 }
 
@@ -106,7 +98,7 @@ const ResultCard: React.FC<SingleResultCardData> = ({ origin, destination, resul
   return (
     <Link href = {{
       pathname: "/DetailedRouteScreen",
-      params: {baseResultsCardData: JSON.stringify(resultData), destinationLocation: JSON.stringify(destination), origin:JSON.stringify(origin)}
+      params: {baseResultsCardData: JSON.stringify(resultData), destination: JSON.stringify(destination), origin:JSON.stringify(origin)}
     }}
     asChild style={styles.resultCard}>
       <Pressable style = {{backgroundColor:"green"}} >
@@ -114,17 +106,17 @@ const ResultCard: React.FC<SingleResultCardData> = ({ origin, destination, resul
           <View style={styles.icons}>
             {types.map((icon, index) => {
               if (icon === "BUS") {
-                let ptLeg = resultData.journeyLegs[index/2] as PublicTransportLeg;
+                const ptLeg = resultData.journeyLegs[index/2] as PublicTransportLeg;
                 return (<View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <BusNumberCard busNumber={ptLeg.serviceType}/>
                   </View>)
               } else if (icon === "SUBWAY") {
-                let ptLeg = resultData.journeyLegs[index/2] as PublicTransportLeg;
+                const ptLeg = resultData.journeyLegs[index/2] as PublicTransportLeg;
                 return (<View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <SubwayTypeCard serviceType={ptLeg.serviceType}/>
                   </View>)
               } else {
-                return( <Image key={index} source={iconList[icon as keyof IconCatalog]} style={{ flexDirection: "row", alignItems: "center" }}/>);
+                return(<Image key={index} source={iconList[icon as keyof IconCatalog]} style={{ flexDirection: "row", alignItems: "center" }}/>);
               }})}
             <Text>{resultData.wholeJourneyTiming}</Text>
             </View>
@@ -148,7 +140,6 @@ export const ResultScreen: React.FC<
     radius: 5000,
     components: "country:sg",
   };
-  const [originText, onChangeOrigin] = React.useState(""); //should change the default value
   if (isVisible) {
     return (
       <SafeAreaView style={{ flex: 1 }}>
@@ -188,7 +179,7 @@ export const ResultScreen: React.FC<
               </View>
               <View style={styles.resultContainer}>
                 {baseResultsData.map((data, index) => (
-                  <ResultCard key={index} origin={origin} resultData={data} destination={destination}/>
+                  <ResultCard key={index} origin={origin} resultData={data} destination = {destination}/>
                 ))}
               </View>
             </View>

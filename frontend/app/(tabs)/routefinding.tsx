@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { Button, Pressable, StyleSheet, View } from "react-native";
-import MapView, { PROVIDER_GOOGLE, Marker, Region } from "react-native-maps";
+import React, { useEffect, useState, useRef } from "react";
+import { StyleSheet, View } from "react-native";
+import MapView, { PROVIDER_GOOGLE, Marker, Region, LatLng } from "react-native-maps";
 import * as Location from "expo-location";
 import { RouteSearchBar } from "@/components/RouteSearchBar";
 import Toast from "react-native-toast-message";
@@ -8,20 +8,9 @@ import { ResultScreen } from "@/components/ResultsScreen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { GooglePlaceData } from "react-native-google-places-autocomplete";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import Constants from 'expo-constants';
-import { Link } from "expo-router";
 
 //interface and types
-type destinationLocation = {
-  address: string;
-  placeId: string;
-};
-
-interface Coords {
-  latitude: number;
-  longitude: number;
-};
 
 interface LegBase {
   //base template for the info that is displayed in the leg
@@ -41,7 +30,7 @@ interface PublicTransportLeg extends LegBase {
   intermediateStopCount: number;
   totalTimeTaken: number;
   intermediateStopNames: string[];
-  intermediateStopGPSCoords:Coords[];
+  intermediateStopGPSLatLng:LatLng[];
 };
 type Leg = PublicTransportLeg | WalkLeg;
 interface baseResultsCardType {
@@ -49,7 +38,12 @@ interface baseResultsCardType {
   journeyTiming: string;
   wholeJourneyTiming: string;
   journeyLegs: Leg[]; //an array of all the legs in 1 route
+  polylineArray: number[];
 };
+type DestinationResult = {
+  address:string;
+  placeId:string;
+} & LatLng;
 
 //constants and variables
 const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
@@ -77,46 +71,35 @@ export default function App() {
   const [locationErrorMsg, setLocationErrorMsg] = useState("");
   const [isResultAttained, setisResultAttained] = useState(false);
   const [routeErrorMsg, setRouteErrorMsg] = useState("");
-  const [destination, setDestination] = useState<destinationLocation>({
+  const DEFAULTDESTINATIONLatLng = {
+    latitude: NaN,
+    longitude: NaN,
     address: "DEFAULT",
     placeId: "DEFAULT",
-  });
-  const [baseResultsCardData, setbaseResultsCardData] = useState<
+    
+  };
+  const [destination, setDestination] = useState<DestinationResult>(DEFAULTDESTINATIONLatLng);
+  const [baseResultsCardData, setbaseResultsCardData] = useState< //the results needed to be displayed
     baseResultsCardType[]
   >([]);
+  const isNotInitialExec = useRef(false);
   
-  //effects
-  useEffect(() => {   
-    //to change when the destination changes
-    if (destination.address !== "DEFAULT") {
-      setisResultAttained(true);
-    }
-  }, [destination]);
-  
+  //effects arranged in execution order
+  //flow goes as follows: (1) Location Permissions + Denial error mesages
+  //(2)Location error messages even when current permission is enabled
+  //(3)Route error messages when unable to query backend
+  //(4) State changes when user inputs a new destination, leading to a new visible modal
+  //(5)
   useEffect(() => {
-    //shows toast when onemap api doesn't return a result
-    if (routeErrorMsg !== "") {
-      setisResultAttained(false);
-      Toast.show({
-        type: "error",
-        text1: permissionErrorMsg,
-        text2: "Please try again later when public transport is available",
-        position: "top",
-        autoHide: true,
-      });
-    }
-  });
-
-  useEffect(() => {
-      //to query for location permission
-      const getLocation = async () => {
+    //to query for location permission
+    const getLocation = async () => {
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
           console.log("Permission to access location was denied");
           setPermissionErrorMsg("Permission to access location was denied.");
           return;
         };
-  
+        
         try {
           let location = await Location.getCurrentPositionAsync({});
           console.log(location);
@@ -147,7 +130,7 @@ export default function App() {
         });
       };
     }, [permissionErrorMsg]);
-  
+      
     useEffect(() => {
       //Toast to display error from inability to fetch location even with gps permission
       if (locationErrorMsg != "") {
@@ -161,20 +144,60 @@ export default function App() {
       }
     }, [locationErrorMsg]);
 
-  //async functions
-  async function getDestinationResult(data: GooglePlaceData) {
-    //slight delay
-    fetchBestRoute(
-      {
+    useEffect(() => {
+      //Toast to display error from inability to fetch route from backend
+      if (routeErrorMsg != "") {
+        Toast.show({
+          type: "error",
+          text1: routeErrorMsg,
+          text2: "Please try again later",
+          position: "top",
+          autoHide: true,
+        });
+      }
+    }, [routeErrorMsg]);
+
+    useEffect(() => {   
+      //to change when the destination state changes due to search bar having user input
+      if (destination.address !== "DEFAULT") {
+        setisResultAttained(true);
+      }
+    }, [destination]);
+  
+
+  useEffect(() => {
+    //function that is executed when destination is changed (a new search result is attained)
+    if (isNotInitialExec.current && destination !== DEFAULTDESTINATIONLatLng) {
+      fetchBestRoute({
         latitude: currentLocation.latitude,
         longitude: currentLocation.longitude,
       },
-      await getCoordsFromId(data.place_id)
+      {
+        latitude: destination.latitude, 
+        longitude: destination.longitude
+      }
     ); //this will return back the gps coordinates which are then sent to the api
-    setDestination({ address: data.description, placeId: data.place_id });
-  }
+      return;
+    } else {
+      isNotInitialExec.current = true;
+    }
+  }, [destination])
 
-  async function getCoordsFromId(placeId: string) {
+  //async functions
+  async function getDestinationResult(data: GooglePlaceData) {
+    //slight delay
+    //sometimes doesnt always get called when clicked on
+    const reversedDestinationLatLng = await getLatLngFromId(data.place_id);
+    console.log("reversed: ", reversedDestinationLatLng);
+    setDestination({
+      latitude: reversedDestinationLatLng.latitude,
+      longitude: reversedDestinationLatLng.longitude,
+      address: data.description,
+      placeId: data.place_id
+    });
+  };
+
+  async function getLatLngFromId(placeId: string) {
     //reverses geocoding 
     const response = await fetch(
       `https://places.googleapis.com/v1/places/${placeId}?fields=location&key=${mapsApiKey}`
@@ -185,7 +208,6 @@ export default function App() {
         latitude: jsonObject.location.latitude,
         longitude: jsonObject.location.longitude,
       };
-      // console.log(result);
       return result;
     } else {
       throw new Error(
@@ -195,10 +217,11 @@ export default function App() {
   }
   
 
-  async function fetchRoutesFromServer(origin:Coords, destination: Coords): Promise<baseResultsCardType[]> {
+  async function fetchRoutesFromServer(origin:LatLng, destination: LatLng): Promise<baseResultsCardType[]> {
     if (process.env.EXPO_PUBLIC_ONEMAPAPITOKEN) {
       try{
-        const data = await fetch("https://nusmaps.onrender.com/transportRoute", {
+        console.log("Origin location:", origin);
+        const data = await fetch("https://test-nusmaps.onrender.com/transportRoute", {
           method:'POST',
           body: JSON.stringify({
             origin:origin,
@@ -223,7 +246,7 @@ export default function App() {
     }
   };
 
-  async function fetchBestRoute(origin: Coords, destination: Coords) {
+  async function fetchBestRoute(origin: LatLng, destination: LatLng) {
     //fetches best route between two points, can pass a check to see if 
     // const {data, error, isLoading} = useQuery({queryKey:['routeData', origin, destination], queryFn:() => fetchRoutesFromServer(origin, destination)});
     // if (isLoading) {
@@ -235,9 +258,14 @@ export default function App() {
       // setbaseResultsCardData(data);
     // }
     //issue: Timing issue + 
-    const result = await fetchRoutesFromServer(origin, destination);
-    console.log("finally", result);
-    setbaseResultsCardData(result);
+    try {
+      const result = await fetchRoutesFromServer(origin, destination);
+      console.log("finally", result);
+      setbaseResultsCardData(result);
+    } catch (error) {
+      console.error("parsing error: ", error);
+      setRouteErrorMsg("service not available, please try again");
+    } 
   };
 
   return (

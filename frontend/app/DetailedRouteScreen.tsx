@@ -5,17 +5,15 @@ import {
   Text,
   View,
   Image,
-  StatusBar,
-  Platform,
   Pressable,
 } from "react-native";
 import { ImageSourcePropType } from "react-native";
 import Constants  from "expo-constants";
 import { SafeAreaView } from "react-native-safe-area-context";
-import MapView, { PROVIDER_GOOGLE, Marker, Region } from "react-native-maps";
+import MapView, { PROVIDER_GOOGLE, Marker, Polyline, LatLng } from "react-native-maps";
 import { SubwayTypeCard } from "@/app/(tabs)/SubwayType";
 import { BusNumberCard } from "@/app/(tabs)/BusNumber";
-import { useNavigation, useRouter, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 
 interface LegBase {
     //base template for the info that is displayed in the leg
@@ -29,15 +27,10 @@ interface WalkLeg extends LegBase {
   }[],
 };
 
-interface Coords {
-  latitude:number;
-  longitude:number;
-};
-
-type destinationLocation = {
+type destinationType = {
   address: string;
   placeId: string;
-};
+} & LatLng;
 
 interface PublicTransportLeg extends LegBase {
   //used to display the routes info
@@ -47,7 +40,7 @@ interface PublicTransportLeg extends LegBase {
   intermediateStopCount: number;
   totalTimeTaken: number;
   intermediateStopNames: string[];
-  intermediateStopGPSCoords:Coords[];
+  intermediateStopGPSLatLng:LatLng[];
 };
 type Leg = PublicTransportLeg | WalkLeg;
 
@@ -55,8 +48,10 @@ interface baseResultsCardType {
   types: string[];
   journeyTiming: string;
   wholeJourneyTiming: string;
-  journeyLegs: Leg[] //an array of all the legs in 1 route
+  journeyLegs: Leg[]; //an array of all the legs in 1 route
+  polylineArray: number[];
 };
+
 interface IconCatalog {
   WALK: ImageSourcePropType;
   SUBWAY: ImageSourcePropType;
@@ -95,14 +90,14 @@ const OriginRectangle: React.FC = () => {
   )
 };
 
-const DestinationMarker: React.FC = () => {
+const DestinationFlag: React.FC = () => {
   return (
     <View style = {stylesheet.barContainer}>  
       <View style = {stylesheet.circle}>
         <Image source = {iconList["FLAG"]} style = {{width:20, height:20}}></Image>
       </View>
     </View>
-  )
+  );
 };
 
 const LegRectangle: React.FC = () => {
@@ -145,41 +140,62 @@ const PublicTransportLegPart: React.FC<PublicTransportLegProps> = ({ptLeg})=> {
 
 const WalkLegPart: React.FC<WalkLegProps> = ({walkLeg}) => {
   //TO-DO: Add details on turns
-  console.log('walk');
-  const totalDistance  = walkLeg.walkInfo.reduce((sum, curr) =>sum + curr.distance, 0)
+  const totalDistance  = walkLeg.walkInfo.reduce((sum, curr) =>sum + curr.distance, 0);
   return (
     <View style = {{backgroundColor:"green"}}>
       <Pressable onPress = {() => console.log("Route pressed!")}>
         <Text>Walk for {totalDistance}m </Text>
       </Pressable>
     </View>
-  )
+  );
 };
-{/* // <View key = {index} style = {{flexDirection : "row", alignItems: 'center'}}>
-//   {
-  //   leg.type === "WALK" ? (<Image source = {iconList["WALK"]}/> ) 
-  //   : leg.type === "SUBWAY" ? (<Image source = {iconList["SUBWAY"]}/>)
-  //   : leg.type === "TRAM" ? (<Image source = {iconList["TRAM"]}/>)
-  //   : null
-  //   }
-  )
-  // </View> */}
-const DetailedRoutingScreen:React.FC<baseResultsCardType & destinationLocation & Coords> = () =>  {
+
+const DetailedRoutingScreen:React.FC<baseResultsCardType & destinationType & LatLng> = () =>  {
   //add a base current location and end flag
     console.log('gone here');
     const params = useLocalSearchParams();
-    let destinationData = JSON.parse(params.destinationLocation as string);
-    console.log("dest:", destinationData)
-    let origin = JSON.parse(params.origin as string);
+    let destination:destinationType = JSON.parse(params.destinationType as string);
+    console.log("dest:", destination)
+    let origin:LatLng = JSON.parse(params.origin as string);
     console.log("origin:", origin);
     if ((params.baseResultsCardData == undefined)) {
       console.error("no base results received");
       return;
-    }
-    let baseResultsCardData:baseResultsCardType = JSON.parse(params.baseResultsCardData as string);
+    };
+    const baseResultsCardData:baseResultsCardType = JSON.parse(params.baseResultsCardData as string);
+    let polylineArray: number[] = [];
+    if ((baseResultsCardData.polylineArray == undefined && (origin.latitude != destination.latitude) && (origin.longitude != destination.longitude))) {
+      console.error("no routing received despite differing origins and destination");
+    } else {
+      polylineArray = baseResultsCardData.polylineArray;
+    };
+    console.log("polyline: ", polylineArray);
+    const formatted_array:LatLng[] = [];
+    for (let step = 0; step < polylineArray.length; step+= 2) {
+      formatted_array.push({
+        latitude:polylineArray[step],
+        longitude: polylineArray[step + 1]
+      });
+    };
     return (
       <SafeAreaView style = {stylesheet.SafeAreaView} >
-        <MapView style = {stylesheet.MapView} provider={PROVIDER_GOOGLE}/>
+        <MapView style = {stylesheet.MapView} provider={PROVIDER_GOOGLE}
+        initialRegion={{
+          latitude: (origin.latitude + destination.latitude) / 2,
+          longitude: (origin.longitude + destination.longitude) / 2,
+          latitudeDelta: Math.abs(origin.latitude - destination.latitude) * 2,
+          longitudeDelta:Math.abs(origin.longitude - destination.longitude) * 2,
+        }}>
+          <Marker coordinate ={origin}/>
+          <Marker coordinate={destination}/>
+          {polylineArray.length > 0 && (
+            <Polyline
+            coordinates={formatted_array}
+            strokeWidth={4}
+            strokeColor="purple"
+            zIndex={1}/>
+          )}
+        </MapView>
         <ScrollView style = {{flex:1, backgroundColor:"white"}}>
           <View style = {{flexDirection:"row"}}>
             <OriginRectangle/>
@@ -198,8 +214,8 @@ const DetailedRoutingScreen:React.FC<baseResultsCardType & destinationLocation &
           );
         }
           )}
-          <DestinationMarker/>
-          <Text>Destination: {destinationData.address}</Text>
+          <DestinationFlag/>
+          <Text>Destination: {destination.address}</Text>
         </ScrollView>
       </SafeAreaView>
       );
