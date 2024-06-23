@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {},
   "dependencies": {
+    "@mapbox/polyline": "^1.2.1",
     "cookie-parser": "~1.4.4",
     "date-fns": "^3.6.0",
     "debug": "~2.6.9",

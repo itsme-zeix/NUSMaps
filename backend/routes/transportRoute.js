@@ -1,6 +1,7 @@
 const { format } = require('date-fns');
 const dotenv = require("dotenv").config();
 var express = require("express");
+var polyline = require("@mapbox/polyline");
 
 var router = express.Router();
 const PUBLICTRANSPORTTYPES = ["BUS", "MRT", "TRAM"];
@@ -18,24 +19,31 @@ async function _processData(response) {
     // Only way to not use 'any' type here is to define an interface for the const routes (the json reply above)
     const legsArray = currPath.legs;
     // console.log("legs array: ", legsArray);
-    const [typesArr, formmatedLegArray] = formatLeg(legsArray);
+    const [typesArr, formattedLegArray, combinedRouteGeometry] = formatLeg(legsArray);
     console.log("types array: ", typesArr);
-    console.log("formmatedLegArray: ", formmatedLegArray);
+    console.log("formattedLegArray: ", formattedLegArray);
     const rightSideTiming = formatBeginningEndingTime(
       currPath.startTime,
       currPath.endTime
     );
     const leftSideTiming = formatJourneyTime(currPath.duration);
+    console.log("combine geometry: ", combinedRouteGeometry);
     baseCardResultsDataStorage.push({
       types: typesArr,
       journeyTiming: leftSideTiming,
       wholeJourneyTiming: rightSideTiming,
-      journeyLegs: formmatedLegArray
+      journeyLegs: formattedLegArray,
+      polylineArray: combinedRouteGeometry
     });
   }
   console.log('finished :', baseCardResultsDataStorage);
   return baseCardResultsDataStorage;
-}
+};
+
+const decodePolyLine = (encodedInput) => {
+  //takes in a string and converts it into points
+  return polyline.decode(encodedInput.points);
+};
 
 const formatBeginningEndingTime = (
   startTiming,
@@ -63,15 +71,21 @@ const formatLeg = (legArray) => {
   //and 4 distinct subtypes for intermediate: 
   //walk, bus, mrt, tram
   // console.log("received leg array ", legArray);
-  const formmatedLegArray = [];
+  //for walking there is only route geometry
+  const formattedLegArray = [];
   const typesArr = [];
+  const geometryArr = [];
   for (leg of legArray) {
-    leg.mode === "WALK" ?  formmatedLegArray.push(formatWalkLeg(leg)) : formmatedLegArray.push(formatPublicTransportLeg(leg));
+    leg.mode === "WALK" ?  formattedLegArray.push(formatWalkLeg(leg)) : formattedLegArray.push(formatPublicTransportLeg(leg));
     typesArr.push(leg.mode);
+    console.log("leg geometry:",leg.legGeometry);
+    geometryArr.push(decodePolyLine(leg.legGeometry)); //returns an array which is then placed into an array
   };
   console.log("typesArr before sending: ", typesArr);
-  console.log("formatted leg array", formmatedLegArray);
-  return [typesArr, formmatedLegArray];
+  console.log("formatted leg array", formattedLegArray);
+  const combinedRouteGeometry = geometryArr.flat(2);
+  console.log("returned total route geometry: ",combinedRouteGeometry);
+  return [typesArr, formattedLegArray, combinedRouteGeometry];
 };
 
 const formatWalkLeg = (leg) => {
