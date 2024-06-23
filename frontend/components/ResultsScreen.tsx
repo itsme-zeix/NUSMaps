@@ -96,7 +96,6 @@ const ResultCard: React.FC<SingleResultCardData> = ({
   //Put in a pressable that when expanded, will
   const types = resultData.types.flatMap((icon) => [icon, "RCHEVRON"]);
   types.splice(types.length - 1, 1); // remove the last chevron
-  console.log("ok");
   console.log(types);
   return (
     <Link
