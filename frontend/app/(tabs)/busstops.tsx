@@ -439,7 +439,7 @@ export default function BusStopsScreen() {
   return (
     <QueryClientProvider client={queryClient}>
       <View style={{ backgroundColor: "white", flex: 1 }}>
-        <SafeAreaView>
+        <SafeAreaView style={{flex: 1}}>
           <BusStopSearchBar />
           <View style={styles.segmentedControlContainer}>
             <SegmentedControl
@@ -450,7 +450,7 @@ export default function BusStopsScreen() {
               }}
             />
           </View>
-          <View>
+          <View style={{flex: 1}}>
             {selectedIndex === 0 ? (
               <NearbyBusStops
                 refreshLocation={refreshLocation}
