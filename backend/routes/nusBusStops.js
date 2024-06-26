@@ -67,7 +67,7 @@ async function getNUSBusStops() {
       const busStopObject = await generateBusStopsObject(stop);
       arrBusStops.push(busStopObject);
     }
-    console.log(arrBusStops)
+    console.log(arrBusStops);
     return arrBusStops;
   } catch (err) {
     console.error(
@@ -84,7 +84,8 @@ async function getNUSBusStops() {
 // for multiple calls to complete synchronously, increasing our API's response time.
 async function getArrivalTime(busStopsArray) {
   for (const busStop of busStopsArray) {
-    await (async (stopName) => {
+    await (async (busStop) => {
+      const stopName = busStop.busStopName.substring(8);
       try {
         const username = process.env.NUSNEXTBUS_USER;
         const password = process.env.NUSNEXTBUS_PASSWORD;
@@ -130,7 +131,7 @@ async function getArrivalTime(busStopsArray) {
         for (let busObject of busStop.savedBuses) {
           const serviceName = busObject.busNumber;
           if (shuttles[serviceName]) {
-            shuttle = shuttles[serviceName]
+            const shuttle = shuttles[serviceName];
             if (shuttle._etas) {
               // These are NUS buses. Public buses do not have ._etas field in NUSNextBus API response.
               // Handle the cases of differing sizes of etas returned due to 0/1/2 next buses.
@@ -155,7 +156,6 @@ async function getArrivalTime(busStopsArray) {
                   currentTime.getTime() + nextArrivalTime * 1000
                 ).toISOString();
                 busObject.timings = [firstArrivalTime, secondArrivalTime];
-                busStop.busNumber = shuttle.caption; // Update NUS Bus Stop name to be the full name rather than the code name (i.e. YIH-OPP -> Opp Yusof Ishak House).
               }
             } else {
               // Public bus timings obtained by NUSNextBus API is given in mins to arrival rather than ISO time.
@@ -179,10 +179,12 @@ async function getArrivalTime(busStopsArray) {
             }
           }
         }
+        // Update NUS Bus Stop name to be the full name rather than the code name (i.e. NUSSTOP_YIH-OPP -> NUSSTOP_Opp Yusof Ishak House).
+        busStop.busStopName = "NUSSTOP_" + NUSReply.ShuttleServiceResult.caption;
       } catch (error) {
         console.error("Error fetching data from NUSNextBus API:", error);
       }
-    })(busStop.busStopName.substring(8)); // substring(8) skips the first 8 characters 'NUSSTOP_'
+    })(busStop); // substring(8) skips the first 8 characters 'NUSSTOP_'
   }
 }
 
@@ -201,8 +203,9 @@ router.get("/", async (req, res) => {
   try {
     (async () => {
       const busStopsArray = await getNUSBusStops();
-      console.log(busStopsArray);
       await getArrivalTime(busStopsArray); // insert arrival times
+      console.log("==RESULT===")
+      console.log(busStopsArray)
       res.json(busStopsArray);
     })();
   } catch (err) {
