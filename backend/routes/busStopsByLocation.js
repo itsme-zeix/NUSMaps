@@ -109,7 +109,8 @@ async function getNearestBusStops(userLat, userLon) {
 async function getArrivalTime(busStopsArray) {
   for (const busStop of busStopsArray) {
     if (busStop.busStopName.startsWith("NUSSTOP")) {
-      await (async (stopName) => {
+      await (async (busStop) => {
+        const stopName = busStop.busStopName.substring(8); // substring(8) skips the first 8 characters 'NUSSTOP_'
         try {
           const username = process.env.NUSNEXTBUS_USER;
           const password = process.env.NUSNEXTBUS_PASSWORD;
@@ -141,7 +142,6 @@ async function getArrivalTime(busStopsArray) {
           }
 
           const NUSReply = JSON.parse(text);
-          console.log(NUSReply);
           // We will process the NUSReply in a 2 step process:
           // 1) reformat reply such that we can search the buses by name in a dict.
           // 2) iterate through buses in our bus stop objects and retrieve the timings based on the name.
@@ -155,8 +155,8 @@ async function getArrivalTime(busStopsArray) {
           for (let busObject of busStop.savedBuses) {
             const serviceName = busObject.busNumber;
             if (shuttles[serviceName]) {
-              const shuttle = shuttles[serviceName]
-              if (shuttle._etas) { 
+              const shuttle = shuttles[serviceName];
+              if (shuttle._etas) {
                 // These are NUS buses. Public buses do not have ._etas field in NUSNextBus API response.
                 // Handle the cases of differing sizes of etas returned due to 0/1/2 next buses.
                 // ETA is not given in ISO time, so we have to calculate the ISO time based on mins till arrival.
@@ -204,10 +204,13 @@ async function getArrivalTime(busStopsArray) {
               }
             }
           }
+          // Update NUS Bus Stop name to be the full name rather than the code name (i.e. NUSSTOP_YIH-OPP -> NUSSTOP_Opp Yusof Ishak House).
+          busStop.busStopName =
+            "NUSSTOP_" + NUSReply.ShuttleServiceResult.caption;
         } catch (error) {
           console.error("Error fetching data from NUSNextBus API:", error);
         }
-      })(busStop.busStopName.substring(8)); // substring(8) skips the first 8 characters 'NUSSTOP_'
+      })(busStop);
     } else {
       for (const bus of busStop.savedBuses) {
         // logic is somewhat convoluted here, can be simplified by removing serviceNo to reduce the number of API calls.
