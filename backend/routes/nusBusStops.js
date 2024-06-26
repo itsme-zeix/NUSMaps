@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { Client } = require("pg");
 
-// Create bus stop objects (based on interface defined in front end, see comment inside the method) using bus stop info retrieved from database in getNearestBusStops method.
+// Create bus stop objects (based on interface defined in front end, see comment inside the method) using bus stop info retrieved from database in getNUSBusStops method.
 async function generateBusStopsObject(stop) {
   // Interface in our tsx frontend for reference so we can reuse them when returning JSON.
   // interface BusService {
@@ -35,10 +35,9 @@ async function generateBusStopsObject(stop) {
   }
   return busStopObject;
 }
-// This function obtains x of the nearest bus stops formatted as busStopObjects.
+// This function obtains all of the NUS Bus Stops formatted as busStopObjects.
 async function getNUSBusStops() {
   // Connect to PostgreSQL server
-
   const client = new Client({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
@@ -52,27 +51,27 @@ async function getNUSBusStops() {
   try {
     await client.connect();
     const res = await client.query(
-      "SELECT id, name, latitude, longitude, services FROM busstops"
+      "SELECT id, name, latitude, longitude, services FROM busstops WHERE name LIKE 'NUSSTOP%'"
     );
     const busStops = res.rows;
-    const nearbyStops = busStops
-      .map((stop) => {
-        const name = stop.name;
-        const services = stop.services;
-        return { id: stop.id, name, distance, services };
-      })
-      .filter(stop.name.startsWith("NUSSTOP"));
+    const nusBusStops = busStops.map((stop) => {
+      const id = stop.id;
+      const name = stop.name;
+      const services = stop.services;
+      return { id, name, services };
+    });
 
     // Format the bus stops properly so that timings can be inserted easily once retrieved.
     const arrBusStops = [];
-    for (stop of nearbyStops) {
+    for (stop of nusBusStops) {
       const busStopObject = await generateBusStopsObject(stop);
       arrBusStops.push(busStopObject);
     }
+    console.log(arrBusStops)
     return arrBusStops;
   } catch (err) {
     console.error(
-      "busStopsByLocation encountered an error with PostgreSQL call:" + err
+      "nusBusStops encountered an error with PostgreSQL call:" + err
     );
   } finally {
     await client.end();
@@ -131,23 +130,24 @@ async function getArrivalTime(busStopsArray) {
         for (let busObject of busStop.savedBuses) {
           const serviceName = busObject.busNumber;
           if (shuttles[serviceName]) {
-            if (shuttles[serviceName]._etas) {
+            shuttle = shuttles[serviceName]
+            if (shuttle._etas) {
               // These are NUS buses. Public buses do not have ._etas field in NUSNextBus API response.
               // Handle the cases of differing sizes of etas returned due to 0/1/2 next buses.
               // ETA is not given in ISO time, so we have to calculate the ISO time based on mins till arrival.
-              const etaLength = shuttles[serviceName]._etas.length;
+              const etaLength = shuttle._etas.length;
               const currentTime = new Date();
               if (etaLength == 0) {
                 busObject.timings = ["N.A.", "N.A."];
               } else if (etaLength == 1) {
-                const arrivalTime = shuttles[serviceName]._etas[0].eta_s;
+                const arrivalTime = shuttle._etas[0].eta_s;
                 const firstArrivalTime = new Date(
                   currentTime.getTime() + arrivalTime * 1000
                 ).toISOString();
                 busObject.timings = [firstArrivalTime, "N.A."];
               } else {
-                const arrivalTime = shuttles[serviceName]._etas[0].eta_s;
-                const nextArrivalTime = shuttles[serviceName]._etas[1].eta_s;
+                const arrivalTime = shuttle._etas[0].eta_s;
+                const nextArrivalTime = shuttle._etas[1].eta_s;
                 const firstArrivalTime = new Date(
                   currentTime.getTime() + arrivalTime * 1000
                 ).toISOString();
@@ -155,6 +155,7 @@ async function getArrivalTime(busStopsArray) {
                   currentTime.getTime() + nextArrivalTime * 1000
                 ).toISOString();
                 busObject.timings = [firstArrivalTime, secondArrivalTime];
+                busStop.busNumber = shuttle.caption; // Update NUS Bus Stop name to be the full name rather than the code name (i.e. YIH-OPP -> Opp Yusof Ishak House).
               }
             } else {
               // Public bus timings obtained by NUSNextBus API is given in mins to arrival rather than ISO time.
@@ -199,10 +200,10 @@ router.get("/", async (req, res) => {
 
   try {
     (async () => {
-      const busStopsArray = await getNUSBusStops;
+      const busStopsArray = await getNUSBusStops();
+      console.log(busStopsArray);
       await getArrivalTime(busStopsArray); // insert arrival times
       res.json(busStopsArray);
-      
     })();
   } catch (err) {
     console.error(err);
