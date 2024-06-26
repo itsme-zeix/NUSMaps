@@ -155,23 +155,24 @@ async function getArrivalTime(busStopsArray) {
           for (let busObject of busStop.savedBuses) {
             const serviceName = busObject.busNumber;
             if (shuttles[serviceName]) {
-              if (shuttles[serviceName]._etas) {
+              const shuttle = shuttles[serviceName]
+              if (shuttle._etas) { 
                 // These are NUS buses. Public buses do not have ._etas field in NUSNextBus API response.
                 // Handle the cases of differing sizes of etas returned due to 0/1/2 next buses.
                 // ETA is not given in ISO time, so we have to calculate the ISO time based on mins till arrival.
-                const etaLength = shuttles[serviceName]._etas.length;
+                const etaLength = shuttle._etas.length;
                 const currentTime = new Date();
                 if (etaLength == 0) {
                   busObject.timings = ["N.A.", "N.A."];
                 } else if (etaLength == 1) {
-                  const arrivalTime = shuttles[serviceName]._etas[0].eta_s;
+                  const arrivalTime = shuttle._etas[0].eta_s;
                   const firstArrivalTime = new Date(
                     currentTime.getTime() + arrivalTime * 1000
                   ).toISOString();
                   busObject.timings = [firstArrivalTime, "N.A."];
                 } else {
-                  const arrivalTime = shuttles[serviceName]._etas[0].eta_s;
-                  const nextArrivalTime = shuttles[serviceName]._etas[1].eta_s;
+                  const arrivalTime = shuttle._etas[0].eta_s;
+                  const nextArrivalTime = shuttle._etas[1].eta_s;
                   const firstArrivalTime = new Date(
                     currentTime.getTime() + arrivalTime * 1000
                   ).toISOString();
@@ -179,6 +180,7 @@ async function getArrivalTime(busStopsArray) {
                     currentTime.getTime() + nextArrivalTime * 1000
                   ).toISOString();
                   busObject.timings = [firstArrivalTime, secondArrivalTime];
+                  busStop.busNumber = shuttle.caption; // Update NUS Bus Stop name to be the full name rather than the code name (i.e. YIH-OPP -> Opp Yusof Ishak House).
                 }
               } else {
                 // Public bus timings obtained by NUSNextBus API is given in mins to arrival rather than ISO time.
