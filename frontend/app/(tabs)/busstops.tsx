@@ -61,6 +61,23 @@ const ColouredCircle = ({
   );
 };
 
+// Logic to modify the timings in the BusService object from ISO time to minutes away from now.
+const calculateMinutesDifference = (isoTime: string): string => {
+  if (!isoTime) return "Loading..."; // Handle uninitialized data
+
+  // Calculate the difference in minutes between the current time and the given ISO time
+  const now = new Date();
+  const busTime = new Date(isoTime);
+
+  if (isNaN(busTime.getTime())) {
+    return "N/A"; // Handle invalid state
+  }
+
+  const differenceInMilliseconds = busTime.getTime() - now.getTime();
+  const differenceInMinutes = Math.round(differenceInMilliseconds / 1000 / 60);
+  return differenceInMinutes >= 0 ? `${differenceInMinutes} min` : "N/A"; // Correctly format the minute output
+};
+
 const CollapsibleContainer = ({
   children,
   expanded,
@@ -176,7 +193,6 @@ const ListItem = ({ item }: { item: BusStop }) => {
           {item.savedBuses.map((bus: BusService, index: number) => (
             <View key={index} style={styles.detailRow}>
               <View style={styles.leftContainer}>
-                {/* use conditional to assign colour to circle based on busStopName */}
                 <ColouredCircle color={getColor(bus.busNumber)} size={15} />
                 <Text style={[styles.details, styles.busNumber]}>
                   {bus.busNumber.startsWith("PUB:")
@@ -186,14 +202,10 @@ const ListItem = ({ item }: { item: BusStop }) => {
               </View>
               <View style={styles.rightContainer}>
                 <Text style={[styles.details, styles.timingText]}>
-                  {bus.timings[0] !== "N/A"
-                    ? `${bus.timings[0]} min`
-                    : bus.timings[0]}
+                  {bus.timings[0]}
                 </Text>
                 <Text style={[styles.details, styles.timingText]}>
-                  {bus.timings[1] !== "N/A"
-                    ? `${bus.timings[1]} min`
-                    : bus.timings[1]}
+                  {bus.timings[1]}
                 </Text>
               </View>
             </View>
@@ -300,26 +312,6 @@ function NearbyBusStops({
       </ScrollView>
     );
 
-  // Logic to modify the timings in the BusService object from ISO time to minutes away from now.
-  const calculateMinutesDifference = (isoTime: string): string => {
-    // Calculate the difference in minutes between the current time and the given ISO time
-    const now = new Date();
-    const busTime = new Date(isoTime);
-
-    if (isNaN(busTime.getTime())) {
-      // If busTime is invalid, return a default value or handle the error
-      return "N/A";
-    }
-
-    const differenceInMilliseconds = busTime.getTime() - now.getTime();
-    const differenceInMinutes = Math.round(
-      differenceInMilliseconds / 1000 / 60
-    );
-    return String(
-      differenceInMinutes >= 0 ? differenceInMinutes : differenceInMinutes
-    );
-  };
-
   busStops.map((busStop: BusStop) =>
     busStop.savedBuses.map((bus: BusService) => {
       bus.timings[0] = calculateMinutesDifference(bus.timings[0]);
@@ -377,26 +369,6 @@ function NUSBusStops({ refresh }: { refresh: () => void }) {
       </ScrollView>
     );
 
-  // Logic to modify the timings in the BusService object from ISO time to minutes away from now.
-  const calculateMinutesDifference = (isoTime: string): string => {
-    // Calculate the difference in minutes between the current time and the given ISO time
-    const now = new Date();
-    const busTime = new Date(isoTime);
-
-    if (isNaN(busTime.getTime())) {
-      // If busTime is invalid, return a default value or handle the error
-      return "N/A";
-    }
-
-    const differenceInMilliseconds = busTime.getTime() - now.getTime();
-    const differenceInMinutes = Math.round(
-      differenceInMilliseconds / 1000 / 60
-    );
-    return String(
-      differenceInMinutes >= 0 ? differenceInMinutes : differenceInMinutes
-    );
-  };
-
   busStops.map((busStop: BusStop) =>
     busStop.savedBuses.map((bus: BusService) => {
       bus.timings[0] = calculateMinutesDifference(bus.timings[0]);
@@ -439,7 +411,7 @@ export default function BusStopsScreen() {
   return (
     <QueryClientProvider client={queryClient}>
       <View style={{ backgroundColor: "white", flex: 1 }}>
-        <SafeAreaView style={{flex: 1}}>
+        <SafeAreaView style={{ flex: 1 }}>
           <BusStopSearchBar />
           <View style={styles.segmentedControlContainer}>
             <SegmentedControl
@@ -450,7 +422,7 @@ export default function BusStopsScreen() {
               }}
             />
           </View>
-          <View style={{flex: 1}}>
+          <View style={{ flex: 1 }}>
             {selectedIndex === 0 ? (
               <NearbyBusStops
                 refreshLocation={refreshLocation}
@@ -506,8 +478,12 @@ const styles = StyleSheet.create({
   timingText: {
     fontSize: 13,
     fontFamily: "Inter-Medium",
+    width: 50,
   },
-  details: { margin: 10 },
+  details: {
+    margin: 10,
+    textAlign: "right",
+  },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -523,6 +499,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingRight: 16,
+    justifyContent: "center",
   },
   nusTagAndChevronContainer: {
     flexDirection: "row",
