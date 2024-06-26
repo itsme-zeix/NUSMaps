@@ -67,7 +67,6 @@ async function getNUSBusStops() {
       const busStopObject = await generateBusStopsObject(stop);
       arrBusStops.push(busStopObject);
     }
-    console.log(arrBusStops);
     return arrBusStops;
   } catch (err) {
     console.error(
@@ -85,7 +84,7 @@ async function getNUSBusStops() {
 async function getArrivalTime(busStopsArray) {
   for (const busStop of busStopsArray) {
     await (async (busStop) => {
-      const stopName = busStop.busStopName.substring(8);
+      const stopName = busStop.busStopName.substring(8); // substring(8) skips the first 8 characters 'NUSSTOP_'
       try {
         const username = process.env.NUSNEXTBUS_USER;
         const password = process.env.NUSNEXTBUS_PASSWORD;
@@ -117,11 +116,9 @@ async function getArrivalTime(busStopsArray) {
         }
 
         const NUSReply = JSON.parse(text);
-        console.log(NUSReply);
         // We will process the NUSReply in a 2 step process:
         // 1) reformat reply such that we can search the buses by name in a dict.
         // 2) iterate through buses in our bus stop objects and retrieve the timings based on the name.
-
         // REFORMAT
         let shuttles = {};
         for (let shuttle of NUSReply.ShuttleServiceResult.shuttles) {
@@ -180,11 +177,12 @@ async function getArrivalTime(busStopsArray) {
           }
         }
         // Update NUS Bus Stop name to be the full name rather than the code name (i.e. NUSSTOP_YIH-OPP -> NUSSTOP_Opp Yusof Ishak House).
-        busStop.busStopName = "NUSSTOP_" + NUSReply.ShuttleServiceResult.caption;
+        busStop.busStopName =
+          "NUSSTOP_" + NUSReply.ShuttleServiceResult.caption;
       } catch (error) {
         console.error("Error fetching data from NUSNextBus API:", error);
       }
-    })(busStop); // substring(8) skips the first 8 characters 'NUSSTOP_'
+    })(busStop);
   }
 }
 
@@ -204,8 +202,6 @@ router.get("/", async (req, res) => {
     (async () => {
       const busStopsArray = await getNUSBusStops();
       await getArrivalTime(busStopsArray); // insert arrival times
-      console.log("==RESULT===")
-      console.log(busStopsArray)
       res.json(busStopsArray);
     })();
   } catch (err) {
