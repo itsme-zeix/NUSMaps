@@ -279,9 +279,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route) => {
                 departure: originWalkingLegEndTime, //HARDCODED 2S
                 vertexType: "TRANSIT",
             },
-            legGeometry: {
-                points: originResult.routes[0].overview_polyline //FOR NOW NO LENGTH
-            },
+            legGeometry: originResult.routes[0].overview_polyline, //FOR NOW NO LENGTH
             rentedBike: false,
             transitLeg: false,
             duration:originResult.routes[0].legs[0].duration.value,
@@ -323,9 +321,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route) => {
                 departure: destWalkingLegEndTime, //HARDCODED 2S
                 vertexType: "TRANSIT",
             },
-            legGeometry: {
-                points: destResult.routes[0].overview_polyline //FOR NOW NO LENGTH
-            },
+            legGeometry: destResult.routes[0].overview_polyline, //FOR NOW NO LENGTH
             rentedBike: false,
             transitLeg: false,
             duration:destResult.routes[0].legs[0].duration.value,
