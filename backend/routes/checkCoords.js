@@ -37,7 +37,7 @@ const getBusLeg = (route, busTravelTime, startTime, originBusStopCoords, destBus
     const intermediateStops = _extractIntermediateStopsArray(originStopIndex, destStopIndex, service, startTime);
     const polyline = _getEncodedPolyLine(originStopIndex, destStopIndex, service);
     const originBusStopDeparture = startTime + route.originServiceETA;
-    console.log("polyline: ", polyine);
+    console.log("polyline: ", polyline);
     return {
         startTime: startTime,
         endTime: startTime + busTravelTime * 1000,
