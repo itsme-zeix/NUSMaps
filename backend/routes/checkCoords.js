@@ -241,7 +241,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route) => {
     const originResult = await routeFromOriginToNearestBusStop.json();
     console.log("sample origin result:", originResult);
     console.log("walk legs: ", originResult.routes[0].legs);
-    console.log("steps :", originResult.routes[0].legs.steps);
+    console.log("steps :", originResult.routes[0].legs[0].steps);
     console.log("reached here");
     if (originResult && destResult && verifyGoogleResult(originResult) && verifyGoogleResult(destResult)) {
         // console.log(`walking route from nearest busstop, ${currentCoords} : ${originResult}`);
