@@ -250,7 +250,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route) => {
         for (step of originResult.routes[0].legs[0].steps) {
             originWalkingLegSteps.push({
                 "distance": step.distance.value,
-                "direction" : step.html_instructions.replace("<b>"/g, "").replace("</b>"/g, "") //STOPGAP, CHANGE IF BETTER IMPLEMENTATION
+                "direction" : step.html_instructions.replace("<b>", "").replace("</b>", "") //STOPGAP, CHANGE IF BETTER IMPLEMENTATION
             });
         };
         console.log("originWalkingLegSteps: ", originWalkingLegSteps);
