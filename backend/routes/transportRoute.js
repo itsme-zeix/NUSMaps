@@ -282,7 +282,7 @@ const checkCoords = async (origin, destination) => {
     const newFinalArray = [];
     for (body of responseBodiesArray) {
       console.log("formatted result: ", body[1].slicedFormattedFinalResult);
-      console.log("itinerary: ", body[0].plan.itineraries[0].duration)
+      console.log("itinerary: ", body[0].plan.itineraries[0].duration);
       if (body[1].slicedFormattedFinalResult.length !== 0) newFinalArray.push(body[0].plan.itineraries[0].duration + body[1].slicedFormattedFinalResult[0].totalTimeTaken);
       // newFinalArray.push(
       //   {
@@ -340,7 +340,7 @@ const checkCoords = async (origin, destination) => {
     const newFinalArray = [];
     for (body of responseBodiesArray) {
       console.log("formatted result: ", body[1].plan);
-      console.log("itinerary: ", body[0].slicedFormattedFinalResult)
+      console.log("itinerary: ", body[0].slicedFormattedFinalResult);
       if (body[0].slicedFormattedFinalResult.length !== 0) newFinalArray.push(body[1].plan.itineraries[0].duration + body[0].slicedFormattedFinalResult[0].totalTimeTaken);
     }
     newFinalArray.sort();
