@@ -36,6 +36,7 @@ const getBusLeg = (route, busTravelTime, startTime, originBusStopCoords, destBus
     const intermediateStops = _extractIntermediateStopsArray(originStopIndex, destStopIndex, service, startTime);
     const polyline = _getEncodedPolyLine(originStopIndex, destStopIndex, service);
     const originBusStopDeparture = startTime + route.originServiceETA;
+    console.log("polyline: ", polyine);
     return {
         startTime: startTime,
         endTime: startTime + busTravelTime * 1000,
@@ -249,7 +250,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route) => {
         for (step of originResult.routes[0].legs[0].steps) {
             originWalkingLegSteps.push({
                 "distance": step.distance.value,
-                "direction" : step.html_instructions.replace("<b>", "").replace("</b>", "") //STOPGAP, CHANGE IF BETTER IMPLEMENTATION
+                "direction" : step.html_instructions.replace("<b>"/g, "").replace("</b>"/g, "") //STOPGAP, CHANGE IF BETTER IMPLEMENTATION
             });
         };
         console.log("originWalkingLegSteps: ", originWalkingLegSteps);
