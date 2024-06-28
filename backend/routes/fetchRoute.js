@@ -113,8 +113,6 @@ router.post("/", async (req, res) => {
     auth_token = req.headers.Authorization;
     let origin;
     let destination;
-    console.log(process.env.ONEMAPITOKEN);
-    console.log(auth_token);
     if (auth_token === process.env.ONEMAPAPITOKEN) {
       origin = req.body.origin;
       destination = req.body.destination;
@@ -138,7 +136,7 @@ router.post("/", async (req, res) => {
         return res.status(401).send("Error retrieving route.");
       }
     } else {
-      return res.status(403).send(`Your token: ${auth.token}`);
+      return res.status(403).send("Incorrect or missing authorization token.");
     }
 });
 

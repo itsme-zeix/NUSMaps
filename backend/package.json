@@ -4,13 +4,15 @@
   "private": true,
   "scripts": {},
   "dependencies": {
+    "@mapbox/polyline": "^1.2.1",
     "cookie-parser": "~1.4.4",
+    "date-fns": "^3.6.0",
     "debug": "~2.6.9",
     "dotenv": "^16.4.5",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
     "morgan": "~1.9.1",
-    "pg": "^8.11.5"
+    "pg": "^8.12.0"
   }
 }
