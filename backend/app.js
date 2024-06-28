@@ -18,12 +18,14 @@ const cacheDataRouter = require("./routes/cacheData");
 const transportRouteRouter = require("./routes/transportRoute");
 const busArrivalTimesRouter = require("./routes/busArrivalTimes");
 const busStopsByLocationRouter = require("./routes/busStopsByLocation");
+const checkCoordsRouter = require("./routes/checkCoords");
 
 // Use routes
 app.use("/busArrivalTimes", busArrivalTimesRouter);
 app.use("/cacheData", cacheDataRouter);
 app.use("/transportRoute", transportRouteRouter);
 app.use("/busStopsByLocation", busStopsByLocationRouter);
+app.use("./checkCoords", checkCoordsRouter);
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
