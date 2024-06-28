@@ -25,7 +25,7 @@ app.use("/busArrivalTimes", busArrivalTimesRouter);
 app.use("/cacheData", cacheDataRouter);
 app.use("/transportRoute", transportRouteRouter);
 app.use("/busStopsByLocation", busStopsByLocationRouter);
-app.use("./checkCoords", checkCoordsRouter);
+app.use("/checkCoords", checkCoordsRouter);
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
