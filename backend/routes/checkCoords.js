@@ -29,6 +29,7 @@ const TEMP_SERVICE_CHECKPOINT_BUS_STOP_MAP = {
     "L":[1, 92, 166, 261],
 };
 //        const busLeg = getBusLeg(route, busTravelTime, originWalkingLeg.endTime, originBusStopCoords, destBustStopCoords);
+
 const getBusLeg = (route, busTravelTime, startTime, originBusStopCoords, destBusStopCoords) => {
     const originStopIndex = route.originStopIndex;
     const destStopIndex = route.destStopIndex;
@@ -175,6 +176,7 @@ const populateShuttleRoutes = () => {
         TEMP_NUS_SHUTTLES_ROUTES.set(route.shuttle, route);
     };
 };
+
 
 const populateNusStops = async () => {
     let result = await fetch("https://nnextbus.nus.edu.sg/BusStops", {
@@ -519,4 +521,33 @@ const binarySearch = (arr, element, attribute) => {
         }
     }
 };
+const populateCorrectedCheckpoints = (service) => {
+    populateNusStops();
+    populateShuttleRoutes();
+    const data = fs.readFileSync(`${service}CheckPoints.json`, 'utf-8');
+    const checkPointArray = JSON.parse(data).CheckPointResult.CheckPoint;
+    const route = TEMP_NUS_SHUTTLES_ROUTES.get(service);
+    const newArray = [];
+    for (checkpoint of checkPointArray) {
+        if (checkpoint == undefined) console.log(checkpoint);
+        let flag = true;
+        for (let index = 0; index < TEMP_SERVICE_CHECKPOINT_BUS_STOP_MAP[service].length; index++) {
+            if (checkpoint.PointID === index) {
+                newArray.push({
+                    longitude: TEMP_NUS_BUS_STOPS_COORDS.get(route[index]).longitude,
+                    latitude: TEMP_NUS_BUS_STOPS_COORDS.get(route[index]).latitude,
+                    PointID: checkpoint.PointID,
+                    routeId: checkpoint.routeid
+                });
+                flag = false;
+            } 
+        }
+        if (flag) newArray.push(checkpoint);
+    };
+    const result = {
+        CheckPoint: newArray
+    };
+    fs.writeFileSync(`${service}CheckPointsCorrected.json`, JSON.stringify(result), 'utf-8');
+}
+// populateCorrectedCheckpoints("L");
 module.exports = router;
