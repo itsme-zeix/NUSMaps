@@ -402,8 +402,8 @@ const checkViabilityOfRoute= (route) => {
 };
 
 const extractCommonBusServices = async (originBusStops, destBusStops) =>  {
-    const originBusServices = [];//[{busStop: "KR-MRT", service: "D1", nextETA:3}] array of shuttles and etas at each bus stop
-    const destBusServices = []; // 
+    const originBusServices = new Set();//[{busStop: "KR-MRT", service: "D1", nextETA:3}] array of shuttles and etas at each bus stop
+    const destBusServices = new Set(); // 
     // console.log("origin bus services", originBusServices);
     // console.log("destination shuttle services:", destBusServices);
     // console.log("origin shuttle service querying starts here");
@@ -421,11 +421,11 @@ const extractCommonBusServices = async (originBusStops, destBusStops) =>  {
         for (shuttle of result.ShuttleServiceResult.shuttles) {
             // console.log("current shuttle: ", shuttle);
             if (shuttle._etas !== undefined && shuttle._etas.length !== 0) {
-                originBusServices.push({
+                originBusServices.add(JSON.stringify({
                     "busStop":busStop.name,
                     "service":shuttle.name,
                     "nextETA": shuttle._etas[0].eta_s
-                });
+                }));
             }
         };
     };
@@ -444,11 +444,11 @@ const extractCommonBusServices = async (originBusStops, destBusStops) =>  {
         result = await result.json();
         for (shuttle of result.ShuttleServiceResult.shuttles) {
             if (shuttle._etas !== undefined && shuttle._etas.length !== 0) {
-                destBusServices.push({
+                destBusServices.add(JSON.stringify({
                     "busStop":busStop.name,
                     "service":shuttle.name,
                     "nextETA": shuttle._etas[0].eta_s
-                });
+                }));
             };
         };
     }; //the shuttles are arranged by bus stop which are sorted by distance
@@ -456,8 +456,10 @@ const extractCommonBusServices = async (originBusStops, destBusStops) =>  {
     console.log("origin bus services arr:", originBusServices);
     console.log("destination bus services arr:", destBusServices);
     for (originBusService of originBusServices) {
+        const parsedOriginService = JSON.parse(originBusService);
         for (destBusService of destBusServices) {
-            if (originBusService.service === destBusService.service) {
+            const parsedDestinationService = JSON.parse(destBusService);
+            if (parsedOriginService.service === parsedDestinationService.service) {
                 possibleBusStops.push({
                     "originBusStop": originBusService.busStop,
                     "destBusStop": destBusService.busStop,
