@@ -453,7 +453,8 @@ router.post("/", async (req, res) => {
           method: "GET",
           headers: headers,
         });
-        const route = await response.json();
+        const routeResponse = await response;
+        const route = await routeResponse.json();
         console.log("response route: ", route);
         const nusResultPromise = checkCoords(origin, destination); //this will decide the course of action
         const result = await _processData(route);
