@@ -261,15 +261,22 @@ const checkCoords = async (origin, destination) => {
   const headers = {
     Authorization: process.env.ONEMAPAPIKEY
   };
+  console.log("origin: ", origin);
+  console.log("destination: ", destination);
   if (isPointInNUSPolygons(originTurfPoint) && isPointInNUSPolygons(destinationTurfPoint)) {
     //can use directly as result
-    const result =  await fetch("https://test-nusmaps.onrender.com/checkCoords", {
+    const resultPromise =  await fetch("https://test-nusmaps.onrender.com/checkCoords", {
       method: "POST",
-      body: {
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
         "origin": origin,
         "destination" : destination
-      }
-    }).json(); //shows top 3 results 
+      })
+    }); //shows top 3 results 
+    const result = await resultPromise.json();
+    console.log("result:", result);
     return {
       status: 200,
       message: "both points lie inside NUS",
@@ -459,8 +466,8 @@ router.post("/", async (req, res) => {
         const nusResultPromise = checkCoords(origin, destination); //this will decide the course of action
         const result = await _processData(route);
         const nusResult = await nusResultPromise;
-        if (nusResult == undefined || nusResult.status === 201 || nusResult.status === 202 || nusResult.status === 203) {
-          return _addAlternativeRoutesToOneMap(route, nusResult);
+        if (nusResult.status === 200 || nusResult.status === 201 || nusResult.status === 202 || nusResult.status === 203) {
+          return res.json(_addAlternativeRoutesToOneMap(route, nusResult));
         } else {
           return res.json(result);
         }
