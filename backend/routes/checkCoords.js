@@ -3,7 +3,7 @@ const polyline = require("@mapbox/polyline");
 const router = express.Router();
 const fs = require('fs');
 
-const NO_OF_BUS_STOPS = 4;
+const NO_OF_BUS_STOPS = 6;
 const TEMP_NUS_SHUTTLES_ROUTES = new Map();
 const TEMP_NUS_BUS_STOPS_COORDS = new Map();
 
