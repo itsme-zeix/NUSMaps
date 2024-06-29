@@ -37,6 +37,7 @@ const getBusLeg = (route, busTravelTime, startTime, originBusStopCoords, destBus
     const intermediateStops = _extractIntermediateStopsArray(originStopIndex, destStopIndex, service, startTime);
     const polyline = _getEncodedPolyLine(originStopIndex, destStopIndex, service);
     const originBusStopDeparture = startTime + route.originServiceETA;
+    console.log("bus travel time: ", busTravelTime);
     console.log("polyline: ", polyline);
     return {
         startTime: startTime,
@@ -50,6 +51,7 @@ const getBusLeg = (route, busTravelTime, startTime, originBusStopCoords, destBus
             stopId: `${service}:${originStopIndex}`,
             lon: originBusStopCoords.longitude,
             lat: originBusStopCoords.latitude,
+            ETA: route.originServiceETA,
             arrival: startTime + route.originServiceETA,
             departure: originBusStopDeparture, //DEFAULT to 10s wait time
             vertexType: "TRANSIT"
