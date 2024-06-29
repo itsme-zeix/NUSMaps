@@ -354,7 +354,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route) => {
         const currTime = Date.now();
         return {
             duration: totalTimeTaken,
-            startTine: currTime,
+            startTime: currTime,
             endTime:currTime + totalTimeTaken * 1000,
             walkTime: originWalkingLeg.duration + destWalkingLeg.duration,
             legs: [
