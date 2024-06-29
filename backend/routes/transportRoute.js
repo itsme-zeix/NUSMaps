@@ -467,7 +467,9 @@ router.post("/", async (req, res) => {
         const result = await _processData(route);
         const nusResult = await nusResultPromise;
         if (nusResult.status === 200 || nusResult.status === 201 || nusResult.status === 202 || nusResult.status === 203) {
-          const finalCombinedResult = await _processData(_addAlternativeRoutesToOneMap(route, nusResult));
+          const addedLeg = _addAlternativeRoutesToOneMap(route, nusResult);
+          console.log('added leg: ', addedLeg);
+          const finalCombinedResult = await _processData(addedLeg);
           return res.json(finalCombinedResult);
         } else {
           return res.json(result);
