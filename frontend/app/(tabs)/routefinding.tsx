@@ -43,7 +43,7 @@ interface baseResultsCardType {
   journeyTiming: string;
   wholeJourneyTiming: string;
   journeyLegs: Leg[]; //an array of all the legs in 1 route
-  polylineArray: number[];
+  polylineArray: string[]; //each leg's polyline is a string
 }
 type DestinationResult = {
   address: string;
@@ -231,7 +231,7 @@ export default function App() {
       try {
         console.log("Origin location:", origin);
         const data = await fetch(
-          "https://nusmaps.onrender.com/transportRoute",
+          "https://test-nusmaps.onrender.com/transportRoute",
           {
             method: "POST",
             body: JSON.stringify({
@@ -248,7 +248,8 @@ export default function App() {
         return data.json();
       } catch (error) {
         setRouteErrorMsg("Server issues, please try again later.");
-        console.error("Route could not be found. Please try again later");
+        console.error("Route could not be found. Please try again later: ", error
+        );
         throw new Error("Route could not be found. Please try again later");
       }
     } else {
@@ -279,7 +280,6 @@ export default function App() {
       setRouteErrorMsg("service not available, please try again");
     }
   }
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={styles.container}>
