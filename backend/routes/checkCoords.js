@@ -461,11 +461,11 @@ const extractCommonBusServices = async (originBusStops, destBusStops) =>  {
             const parsedDestinationService = JSON.parse(destBusService);
             if (parsedOriginService.service === parsedDestinationService.service) {
                 possibleBusStops.push({
-                    "originBusStop": originBusService.busStop,
-                    "destBusStop": destBusService.busStop,
-                    "service": originBusService.service,
-                    "originServiceETA": originBusService.nextETA,
-                    "destServiceETA": destBusService.nextETA
+                    "originBusStop": parsedOriginService.busStop,
+                    "destBusStop": parsedDestinationService.busStop,
+                    "service": parsedOriginService.service,
+                    "originServiceETA": parsedOriginService.nextETA,
+                    "destServiceETA": parsedDestinationService.nextETA
                 });
             }
         }
@@ -556,6 +556,6 @@ const populateCorrectedCheckpoints = (service) => {
         CheckPoint: newArray
     };
     fs.writeFileSync(`${service}CheckPointsCorrected.json`, JSON.stringify(result), 'utf-8');
-}
+};
 // populateCorrectedCheckpoints("L");
 module.exports = router;
