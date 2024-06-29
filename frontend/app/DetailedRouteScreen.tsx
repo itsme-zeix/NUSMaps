@@ -54,7 +54,7 @@ interface baseResultsCardType {
   journeyTiming: string;
   wholeJourneyTiming: string;
   journeyLegs: Leg[]; //an array of all the legs in 1 route
-  polylineArray: number[];
+  polylineArray: string[];
 }
 
 interface IconCatalog {
@@ -84,6 +84,8 @@ interface PublicTransportLegProps {
 interface WalkLegProps {
   walkLeg: WalkLeg;
 }
+
+const polyline = require("@mapbox/polyline");
 
 const OriginRectangle: React.FC = () => {
   return (
@@ -183,8 +185,9 @@ const DetailedRoutingScreen: React.FC<
   //add a base current location and end flag
   console.log("gone here");
   const params = useLocalSearchParams();
+  console.log("destination type:", params.destination);
   let destination: destinationType = JSON.parse(
-    params.destinationType as string
+    params.destination as string
   );
   console.log("dest:", destination);
   let origin: LatLng = JSON.parse(params.origin as string);
@@ -196,7 +199,7 @@ const DetailedRoutingScreen: React.FC<
   const baseResultsCardData: baseResultsCardType = JSON.parse(
     params.baseResultsCardData as string
   );
-  let polylineArray: number[] = [];
+  let polylineArray: string[] = [];
   if (
     baseResultsCardData.polylineArray == undefined &&
     origin.latitude != destination.latitude &&
@@ -208,14 +211,23 @@ const DetailedRoutingScreen: React.FC<
   } else {
     polylineArray = baseResultsCardData.polylineArray;
   }
-  console.log("polyline: ", polylineArray);
-  const formatted_array: LatLng[] = [];
-  for (let step = 0; step < polylineArray.length; step += 2) {
+  let formatted_array: LatLng[] = [];
+  console.log("polyline arr: ", polylineArray);
+  // for (let step = 0; step < polylineArray.length; step += 1) {
+  //   const decodedPolyLineArray = polyline.decode(polylineArray[step]);
+  //   decodedPolyLineArray.map((latLngPair: number[]) => formatted_array.push({
+  //     latitude: latLngPair[0],
+  //     longitude: latLngPair[1]
+  //   }));
+  // }
+  for (let arr of (polyline.decode(polylineArray))) {
     formatted_array.push({
-      latitude: polylineArray[step],
-      longitude: polylineArray[step + 1],
+      latitude: arr[0],
+      longitude:arr[1]
     });
-  }
+  };
+  console.log("formatted polyline array:", formatted_array);
+
   return (
     <SafeAreaView style={stylesheet.SafeAreaView}>
       <MapView

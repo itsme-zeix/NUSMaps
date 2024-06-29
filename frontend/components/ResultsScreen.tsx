@@ -52,7 +52,7 @@ interface baseResultsCardType {
   journeyTiming: string;
   wholeJourneyTiming: string;
   journeyLegs: Leg[]; //an array of all the legs in 1 route
-  polylineArray: number[];
+  polylineArray: string[];
 }
 
 interface ResultObject {
@@ -94,6 +94,7 @@ const ResultCard: React.FC<SingleResultCardData> = ({
   resultData,
 }) => {
   //Put in a pressable that when expanded, will
+  console.log("destination received in resultcard", destination);
   const types = resultData.types.flatMap((icon) => [icon, "RCHEVRON"]);
   types.splice(types.length - 1, 1); // remove the last chevron
   console.log(types);
@@ -170,6 +171,7 @@ export const ResultScreen: React.FC<
     radius: 5000,
     components: "country:sg",
   };
+  console.log("base result cards data:", JSON.stringify(baseResultsData));
   if (isVisible) {
     return (
       <SafeAreaView style={{ flex: 1 }}>

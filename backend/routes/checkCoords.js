@@ -41,7 +41,7 @@ const getBusLeg = (route, busTravelTime, startTime, originBusStopCoords, destBus
     console.log("polyline: ", polyline);
     return {
         startTime: startTime,
-        endTime: startTime + busTravelTime * 1000,
+        endTime: startTime + (busTravelTime * 1000),
         mode:"NUS_BUS",
         route: service,
         routeId: service,
@@ -108,12 +108,8 @@ const _getEncodedPolyLine = (originStopIndex, destStopIndex, service) => {
     try {
         const data = fs.readFileSync(`./routes/${service}CheckPointsCorrected.json`, 'utf-8');
         const checkPointArray = JSON.parse(data).CheckPoint;
-        // console.log("check point array: ", checkPointArray);
         let coordsArray = [];
         let flag = false;
-        // console.log("origin stop checkpoint id:", originStopCheckpointId);
-        // console.log("dest stop checkpoint id:", destStopCheckpointId);
-        // console.log("service: ", service);
         for (checkpoint of checkPointArray) {
             if (checkpoint.PointID == originStopCheckpointId) {
                 flag = true;
@@ -126,7 +122,6 @@ const _getEncodedPolyLine = (originStopIndex, destStopIndex, service) => {
                 if (flag) coordsArray.push([checkpoint.latitude, checkpoint.longitude]);
             }
         };
-        // console.log("coords array: ", coordsArray);
         return polyline.encode(coordsArray);
     } catch (error) {
         console.error("Error attaining checkpoint files: ", error);
@@ -141,11 +136,6 @@ router.post("/", async (req, res) => {
     try {
         console.log("origin received: ", req.body.origin);
         console.log("destination received: ", req.body.destination);
-        // const turfCurrentLocationCoordsPoint = turf.point([req.body.origin.latitude, req.body.origin.longitude]);
-        // const turfDestinationLocationCoords = turf.point([req.body.destination.latitude, req.body.destination.longitude]);
-        // if (!(isPointInNUSPolygons(turfCurrentLocationCoordsPoint) && isPointInNUSPolygons(turfDestinationLocationCoords))) {
-        //     return res.status(502).json({error:"Both endpoints are not located in NUS"});
-        // };
         await populateNusStops(); // can be elimintaed once backend postgresql db is implemented
         // console.log("nus stops after calling fun: ", NUS_STOPS);
         const resultingBusStopFromDest = findNearestBusStopsFromPoints(req.body.destination, NO_OF_BUS_STOPS); //finds nearest bus stops from destination
