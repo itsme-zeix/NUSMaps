@@ -449,13 +449,13 @@ router.post("/", async (req, res) => {
         Authorization: process.env.ONEMAPAPIKEY
       };
       try {
-        const nusResultPromise = checkCoords(origin, destination); //this will decide the course of action
         const response = fetch(routesUrl, {
           method: "GET",
           headers: headers,
         });
         const route = await response.json();
         console.log("response route: ", route);
+        const nusResultPromise = checkCoords(origin, destination); //this will decide the course of action
         const result = await _processData(route);
         const nusResult = await nusResultPromise;
         if (nusResult == undefined || nusResult.status === 201 || nusResult.status === 202 || nusResult.status === 203) {
