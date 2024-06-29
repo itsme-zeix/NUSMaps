@@ -131,6 +131,10 @@ const _getEncodedPolyLine = (originStopIndex, destStopIndex, service) => {
     }
 };
 
+function compareBasedOnDuration(firstItinerary, secondItinerary) {
+    return firstItinerary.duration - secondItinerary.duration;
+};
+
 router.post("/", async (req, res) => {
     try {
         console.log("origin received: ", req.body.origin);
@@ -161,7 +165,7 @@ router.post("/", async (req, res) => {
             };
         };
         // console.log("formatted final result: ", formattedFinalResult);
-        const slicedFormattedFinalResult = formattedFinalResult.slice(0, 3);
+        const slicedFormattedFinalResult = formattedFinalResult.slice(0, 3).sort(compareBasedOnDuration);
         console.log("sliced formatted final result: ", slicedFormattedFinalResult);
         res.json({viableRoutes, slicedFormattedFinalResult});
     } catch (error) {
@@ -449,6 +453,8 @@ const extractCommonBusServices = async (originBusStops, destBusStops) =>  {
         };
     }; //the shuttles are arranged by bus stop which are sorted by distance
     const possibleBusStops = [];
+    console.log("origin bus services arr:", originBusServices);
+    console.log("destination bus services arr:", destBusServices);
     for (originBusService of originBusServices) {
         for (destBusService of destBusServices) {
             if (originBusService.service === destBusService.service) {
