@@ -3,7 +3,7 @@ const polyline = require("@mapbox/polyline");
 const router = express.Router();
 const fs = require('fs');
 
-const NO_OF_BUS_STOPS = 6;
+const NO_OF_BUS_STOPS = 3;
 const TEMP_NUS_SHUTTLES_ROUTES = new Map();
 const TEMP_NUS_BUS_STOPS_COORDS = new Map();
 
@@ -149,7 +149,7 @@ router.post("/", async (req, res) => {
         const resultingBusStopFromDest = findNearestBusStopsFromPoints(req.body.destination, NO_OF_BUS_STOPS); //finds nearest bus stops from destination
         const resultingBusStopFromOrigin = findNearestBusStopsFromPoints(req.body.origin, NO_OF_BUS_STOPS);
         const possibleRoutes = await extractCommonBusServices(resultingBusStopFromOrigin, resultingBusStopFromDest); //possible edgecase where origin === dest bus stop, in that case dont bother checking, just factor in walking time
-        // console.log("possible routes: ", possibleRoutes);
+        console.log("possible routes: ", possibleRoutes);
         populateShuttleRoutes();
         // console.log("possible routes:", await possibleRoutes);
         //no results
