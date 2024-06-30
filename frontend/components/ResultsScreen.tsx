@@ -18,6 +18,7 @@ import Constants from "expo-constants";
 import { SubwayTypeCard } from "@/app/(tabs)/SubwayType";
 import { BusNumberCard } from "@/app/(tabs)/BusNumber";
 import { Link } from "expo-router";
+import { TramTypeCard } from "@/app/(tabs)/TramNumber";
 
 //interfaces and types
 type destinationType = {
@@ -28,32 +29,38 @@ type destinationType = {
 interface LegBase {
   //base template for the info that is displayed in the leg
   type: string;
-}
+};
+
 interface WalkLeg extends LegBase {
   walkInfo: {
     distance: string;
     direction: string;
   }[];
-}
+};
+
 interface PublicTransportLeg extends LegBase {
   //used to display the routes info
+  startingStopETA: number,
   serviceType: string;
   startingStopName: string;
   destinationStopName: string;
   intermediateStopCount: number;
-  totalTimeTaken: number;
+  duration: number;
   intermediateStopNames: string[];
   intermediateStopGPSLatLng: LatLng[];
-}
+};
+
 type Leg = PublicTransportLeg | WalkLeg;
+
 
 interface baseResultsCardType {
   types: string[];
   journeyTiming: string;
   wholeJourneyTiming: string;
   journeyLegs: Leg[]; //an array of all the legs in 1 route
-  polylineArray: number[];
-}
+  polylineArray: string[]; //each leg's polyline is a string
+  stopsCoordsArray: string[]
+};
 
 interface ResultObject {
   origin: LatLng;
@@ -73,15 +80,17 @@ interface IconCatalog {
   BUS: ImageSourcePropType;
   TRAM: ImageSourcePropType;
   RCHEVRON: ImageSourcePropType;
+  NUS_BUS: ImageSourcePropType;
 }
 
 //stores the paths of the chevrons
 const iconList: IconCatalog = {
-  WALK: require("../assets/images/walk_icon.png"),
-  SUBWAY: require("../assets/images/subway_icon.png"),
-  BUS: require("../assets/images/bus_icon.png"),
-  TRAM: require("../assets/images/tram_icon.png"),
-  RCHEVRON: require(`../assets/images/chevron_right_icon.png`),
+  WALK: require("../assets/images/walk-icon.png"),
+  SUBWAY: require("../assets/images/subway-icon.png"),
+  BUS: require("../assets/images/bus-icon.png"),
+  TRAM: require("../assets/images/tram-icon.png"),
+  RCHEVRON: require(`../assets/images/chevron_right-icon.png`),
+  NUS_BUS: require("../assets/images/bus-icon.png"),
 };
 
 //constant variables
@@ -94,6 +103,7 @@ const ResultCard: React.FC<SingleResultCardData> = ({
   resultData,
 }) => {
   //Put in a pressable that when expanded, will
+  console.log("destination received in resultcard", destination);
   const types = resultData.types.flatMap((icon) => [icon, "RCHEVRON"]);
   types.splice(types.length - 1, 1); // remove the last chevron
   console.log(types);
@@ -110,20 +120,21 @@ const ResultCard: React.FC<SingleResultCardData> = ({
       asChild
       style={styles.resultCard}
     >
-      <Pressable style={{ backgroundColor: "green" }}>
+      <Pressable style={{ backgroundColor: "grey" }}>
         <View>
           <View style={styles.icons}>
             {types.map((icon, index) => {
-              if (icon === "BUS") {
+              if (icon === "BUS" || icon === "NUS_BUS") {
                 const ptLeg = resultData.journeyLegs[
                   index / 2
                 ] as PublicTransportLeg;
+                console.log("pt leg:", ptLeg);
                 return (
                   <View
                     key={index}
                     style={{ flexDirection: "row", alignItems: "center" }}
                   >
-                    <BusNumberCard busNumber={ptLeg.serviceType} />
+                    <BusNumberCard busNumber={ptLeg.serviceType} busType={ptLeg.type}/>
                   </View>
                 );
               } else if (icon === "SUBWAY") {
@@ -136,6 +147,18 @@ const ResultCard: React.FC<SingleResultCardData> = ({
                     style={{ flexDirection: "row", alignItems: "center" }}
                   >
                     <SubwayTypeCard serviceType={ptLeg.serviceType} />
+                  </View>
+                );
+              } else if (icon === "TRAM") {
+                const ptLeg = resultData.journeyLegs[
+                  index / 2
+                ] as PublicTransportLeg;
+                return (
+                  <View
+                    key={index}
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <TramTypeCard serviceType={ptLeg.serviceType} />
                   </View>
                 );
               } else {
@@ -170,10 +193,10 @@ export const ResultScreen: React.FC<
     radius: 5000,
     components: "country:sg",
   };
+  console.log("base result cards data:", JSON.stringify(baseResultsData));
   if (isVisible) {
     return (
       <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView>
           <Modal
             isVisible={isVisible}
             animationInTiming={200}
@@ -182,7 +205,8 @@ export const ResultScreen: React.FC<
             hideModalContentWhileAnimating={true}
             backdropOpacity={1}
             backdropColor="white"
-          >
+            >
+            <ScrollView>
             <View style={{ flex: 1 }}>
               <StatusBar></StatusBar>
               <View style={styles.doubleSearchBarsContainer}>
@@ -218,15 +242,15 @@ export const ResultScreen: React.FC<
                 ))}
               </View>
             </View>
-          </Modal>
         </ScrollView>
+          </Modal>
       </SafeAreaView>
     );
   } else {
     return;
   }
 };
-
+//PUT a next ETA timing in the detailed screen then build
 //stylesheet
 const styles = StyleSheet.create({
   googleSearchBar: {
@@ -275,7 +299,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
-    backgroundColor: "red",
+    backgroundColor: "grey",
   },
   travelDuration: {
     fontSize: 18,
