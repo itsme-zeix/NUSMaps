@@ -289,7 +289,7 @@ function NearbyBusStops({
     queryKey: ["busStopsByLocation"],
     queryFn: () =>
       fetch(
-        `http://localhost:3000/busStopsByLocation?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}`
+        `https://test-nusmaps.onrender.com/busStopsByLocation?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}`
       ).then((res) => res.json()),
   });
 
@@ -350,7 +350,7 @@ function NUSBusStops({ refresh }: { refresh: () => void }) {
   } = useQuery({
     queryKey: ["nusBusStops"],
     queryFn: () =>
-      fetch(`http://localhost:3000/nusBusStops`).then((res) => res.json()),
+      fetch(`https://test-nusmaps.onrender.com/nusBusStops`).then((res) => res.json()),
   });
 
   if (isPending)
