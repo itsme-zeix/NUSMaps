@@ -18,9 +18,9 @@ interface RouteSearchBarInput {
 };
 
 //constants
-const apiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
+// const apiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
 //USE THIS FOR PRODUCTION BUILDS Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
-
+const apiKey = Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
 //The search bar itself
 export const RouteSearchBar: React.FC<
   RouteSearchBarInput & {

@@ -9,7 +9,6 @@ import {
   ImageURISource,
 } from "react-native";
 import { ImageSourcePropType } from "react-native";
-import Constants from "expo-constants";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MapView, {
   PROVIDER_GOOGLE,
