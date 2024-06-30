@@ -1,11 +1,11 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { View, StyleSheet, Text, Image } from "react-native";
 
 interface MRTServiceType {
     serviceType:string
 };
 
-const SUBWAYICON = require("../../assets/images/subway_icon.png");
+const SUBWAYICON = require("../../assets/images/subway-icon.png");
 
 const determineBG = (input:string) => {
     //input is based on routeId
@@ -13,10 +13,10 @@ const determineBG = (input:string) => {
         return "red";
     } else if (input === "DT") {
         return "#338AFF";
-    } else if (input === "EW") {
+    } else if (input === "EW" || input === "CG") {
         return "#33FF3C";
     } else if (input === "NE") {
-        return "8D33FF";
+        return "#8D33FF";
     } else if (input === "CC") {
         return "#FFF633";
     } else if (input === "TE") {
