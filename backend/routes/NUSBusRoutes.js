@@ -230,11 +230,11 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
         'X-Goog-Api-Key': process.env.GOOGLEMAPSAPIKEY,
         'X-Goog-FieldMask': 'routes.legs.steps.transitDetails'
     };
-    const routeFromOriginToNearestBusStop = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${currentCoords.latitude},${currentCoords.longitude}&destination=${originBusStopCoords.latitude},${originBusStopCoords.longitude}&mode=walking&key=AIzaSyBxD7k9OplpOM3-uZEPXOyN9yq8PXlNxCk`, {
+    const routeFromOriginToNearestBusStop = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${currentCoords.latitude},${currentCoords.longitude}&destination=${originBusStopCoords.latitude},${originBusStopCoords.longitude}&mode=walking&key=${process.env.ONEMAPAPITOKEN}`, {
         method:"GET",
         headers:headers,
     });
-    const routeFromNearestBusStopToDest = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${destBustStopCoords.latitude},${destBustStopCoords.longitude}&destination=${destinationCoords.latitude},${destinationCoords.longitude}&mode=walking&key=AIzaSyBxD7k9OplpOM3-uZEPXOyN9yq8PXlNxCk`, {
+    const routeFromNearestBusStopToDest = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${destBustStopCoords.latitude},${destBustStopCoords.longitude}&destination=${destinationCoords.latitude},${destinationCoords.longitude}&mode=walking&key=${process.env.ONEMAPAPITOKEN}`, {
         method:"GET",
         headers:headers,
     });
