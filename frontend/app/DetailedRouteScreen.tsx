@@ -139,8 +139,10 @@ const LegRectangle: React.FC = () => {
 const formatIntoMinutesAndSeconds = (timingInSeconds:number) => {
   const seconds = timingInSeconds % 60;
   const minutes  = Math.floor(timingInSeconds / 60);
-  if (minutes !== 0) {return `${minutes} minutes, ${seconds} seconds`};
-  {return `${seconds} seconds`};
+  if (minutes !== 0) {
+    return `${minutes} minutes, ${seconds} seconds`;
+  };
+  return `${seconds} seconds`;
 };
 
 const PublicTransportLegPart: React.FC<PublicTransportLegProps> = ({
@@ -252,8 +254,7 @@ const DetailedRoutingScreen: React.FC<
       longitude:arr[1]
     });
   };
-  // console.log("formatted polyline array:", formatted_array);
-  const stopsCoordsArray:stopCoords[] = baseResultsCardData.stopsCoordsArray.map((str) => {return JSON.parse(str)});
+  const stopsCoordsArray:stopCoords[] = baseResultsCardData.stopsCoordsArray.map((str) => {return JSON.parse(str);});
   return (
     <SafeAreaView style={stylesheet.SafeAreaView}>
       <MapView
