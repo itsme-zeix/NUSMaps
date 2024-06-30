@@ -26,25 +26,31 @@ interface WalkLeg extends LegBase {
     distance: string;
     direction: string;
   }[];
-}
+};
+
 interface PublicTransportLeg extends LegBase {
   //used to display the routes info
+  startingStopETA: number,
   serviceType: string;
   startingStopName: string;
   destinationStopName: string;
   intermediateStopCount: number;
-  totalTimeTaken: number;
+  duration: number;
   intermediateStopNames: string[];
   intermediateStopGPSLatLng: LatLng[];
-}
+};
+
 type Leg = PublicTransportLeg | WalkLeg;
+
 interface baseResultsCardType {
   types: string[];
   journeyTiming: string;
   wholeJourneyTiming: string;
   journeyLegs: Leg[]; //an array of all the legs in 1 route
-  polylineArray: number[];
-}
+  polylineArray: string[]; //each leg's polyline is a string
+  stopsCoordsArray: string[]
+};
+
 type DestinationResult = {
   address: string;
   placeId: string;
@@ -248,7 +254,8 @@ export default function App() {
         return data.json();
       } catch (error) {
         setRouteErrorMsg("Server issues, please try again later.");
-        console.error("Route could not be found. Please try again later");
+        console.error("Route could not be found. Please try again later: ", error
+        );
         throw new Error("Route could not be found. Please try again later");
       }
     } else {
@@ -279,7 +286,6 @@ export default function App() {
       setRouteErrorMsg("service not available, please try again");
     }
   }
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={styles.container}>

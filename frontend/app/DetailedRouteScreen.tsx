@@ -6,6 +6,7 @@ import {
   View,
   Image,
   Pressable,
+  ImageURISource,
 } from "react-native";
 import { ImageSourcePropType } from "react-native";
 import Constants from "expo-constants";
@@ -15,14 +16,19 @@ import MapView, {
   Marker,
   Polyline,
   LatLng,
+  Callout
 } from "react-native-maps";
 import { SubwayTypeCard } from "@/app/(tabs)/SubwayType";
 import { BusNumberCard } from "@/app/(tabs)/BusNumber";
+import { TramTypeCard } from "./(tabs)/TramNumber";
 import { useLocalSearchParams } from "expo-router";
 
 interface LegBase {
   //base template for the info that is displayed in the leg
   type: string;
+  startTime: number, //start and end time only defined for buses(+ nus buses) for now
+  endTime: number,
+  duration:number,
 }
 
 interface WalkLeg extends LegBase {
@@ -39,23 +45,30 @@ type destinationType = {
 
 interface PublicTransportLeg extends LegBase {
   //used to display the routes info
+  startingStopETA: number, //only defined for nus buses, for now
   serviceType: string;
   startingStopName: string;
   destinationStopName: string;
   intermediateStopCount: number;
-  totalTimeTaken: number;
+  duration: number;
   intermediateStopNames: string[];
   intermediateStopGPSLatLng: LatLng[];
-}
+};
+
 type Leg = PublicTransportLeg | WalkLeg;
+
+type stopCoords = {
+  name:string
+} & LatLng;
 
 interface baseResultsCardType {
   types: string[];
   journeyTiming: string;
   wholeJourneyTiming: string;
   journeyLegs: Leg[]; //an array of all the legs in 1 route
-  polylineArray: number[];
-}
+  polylineArray: string[]; //each leg's polyline is a string
+  stopsCoordsArray: string[]
+};
 
 interface IconCatalog {
   WALK: ImageSourcePropType;
@@ -65,16 +78,18 @@ interface IconCatalog {
   RCHEVRON: ImageSourcePropType;
   MARKER: ImageSourcePropType;
   FLAG: ImageSourcePropType;
+  STOPCIRCULARMARKER: ImageURISource;
 }
 
 const iconList: IconCatalog = {
-  WALK: require("../assets/images/walk_icon.png"),
-  SUBWAY: require("../assets/images/subway_icon.png"),
-  BUS: require("../assets/images/bus_icon.png"),
-  TRAM: require("../assets/images/tram_icon.png"),
-  RCHEVRON: require(`../assets/images/chevron_right_icon.png`),
+  WALK: require("../assets/images/walk-icon.png"),
+  SUBWAY: require("../assets/images/subway-icon.png"),
+  BUS: require("../assets/images/bus-icon.png"),
+  TRAM: require("../assets/images/tram-icon.png"),
+  RCHEVRON: require(`../assets/images/chevron_right-icon.png`),
   MARKER: require("../assets/images/location-icon.png"),
   FLAG: require("../assets/images/finishFlag-icon.png"),
+  STOPCIRCULARMARKER: require("../assets/images/mapCircle-icon.png")
 };
 
 interface PublicTransportLegProps {
@@ -84,6 +99,9 @@ interface PublicTransportLegProps {
 interface WalkLegProps {
   walkLeg: WalkLeg;
 }
+
+const polyline = require("@mapbox/polyline");
+const { format } = require('date-fns');
 
 const OriginRectangle: React.FC = () => {
   return (
@@ -118,13 +136,21 @@ const LegRectangle: React.FC = () => {
     </View>
   );
 };
+const formatIntoMinutesAndSeconds = (timingInSeconds:number) => {
+  const seconds = timingInSeconds % 60;
+  const minutes  = Math.floor(timingInSeconds / 60);
+  if (minutes !== 0) {
+    return `${minutes} minutes, ${seconds} seconds`;
+  };
+  return `${seconds} seconds`;
+};
 
 const PublicTransportLegPart: React.FC<PublicTransportLegProps> = ({
   ptLeg,
 }) => {
   //TO-DO: put in Tram type
   console.log("type:", ptLeg.type);
-  console.log(ptLeg.intermediateStopCount);
+  console.log("duration:", ptLeg.duration);
   return (
     <View>
       <Pressable onPress={() => console.log("route pressed!")}>
@@ -133,21 +159,25 @@ const PublicTransportLegPart: React.FC<PublicTransportLegProps> = ({
           {ptLeg.type === "SUBWAY" && (
             <SubwayTypeCard serviceType={ptLeg.serviceType} />
           )}
-          {ptLeg.type === "BUS" && (
-            <BusNumberCard busNumber={ptLeg.serviceType} />
-          )}
+          {(ptLeg.type === "BUS" || ptLeg.type === "NUS_BUS")  && (
+              <BusNumberCard busNumber={ptLeg.serviceType} busType={ptLeg.type} />
+          )} 
+          {ptLeg.type === "NUS_BUS" && (
+            <Text>Wait for {formatIntoMinutesAndSeconds(ptLeg.startingStopETA)} for the next bus</Text>
+          )} 
           {ptLeg.type === "WALK" && (
             <Image source={iconList[ptLeg.type as keyof IconCatalog]} />
           )}
           {ptLeg.type === "TRAM" && (
-            <Image source={iconList[ptLeg.type as keyof IconCatalog]} />
+            // <Image source={iconList[ptLeg.type as keyof IconCatalog]} />
+            <TramTypeCard serviceType={ptLeg.serviceType} />
           )}
         </View>
         <View style={{ flexDirection: "row" }}>
           <Text>
             {" "}
             Ride {ptLeg.intermediateStopCount} stops (
-            {ptLeg.intermediateStopCount} min)
+            {Math.ceil(ptLeg.duration / 60)} min)
           </Text>
           <Image source={iconList["RCHEVRON"]}></Image>
         </View>
@@ -169,9 +199,9 @@ const WalkLegPart: React.FC<WalkLegProps> = ({ walkLeg }) => {
     0
   );
   return (
-    <View style={{ backgroundColor: "green" }}>
+    <View>
       <Pressable onPress={() => console.log("Route pressed!")}>
-        <Text>Walk for {totalDistance}m </Text>
+        <Text>Walk for {totalDistance}m ({formatIntoMinutesAndSeconds(walkLeg.duration)})</Text>
       </Pressable>
     </View>
   );
@@ -181,10 +211,10 @@ const DetailedRoutingScreen: React.FC<
   baseResultsCardType & destinationType & LatLng
 > = () => {
   //add a base current location and end flag
-  console.log("gone here");
   const params = useLocalSearchParams();
+  console.log("destination type:", params.destination);
   let destination: destinationType = JSON.parse(
-    params.destinationType as string
+    params.destination as string
   );
   console.log("dest:", destination);
   let origin: LatLng = JSON.parse(params.origin as string);
@@ -196,26 +226,35 @@ const DetailedRoutingScreen: React.FC<
   const baseResultsCardData: baseResultsCardType = JSON.parse(
     params.baseResultsCardData as string
   );
-  let polylineArray: number[] = [];
+  let polylineArray: string[] = [];
   if (
     baseResultsCardData.polylineArray == undefined &&
-    origin.latitude != destination.latitude &&
+    origin.latitude != destination.latitude && 
     origin.longitude != destination.longitude
   ) {
+    console.log("base results card data: ", JSON.stringify(baseResultsCardData));
+    // console.log("stop coords array as str: ", JSON.stringify(baseResultsCardData).)
     console.error(
       "no routing received despite differing origins and destination"
     );
   } else {
     polylineArray = baseResultsCardData.polylineArray;
   }
-  console.log("polyline: ", polylineArray);
-  const formatted_array: LatLng[] = [];
-  for (let step = 0; step < polylineArray.length; step += 2) {
+  let formatted_array: LatLng[] = [];
+  // for (let step = 0; step < polylineArray.length; step += 1) {
+  //   const decodedPolyLineArray = polyline.decode(polylineArray[step]);
+  //   decodedPolyLineArray.map((latLngPair: number[]) => formatted_array.push({
+  //     latitude: latLngPair[0],
+  //     longitude: latLngPair[1]
+  //   }));
+  // }
+  for (let arr of (polyline.decode(polylineArray))) {
     formatted_array.push({
-      latitude: polylineArray[step],
-      longitude: polylineArray[step + 1],
+      latitude: arr[0],
+      longitude:arr[1]
     });
-  }
+  };
+  const stopsCoordsArray:stopCoords[] = baseResultsCardData.stopsCoordsArray.map((str) => {return JSON.parse(str);});
   return (
     <SafeAreaView style={stylesheet.SafeAreaView}>
       <MapView
@@ -229,8 +268,12 @@ const DetailedRoutingScreen: React.FC<
             Math.abs(origin.longitude - destination.longitude) * 2,
         }}
       >
-        <Marker coordinate={origin} />
-        <Marker coordinate={destination} />
+        <Marker title="Origin" coordinate={{latitude: origin.latitude, longitude: origin.longitude}}/>
+        {stopsCoordsArray.map((stop, index) => {
+          if (stop.name != "Origin" && stop.name != "Destination" ) {
+          return (<Marker title={stop.name} index = {index} coordinate={{latitude: stop.latitude, longitude: stop.longitude}} image={iconList.STOPCIRCULARMARKER}/>);
+        }})}
+        <Marker title="Destination" coordinate={{latitude: destination.latitude, longitude: destination.longitude}}/>
         {polylineArray.length > 0 && (
           <Polyline
             coordinates={formatted_array}
@@ -243,7 +286,7 @@ const DetailedRoutingScreen: React.FC<
       <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
         <View style={{ flexDirection: "row" }}>
           <OriginRectangle />
-          <Text style={{ backgroundColor: "red" }}>
+          <Text>
             Starting position: {origin.latitude}, {origin.longitude}
           </Text>
         </View>
@@ -253,7 +296,7 @@ const DetailedRoutingScreen: React.FC<
             <React.Fragment key={index}>
               <View style={{ flexDirection: "row" }}>
                 <LegRectangle />
-                {(leg.type === "BUS" || leg.type === "SUBWAY") && (
+                {(leg.type === "BUS" || leg.type === "SUBWAY" || leg.type === "NUS_BUS" || leg.type === "TRAM") && (
                   <PublicTransportLegPart ptLeg={leg as PublicTransportLeg} />
                 )}
                 {leg.type === "WALK" && (
@@ -264,7 +307,7 @@ const DetailedRoutingScreen: React.FC<
           );
         })}
         <DestinationFlag />
-        <Text>Destination: {destination.address}</Text>
+        <Text>Destination: {destination.address}</Text> 
       </ScrollView>
     </SafeAreaView>
   );
@@ -303,7 +346,7 @@ const stylesheet = StyleSheet.create({
   rectangle: {
     width: 4,
     height: 30, // Adjust as needed
-    backgroundColor: "limegreen",
+    // backgroundColor: "limegreen",
     marginLeft: 8,
   },
 });
