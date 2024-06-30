@@ -29,7 +29,7 @@ const TEMP_SERVICE_CHECKPOINT_BUS_STOP_MAP = {
     "L":[1, 92, 166, 261],
 };
 
-const getBusLeg = (route, busTravelTime, busLegStartTime, originBusStopCoords, destBusStopCoords, ETAFromOriginBusStop) => {
+const _getBusLeg = (route, busTravelTime, busLegStartTime, originBusStopCoords, destBusStopCoords, ETAFromOriginBusStop) => {
     const originStopIndex = route.originStopIndex;
     const destStopIndex = route.destStopIndex;
     const service = route.service;
@@ -124,7 +124,7 @@ const _getEncodedPolyLine = (originStopIndex, destStopIndex, service) => {
     }
 };
 
-function compareBasedOnDuration(firstItinerary, secondItinerary) {
+function _compareBasedOnDuration(firstItinerary, secondItinerary) {
     return firstItinerary.duration - secondItinerary.duration;
 };
 
@@ -132,14 +132,14 @@ router.post("/", async (req, res) => {
     try {
         console.log("origin received: ", req.body.origin);
         console.log("destination received: ", req.body.destination);
-        await populateNusStops(); // can be elimintaed once backend postgresql db is implemented
+        await _populateNusStops(); // can be elimintaed once backend postgresql db is implemented
         // console.log("nus stops after calling fun: ", NUS_STOPS);
         const startTimeAtOrigin = Date.now();
         const resultingBusStopFromDest = findNearestBusStopsFromPoints(req.body.destination, NO_OF_BUS_STOPS); //finds nearest bus stops from destination
         const resultingBusStopFromOrigin = findNearestBusStopsFromPoints(req.body.origin, NO_OF_BUS_STOPS);
         const possibleRoutes = await extractCommonBusServices(resultingBusStopFromOrigin, resultingBusStopFromDest); //possible edgecase where origin === dest bus stop, in that case dont bother checking, just factor in walking time
         // console.log("possible routes: ", possibleRoutes);
-        populateShuttleRoutes();
+        _populateShuttleRoutes();
         // console.log("possible routes:", await possibleRoutes);
         //no results
         // console.log("possible routes: ", possibleRoutes);
@@ -154,7 +154,7 @@ router.post("/", async (req, res) => {
             };
         };
         // console.log("formatted final result: ", formattedFinalResult);
-        const slicedFormattedFinalResult = formattedFinalResult.slice(0, 3).sort(compareBasedOnDuration);
+        const slicedFormattedFinalResult = formattedFinalResult.slice(0, 3).sort(_compareBasedOnDuration);
         // console.log("sliced formatted final result: ", slicedFormattedFinalResult);
         res.json({viableRoutes, slicedFormattedFinalResult});
     } catch (error) {
@@ -163,7 +163,7 @@ router.post("/", async (req, res) => {
     }
     });
 
-const populateShuttleRoutes = () => {
+const _populateShuttleRoutes = () => {
     //saves the results into a hashmap, which is faster
     for (route of NUS_SHUTTLE_ROUTES) {
         TEMP_NUS_SHUTTLES_ROUTES.set(route.shuttle, route);
@@ -171,7 +171,7 @@ const populateShuttleRoutes = () => {
 };
 
 
-const populateNusStops = async () => {
+const _populateNusStops = async () => {
 
     let result = await fetch("https://nnextbus.nus.edu.sg/BusStops", {
         method: "GET",
@@ -196,10 +196,10 @@ const populateNusStops = async () => {
     // console.log(NUS_STOPS);
 };
 
-const degToRad = (degrees) => {
+const _degToRad = (degrees) => {
     return degrees * (Math.PI / 180);
 };
-const verifyGoogleResult = (resultJSON) => {
+const _verifyGoogleResult = (resultJSON) => {
     for (geocoderObject of resultJSON.geocoded_waypoints) {
         if (geocoderObject.geocoder_status !== "OK") {
             return false;
@@ -243,7 +243,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
     // console.log("sample origin result:", originResult);
     // console.log("walk legs: ", originResult.routes[0].legs);
     // console.log("steps :", originResult.routes[0].legs[0].steps);
-    if (originResult && destResult && verifyGoogleResult(originResult) && verifyGoogleResult(destResult)) {
+    if (originResult && destResult && _verifyGoogleResult(originResult) && _verifyGoogleResult(destResult)) {
         // console.log(`walking route from nearest busstop, ${currentCoords} : ${originResult}`);
         // console.log("origin distance in m: ", originResult.routes[0].legs[0].distance.value);
         // console.log("polyline of originLeg: ", originResult.routes[0].overview_polyline);
@@ -345,7 +345,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
 
         // console.log("total time taken before: ", totalTimeTaken);
         // console.log("total time taken after: ", totalTimeTaken);
-        const busLeg = getBusLeg(route, busTravelTime, busLegStartTime, originBusStopCoords, destBustStopCoords, bestOriginBusServiceETA);
+        const busLeg = _getBusLeg(route, busTravelTime, busLegStartTime, originBusStopCoords, destBustStopCoords, bestOriginBusServiceETA);
         // console.log("bus leg: ", busLeg);
         const currTime = Date.now();
         return {
@@ -476,12 +476,12 @@ const extractCommonBusServices = async (originBusStops, destBusStops) =>  {
     return possibleBusStops;
 };
 
-const calculateEuclideanDistance = (pointLat, pointLongitude, busStopLat, busStopLongitude) => {
+const _calculateEuclideanDistance = (pointLat, pointLongitude, busStopLat, busStopLongitude) => {
     const R  = 6371.0; // approximate radius of Earth in km
-    const latRadOrigin = degToRad(pointLat);
-    const longRadOrigin = degToRad(pointLongitude);
-    const busStopLatRad = degToRad(busStopLat);
-    const busStopLongitudeRad = degToRad(busStopLongitude);
+    const latRadOrigin = _degToRad(pointLat);
+    const longRadOrigin = _degToRad(pointLongitude);
+    const busStopLatRad = _degToRad(busStopLat);
+    const busStopLongitudeRad = _degToRad(busStopLongitude);
     const dLat = busStopLatRad - latRadOrigin;
     const dLong = busStopLongitudeRad - longRadOrigin;
     const a = Math.pow(dLong * Math.cos((busStopLatRad + latRadOrigin) / 2), 2) + Math.pow(dLat, 2);
@@ -498,7 +498,7 @@ const findNearestBusStopsFromPoints = (pointCoords, noOfBusStops) => {
     for (busStop of NUS_STOPS) {
         const busStopLat = busStop.latitude;
         const busStopLongitude = busStop.longitude;
-        const dist = calculateEuclideanDistance(pointLat, pointLongitude, busStopLat, busStopLongitude);
+        const dist = _calculateEuclideanDistance(pointLat, pointLongitude, busStopLat, busStopLongitude);
         const index = binarySearch(busStopsSortedByDist, dist, "distance");
         busStopsSortedByDist.splice(index, 0, {
             "name": busStop.name,
@@ -532,9 +532,9 @@ const binarySearch = (arr, element, attribute) => {
     }
 };
 
-const populateCorrectedCheckpoints = (service) => {
-    populateNusStops();
-    populateShuttleRoutes();
+const _populateCorrectedCheckpoints = (service) => {
+    _populateNusStops();
+    _populateShuttleRoutes();
     const data = fs.readFileSync(`${service}CheckPoints.json`, 'utf-8');
     const checkPointArray = JSON.parse(data).CheckPointResult.CheckPoint;
     const route = TEMP_NUS_SHUTTLES_ROUTES.get(service);
@@ -560,5 +560,5 @@ const populateCorrectedCheckpoints = (service) => {
     };
     fs.writeFileSync(`${service}CheckPointsCorrected.json`, JSON.stringify(result), 'utf-8');
 };
-// populateCorrectedCheckpoints("L");
+//_populateCorrectedCheckpoints("L");
 module.exports = router;
