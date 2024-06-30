@@ -26,25 +26,31 @@ interface WalkLeg extends LegBase {
     distance: string;
     direction: string;
   }[];
-}
+};
+
 interface PublicTransportLeg extends LegBase {
   //used to display the routes info
+  startingStopETA: number,
   serviceType: string;
   startingStopName: string;
   destinationStopName: string;
   intermediateStopCount: number;
-  totalTimeTaken: number;
+  duration: number;
   intermediateStopNames: string[];
   intermediateStopGPSLatLng: LatLng[];
-}
+};
+
 type Leg = PublicTransportLeg | WalkLeg;
+
 interface baseResultsCardType {
   types: string[];
   journeyTiming: string;
   wholeJourneyTiming: string;
   journeyLegs: Leg[]; //an array of all the legs in 1 route
   polylineArray: string[]; //each leg's polyline is a string
-}
+  stopsCoordsArray: string[]
+};
+
 type DestinationResult = {
   address: string;
   placeId: string;
@@ -231,7 +237,7 @@ export default function App() {
       try {
         console.log("Origin location:", origin);
         const data = await fetch(
-          "https://test-nusmaps.onrender.com/transportRoute",
+          "http://192.168.2.139:3000/transportRoute",
           {
             method: "POST",
             body: JSON.stringify({

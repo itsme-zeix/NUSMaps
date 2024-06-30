@@ -3,10 +3,10 @@ const polyline = require("@mapbox/polyline");
 const router = express.Router();
 const fs = require('fs');
 
-const NO_OF_BUS_STOPS = 6;
+const NO_OF_BUS_STOPS = 14;
 const TEMP_NUS_SHUTTLES_ROUTES = new Map();
 const TEMP_NUS_BUS_STOPS_COORDS = new Map();
-
+const NUSNEXTBUSCREDENTIALS = btoa(`${process.env.NUSNEXTBUS_USER}:${process.env.NUSNEXTBUS_PASSWORD}`);
 const NUS_STOPS = [];
 
 const NUS_SHUTTLE_ROUTES = [
@@ -28,20 +28,19 @@ const TEMP_SERVICE_CHECKPOINT_BUS_STOP_MAP = {
     "K": [1, 88, 140, 173, 206, 224, 257, 311, 344, 380, 429, 471, 499, 529, 584, 681],
     "L":[1, 92, 166, 261],
 };
-//        const busLeg = getBusLeg(route, busTravelTime, originWalkingLeg.endTime, originBusStopCoords, destBustStopCoords);
 
-const getBusLeg = (route, busTravelTime, startTime, originBusStopCoords, destBusStopCoords) => {
+const getBusLeg = (route, busTravelTime, busLegStartTime, originBusStopCoords, destBusStopCoords, ETAFromOriginBusStop) => {
     const originStopIndex = route.originStopIndex;
     const destStopIndex = route.destStopIndex;
     const service = route.service;
-    const intermediateStops = _extractIntermediateStopsArray(originStopIndex, destStopIndex, service, startTime);
+    const intermediateStops = _extractIntermediateStopsArray(originStopIndex, destStopIndex, service, busLegStartTime);
     const polyline = _getEncodedPolyLine(originStopIndex, destStopIndex, service);
-    const originBusStopDeparture = startTime + route.originServiceETA;
+    console.log("origin service etas: ", route.originServiceETAs);
     console.log("bus travel time: ", busTravelTime);
     console.log("polyline: ", polyline);
     return {
-        startTime: startTime,
-        endTime: startTime + (busTravelTime * 1000),
+        startTime: busLegStartTime,
+        endTime: busLegStartTime + (busTravelTime * 1000),
         mode:"NUS_BUS",
         route: service,
         routeId: service,
@@ -51,9 +50,9 @@ const getBusLeg = (route, busTravelTime, startTime, originBusStopCoords, destBus
             stopId: `${service}:${originStopIndex}`,
             lon: originBusStopCoords.longitude,
             lat: originBusStopCoords.latitude,
-            ETA: route.originServiceETA,
-            arrival: startTime + route.originServiceETA,
-            departure: originBusStopDeparture, //DEFAULT to 10s wait time
+            ETA: ETAFromOriginBusStop,
+            arrival: busLegStartTime,
+            departure: busLegStartTime, //DEFAULT NO WAIT TIME which is factored into traveltime
             vertexType: "TRANSIT"
         },
         to: {
@@ -61,8 +60,8 @@ const getBusLeg = (route, busTravelTime, startTime, originBusStopCoords, destBus
             stopId: `${service}: ${destStopIndex}`,
             lon: destBusStopCoords.longitude,
             lat: destBusStopCoords.latitude,
-            arrival: originBusStopDeparture + busTravelTime * 1000,
-            departure: originBusStopDeparture + busTravelTime * 1000,
+            arrival: busLegStartTime + busTravelTime * 1000,
+            departure: busLegStartTime + busTravelTime * 1000,
             vertexType: "TRANSIT",
 
         },
@@ -82,7 +81,7 @@ const _extractIntermediateStopsArray = (originStopIndex, destStopIndex, service,
     const routeArray = TEMP_NUS_SHUTTLES_ROUTES.get(service).route;
     let currTime = startTime;
     const intermediateStops = [];
-    for (let index = originStopIndex + 1; index <= destStopIndex; index++) {
+    for (let index = originStopIndex + 1; index < destStopIndex; index++) {
         const busStopName = routeArray[index];
         const currStopCoords = TEMP_NUS_BUS_STOPS_COORDS.get(busStopName);
         const singularStop = {
@@ -100,9 +99,6 @@ const _extractIntermediateStopsArray = (originStopIndex, destStopIndex, service,
     return intermediateStops;
 };
 const _getEncodedPolyLine = (originStopIndex, destStopIndex, service) => {
-    //used to attain the polyline for the bus route
-    // console.log("service: ", service);
-    // console.log(TEMP_SERVICE_CHECKPOINT_BUS_STOP_MAP[service]);
     originStopCheckpointId = TEMP_SERVICE_CHECKPOINT_BUS_STOP_MAP[service][originStopIndex];
     destStopCheckpointId = TEMP_SERVICE_CHECKPOINT_BUS_STOP_MAP[service][destStopIndex];
     try {
@@ -138,6 +134,7 @@ router.post("/", async (req, res) => {
         console.log("destination received: ", req.body.destination);
         await populateNusStops(); // can be elimintaed once backend postgresql db is implemented
         // console.log("nus stops after calling fun: ", NUS_STOPS);
+        const startTimeAtOrigin = Date.now();
         const resultingBusStopFromDest = findNearestBusStopsFromPoints(req.body.destination, NO_OF_BUS_STOPS); //finds nearest bus stops from destination
         const resultingBusStopFromOrigin = findNearestBusStopsFromPoints(req.body.origin, NO_OF_BUS_STOPS);
         const possibleRoutes = await extractCommonBusServices(resultingBusStopFromOrigin, resultingBusStopFromDest); //possible edgecase where origin === dest bus stop, in that case dont bother checking, just factor in walking time
@@ -150,7 +147,7 @@ router.post("/", async (req, res) => {
         // console.log("viable routes: ", viableRoutes);
         const formattedFinalResult = [];
         for (viableRoute of viableRoutes) {
-            const busLeg = await formatIntoRoute(req.body.origin, req.body.destination, viableRoute);
+            const busLeg = await formatIntoRoute(req.body.origin, req.body.destination, viableRoute, startTimeAtOrigin);
             if (busLeg !== undefined) {
                 const indexToInsert = binarySearch(formattedFinalResult, busLeg.totalTimeTaken, "totalTimeTaken");
                 formattedFinalResult.splice(indexToInsert, 0, busLeg);
@@ -175,11 +172,12 @@ const populateShuttleRoutes = () => {
 
 
 const populateNusStops = async () => {
+
     let result = await fetch("https://nnextbus.nus.edu.sg/BusStops", {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            "Authorization" : `Basic ***REMOVED***`
+            "Authorization" : NUSNEXTBUSCREDENTIALS
           //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
         },
     });
@@ -210,14 +208,21 @@ const verifyGoogleResult = (resultJSON) => {
     return true;
 };
 
-const formatIntoRoute = async (currentCoords,destinationCoords,route) => {
+const _extractBusServiceETA = (serviceETAs, timeTakenToWalkInSeconds) => {
+    //extracts the best ETA time, based on how long it takes for a person to walk from the origin to the stop, returning the ETA - the time taken to walk
+    for (serviceETA of serviceETAs) {
+        if (serviceETA > timeTakenToWalkInSeconds) return (serviceETA - timeTakenToWalkInSeconds);
+    }
+    return undefined;
+};
+
+const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeAtOrigin) => {
     //bug is here
     //this can be displayed on a result card, but also can be treated as a collection of legs
     //route is of type 
     //"startStop" : route_info[originIndex], "destStop": route_info[destIndex], "noOfStops":(destIndex - originIndex), "service": service, "originStopIndex": originIndex, "destStopIndex": destIndex, "originServiceETA": route.originServiceETA}, we will do reverse searches, and then store the polyline info
     let totalTimeTaken = 0; //(in seconds)
     let originWalkingLeg;
-    let destWalkingLeg;
     const originBusStopCoords = TEMP_NUS_BUS_STOPS_COORDS.get(route.startStop);
     const destBustStopCoords = TEMP_NUS_BUS_STOPS_COORDS.get(route.destStop);
     const headers = {
@@ -225,11 +230,11 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route) => {
         'X-Goog-Api-Key': process.env.GOOGLEMAPSAPIKEY,
         'X-Goog-FieldMask': 'routes.legs.steps.transitDetails'
     };
-    const routeFromOriginToNearestBusStop = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${currentCoords.latitude},${currentCoords.longitude}&destination=${originBusStopCoords.latitude},${originBusStopCoords.longitude}&mode=walking&key=${process.env.GOOGLEMAPSAPIKEY}`, {
+    const routeFromOriginToNearestBusStop = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${currentCoords.latitude},${currentCoords.longitude}&destination=${originBusStopCoords.latitude},${originBusStopCoords.longitude}&mode=walking&key=AIzaSyBxD7k9OplpOM3-uZEPXOyN9yq8PXlNxCk`, {
         method:"GET",
         headers:headers,
     });
-    const routeFromNearestBusStopToDest = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${destBustStopCoords.latitude},${destBustStopCoords.longitude}&destination=${destinationCoords.latitude},${destinationCoords.longitude}&mode=walking&key=${process.env.GOOGLEMAPSAPIKEY}`, {
+    const routeFromNearestBusStopToDest = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${destBustStopCoords.latitude},${destBustStopCoords.longitude}&destination=${destinationCoords.latitude},${destinationCoords.longitude}&mode=walking&key=AIzaSyBxD7k9OplpOM3-uZEPXOyN9yq8PXlNxCk`, {
         method:"GET",
         headers:headers,
     });
@@ -243,7 +248,6 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route) => {
         // console.log(`walking route from nearest busstop, ${currentCoords} : ${originResult}`);
         // console.log("origin distance in m: ", originResult.routes[0].legs[0].distance.value);
         // console.log("polyline of originLeg: ", originResult.routes[0].overview_polyline);
-        const startTimeAtOrigin = Date.now();
         const originWalkingLegSteps = [];
         for (step of originResult.routes[0].legs[0].steps) {
             originWalkingLegSteps.push({
@@ -286,7 +290,10 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route) => {
             numOfIntermediateStops:1,
             };
         const busTravelTime = route.noOfStops * 2 * 60;
-        const destWalkingLegStartTime = originWalkingLegEndTime + busTravelTime * 1000;
+        const bestOriginBusServiceETA = _extractBusServiceETA(route.originServiceETAs, originResult.routes[0].legs[0].duration.value); //the time the user has to wait at the bus stop before the next shuttle arrives
+        if (bestOriginBusServiceETA === undefined) return undefined;
+        const busLegStartTime = originWalkingLegEndTime + bestOriginBusServiceETA * 1000;
+        const destWalkingLegStartTime = busLegStartTime + busTravelTime * 1000;
         const destWalkingLegEndTime = destWalkingLegStartTime + destResult.routes[0].legs[0].duration.value * 1000;
         const destWalkingLegSteps = [];
         for (step of destResult.routes[0].legs[0].steps) {
@@ -332,14 +339,14 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route) => {
         totalTimeTaken += originResult.routes[0].legs[0].duration.value;
         totalTimeTaken += destResult.routes[0].legs[0].duration.value;
         totalTimeTaken += busTravelTime; //HARDCODED FOR NOW, CHANGE LATER
-        totalTimeTaken += route.originServiceETA;
-        console.log("ETA: ", route.originServiceETA);
+        totalTimeTaken += bestOriginBusServiceETA;
+        console.log("ETA: ", bestOriginBusServiceETA);
         // console.log("dest distance in m: ", destResult.routes[0].legs[0].distance.value);
         // console.log("polyline of destleg: ", destResult.routes[0].overview_polyline);
 
         // console.log("total time taken before: ", totalTimeTaken);
         // console.log("total time taken after: ", totalTimeTaken);
-        const busLeg = getBusLeg(route, busTravelTime, originWalkingLeg.endTime, originBusStopCoords, destBustStopCoords);
+        const busLeg = getBusLeg(route, busTravelTime, busLegStartTime, originBusStopCoords, destBustStopCoords, bestOriginBusServiceETA);
         console.log("bus leg: ", busLeg);
         const currTime = Date.now();
         return {
@@ -383,7 +390,7 @@ const checkViabilityOfRoute= (route) => {
             for (originIndex of originIndexes) {
                 for (destIndex of destIndexes) {
                     //for now use first match
-                    if (destIndex > originIndex) return {"startStop" : route_info[originIndex], "destStop": route_info[destIndex], "noOfStops":(destIndex - originIndex), "service": service, "originStopIndex": originIndex, "destStopIndex": destIndex, "originServiceETA": route.originServiceETA};
+                    if (destIndex > originIndex) return {"startStop" : route_info[originIndex], "destStop": route_info[destIndex], "noOfStops":(destIndex - originIndex), "service": service, "originStopIndex": originIndex, "destStopIndex": destIndex, "originServiceETAs": route.originServiceETAs, "destinationServiceETAs": route.destServiceETAs};
                 }
             }
             return undefined;
@@ -405,7 +412,7 @@ const extractCommonBusServices = async (originBusStops, destBusStops) =>  {
             method:"GET",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization" : `Basic ${process.env.NEXTBUS}`
+                "Authorization" : NUSNEXTBUSCREDENTIALS
               //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
             },
         });
@@ -413,10 +420,12 @@ const extractCommonBusServices = async (originBusStops, destBusStops) =>  {
         for (shuttle of result.ShuttleServiceResult.shuttles) {
             // console.log("current shuttle: ", shuttle);
             if (shuttle._etas !== undefined && shuttle._etas.length !== 0) {
+                let nextETAsInSecondsArr = [];
+                shuttle._etas.map((shuttle) => nextETAsInSecondsArr.push(shuttle.eta_s));
                 originBusServices.add(JSON.stringify({
                     "busStop":busStop.name,
                     "service":shuttle.name,
-                    "nextETA": shuttle._etas[0].eta_s
+                    "nextETAs": nextETAsInSecondsArr
                 }));
             }
         };
@@ -429,17 +438,19 @@ const extractCommonBusServices = async (originBusStops, destBusStops) =>  {
             method:"GET",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization" : `Basic ${process.env.NEXTBUS}`
+                "Authorization" : NUSNEXTBUSCREDENTIALS
               //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
             },
         });
         result = await result.json();
         for (shuttle of result.ShuttleServiceResult.shuttles) {
             if (shuttle._etas !== undefined && shuttle._etas.length !== 0) {
+                let nextETAsInSecondsArr = [];
+                shuttle._etas.map((shuttle) => nextETAsInSecondsArr.push(shuttle.eta_s));
                 destBusServices.add(JSON.stringify({
                     "busStop":busStop.name,
                     "service":shuttle.name,
-                    "nextETA": shuttle._etas[0].eta_s
+                    "nextETAs": nextETAsInSecondsArr
                 }));
             };
         };
@@ -456,8 +467,8 @@ const extractCommonBusServices = async (originBusStops, destBusStops) =>  {
                     "originBusStop": parsedOriginService.busStop,
                     "destBusStop": parsedDestinationService.busStop,
                     "service": parsedOriginService.service,
-                    "originServiceETA": parsedOriginService.nextETA,
-                    "destServiceETA": parsedDestinationService.nextETA
+                    "originServiceETAs": parsedOriginService.nextETAs,
+                    "destServiceETAs": parsedDestinationService.nextETAs
                 });
             }
         }
@@ -521,6 +532,7 @@ const binarySearch = (arr, element, attribute) => {
         }
     }
 };
+
 const populateCorrectedCheckpoints = (service) => {
     populateNusStops();
     populateShuttleRoutes();
