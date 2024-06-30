@@ -138,7 +138,7 @@ router.post("/", async (req, res) => {
         const resultingBusStopFromDest = findNearestBusStopsFromPoints(req.body.destination, NO_OF_BUS_STOPS); //finds nearest bus stops from destination
         const resultingBusStopFromOrigin = findNearestBusStopsFromPoints(req.body.origin, NO_OF_BUS_STOPS);
         const possibleRoutes = await extractCommonBusServices(resultingBusStopFromOrigin, resultingBusStopFromDest); //possible edgecase where origin === dest bus stop, in that case dont bother checking, just factor in walking time
-        console.log("possible routes: ", possibleRoutes);
+        // console.log("possible routes: ", possibleRoutes);
         populateShuttleRoutes();
         // console.log("possible routes:", await possibleRoutes);
         //no results
@@ -155,7 +155,7 @@ router.post("/", async (req, res) => {
         };
         // console.log("formatted final result: ", formattedFinalResult);
         const slicedFormattedFinalResult = formattedFinalResult.slice(0, 3).sort(compareBasedOnDuration);
-        console.log("sliced formatted final result: ", slicedFormattedFinalResult);
+        // console.log("sliced formatted final result: ", slicedFormattedFinalResult);
         res.json({viableRoutes, slicedFormattedFinalResult});
     } catch (error) {
         console.error("error: ", error);
@@ -240,10 +240,9 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
     });
     const destResult = await routeFromNearestBusStopToDest.json();
     const originResult = await routeFromOriginToNearestBusStop.json();
-    console.log("sample origin result:", originResult);
-    console.log("walk legs: ", originResult.routes[0].legs);
-    console.log("steps :", originResult.routes[0].legs[0].steps);
-    console.log("reached here");
+    // console.log("sample origin result:", originResult);
+    // console.log("walk legs: ", originResult.routes[0].legs);
+    // console.log("steps :", originResult.routes[0].legs[0].steps);
     if (originResult && destResult && verifyGoogleResult(originResult) && verifyGoogleResult(destResult)) {
         // console.log(`walking route from nearest busstop, ${currentCoords} : ${originResult}`);
         // console.log("origin distance in m: ", originResult.routes[0].legs[0].distance.value);
@@ -255,7 +254,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
                 "direction" : step.html_instructions.replace("<b>", "").replace("</b>", "") //STOPGAP, CHANGE IF BETTER IMPLEMENTATION
             });
         };
-        console.log("originWalkingLegSteps: ", originWalkingLegSteps);
+        // console.log("originWalkingLegSteps: ", originWalkingLegSteps);
         const originWalkingLegEndTime = startTimeAtOrigin + originResult.routes[0].legs[0].duration.value * 1000;
         originWalkingLeg = {
             startTime: startTimeAtOrigin,
@@ -340,14 +339,14 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
         totalTimeTaken += destResult.routes[0].legs[0].duration.value;
         totalTimeTaken += busTravelTime; //HARDCODED FOR NOW, CHANGE LATER
         totalTimeTaken += bestOriginBusServiceETA;
-        console.log("ETA: ", bestOriginBusServiceETA);
+        // console.log("ETA: ", bestOriginBusServiceETA);
         // console.log("dest distance in m: ", destResult.routes[0].legs[0].distance.value);
         // console.log("polyline of destleg: ", destResult.routes[0].overview_polyline);
 
         // console.log("total time taken before: ", totalTimeTaken);
         // console.log("total time taken after: ", totalTimeTaken);
         const busLeg = getBusLeg(route, busTravelTime, busLegStartTime, originBusStopCoords, destBustStopCoords, bestOriginBusServiceETA);
-        console.log("bus leg: ", busLeg);
+        // console.log("bus leg: ", busLeg);
         const currTime = Date.now();
         return {
             duration: totalTimeTaken,
@@ -430,7 +429,7 @@ const extractCommonBusServices = async (originBusStops, destBusStops) =>  {
             }
         };
     };
-    console.log("dest shuttle service querying starts here");
+    // console.log("dest shuttle service querying starts here");
     for (busStop of destBusStops) {
         // console.log("busstop name: ", busStop.name);
         //logging the next few etas, when i want it to log only 
@@ -456,8 +455,8 @@ const extractCommonBusServices = async (originBusStops, destBusStops) =>  {
         };
     }; //the shuttles are arranged by bus stop which are sorted by distance
     const possibleBusStops = [];
-    console.log("origin bus services arr:", originBusServices);
-    console.log("destination bus services arr:", destBusServices);
+    // console.log("origin bus services arr:", originBusServices);
+    // console.log("destination bus services arr:", destBusServices);
     for (originBusService of originBusServices) {
         const parsedOriginService = JSON.parse(originBusService);
         for (destBusService of destBusServices) {
@@ -510,7 +509,7 @@ const findNearestBusStopsFromPoints = (pointCoords, noOfBusStops) => {
             }
         });
     };
-    console.log("bus stops array after slicing:", busStopsSortedByDist.slice(0, noOfBusStops));
+    // console.log("bus stops array after slicing:", busStopsSortedByDist.slice(0, noOfBusStops));
     return busStopsSortedByDist.slice(0, noOfBusStops);
 };
 
