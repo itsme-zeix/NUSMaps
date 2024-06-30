@@ -52,7 +52,7 @@ export default function RootLayout() {
           queryKey: ["busStopDatabase"],
           queryFn: () =>
             fetch(
-              `http://localhost:3000/busStopsByLocation?latitude=${lastUpdated}`
+              `http://localhost:3000/busStopDatabase?lastUpdated=${lastUpdated}`
             ).then((res) => res.json()),
         });
 
