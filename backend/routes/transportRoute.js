@@ -136,7 +136,6 @@ const formatBeginningEndingTime = (
   const formattedEndTiming = format(new Date(endTiming), "hh:mm a");
   return `${formattedStartTiming} - ${formattedEndTiming}`;
 };
-console.log(format(new Date(1719671949000), "hh:mm a"));
 const formatJourneyTime = (time) => {
   console.log(time);
   const intermediate = Math.floor(time / 60);
@@ -259,7 +258,7 @@ const _combineNUSInternalAlgo_OneMapResult = (slicedFormattedFinalResult, oneMap
   // let finalPolyLineString;
   if (oneMapResultFirst) {
     startTime = oneMapItinerary.startTime;
-    console.log("start time: ", startTime);
+    // console.log("start time: ", startTime);
     endTime = oneMapItinerary.startTime + singularSlicedFormattedFinalResult.duration * 1000;
     legsArray = oneMapItinerary.legs.concat(singularSlicedFormattedFinalResult.legs);
     // finalPolyLineString = _combineEncodedPolyLine(oneMapItinerary.legGeometry.points, singularSlicedFormattedFinalResult.legGeometry.points);
@@ -285,8 +284,9 @@ const _sortBasedOnTotalDuration = (firstPlan, secondPlan) => {
   return firstPlan.duration - secondPlan.duration;
 };
 
-const checkCoords = async (origin, destination) => {
+const handleRouting = async (origin, destination) => {
   //ALWAYS add this to results returned by onemap and compare
+  console.log("code 1");
   const dateObject = new Date();
   await populateNusStops();
   const originTurfPoint = turf.point([origin.latitude, origin.longitude]);
@@ -318,6 +318,7 @@ const checkCoords = async (origin, destination) => {
   } else if (!(isPointInNUSPolygons(originTurfPoint)) && isPointInNUSPolygons(destinationTurfPoint)) {
     //now we use onemaps to link to all possible public bus stops and then from all possible bus stops to the destination
     //we also compute the path from the public nus bus stop to the destination by walking
+    console.log("code 2");
     const promisesArray = []; //a 2d array of promises like [[Promise<Origin, nus_stop>, Promise<nus_stop, destination>]...]
     for (nusStop of PUBLICNUSBUSSTOPS) {
       const nusStopCoords = TEMP_NUS_BUS_STOPS_COORDS.get(nusStop);
@@ -356,19 +357,19 @@ const checkCoords = async (origin, destination) => {
           return response.json();
         }})));
     const responseBodiesArray = await Promise.all(jsonPromisesArray);
-    console.log("all: ", responseBodiesArray);
+    // console.log("all: ", responseBodiesArray);
     const newFinalArray = [];
     for (body of responseBodiesArray) {
-      console.log("formatted result: ", JSON.stringify(body[1].slicedFormattedFinalResult));
-      console.log("itinerary: ", JSON.stringify(body[0].plan.itineraries[0].duration));
+      // console.log("formatted result: ", JSON.stringify(body[1].slicedFormattedFinalResult));
+      // console.log("itinerary: ", JSON.stringify(body[0].plan.itineraries[0].duration));
       if (body[1].slicedFormattedFinalResult.length !== 0) {
-        console.log("result: ", JSON.stringify(_combineNUSInternalAlgo_OneMapResult(body[1].slicedFormattedFinalResult, body[0].plan, true)));
+        // console.log("result: ", JSON.stringify(_combineNUSInternalAlgo_OneMapResult(body[1].slicedFormattedFinalResult, body[0].plan, true)));
         newFinalArray.push(_combineNUSInternalAlgo_OneMapResult(body[1].slicedFormattedFinalResult, body[0].plan, true));
       }
     };
-    console.log("new final array pre sorting: ", JSON.stringify(newFinalArray));
+    // console.log("new final array pre sorting: ", JSON.stringify(newFinalArray));
     newFinalArray.sort(_sortBasedOnTotalDuration);
-    console.log("sorted by timing",  JSON.stringify(newFinalArray));
+    // console.log("sorted by timing",  JSON.stringify(newFinalArray));
     return {
       status: 201,
       message: "The origin lies outside of NUS, while the destination lies inside NUS",
@@ -376,6 +377,7 @@ const checkCoords = async (origin, destination) => {
       };
   } else if ( isPointInNUSPolygons(originTurfPoint) && !(isPointInNUSPolygons(destinationTurfPoint))) {
     //origin is in nus, destination lies outside
+    console.log("code 3");
     const promisesArray = [];
     for (nusStop of PUBLICNUSBUSSTOPS) {
       const nusStopCoords = TEMP_NUS_BUS_STOPS_COORDS.get(nusStop);
@@ -415,19 +417,18 @@ const checkCoords = async (origin, destination) => {
           return response.json();
         }})));
     const responseBodiesArray = await Promise.all(jsonPromisesArray);
-    console.log("all: ", responseBodiesArray);
+    // console.log("all: ", responseBodiesArray);
     const newFinalArray = [];
     for (body of responseBodiesArray) {
-      console.log("formatted result: ", body[1].plan);
-      console.log("itinerary: ", body[0].slicedFormattedFinalResult);
+      // console.log("formatted result: ", body[1].plan);
+      // console.log("itinerary: ", body[0].slicedFormattedFinalResult);
       if (body[0].slicedFormattedFinalResult.length !== 0) {
-        console.log("code 3");
-        console.log("result: ", JSON.stringify(_combineNUSInternalAlgo_OneMapResult(body[0].slicedFormattedFinalResult, body[1].plan, false)));
+        // console.log("result: ", JSON.stringify(_combineNUSInternalAlgo_OneMapResult(body[0].slicedFormattedFinalResult, body[1].plan, false)));
         newFinalArray.push(_combineNUSInternalAlgo_OneMapResult(body[0].slicedFormattedFinalResult, body[1].plan, false));
       };
     };
     newFinalArray.sort(_sortBasedOnTotalDuration);
-    console.log("new final array", JSON.stringify(newFinalArray));
+    // console.log("new final array", JSON.stringify(newFinalArray));
     // newFinalArray.sort();
     // console.log("sorted by timing", JSON.stringify(newFinalArray));
     return { 
@@ -437,6 +438,7 @@ const checkCoords = async (origin, destination) => {
     };
   } else {
     //both not inside, will return undefined
+    console.log("code 4");
     return {
       status:203,
       message: "Both points do not lie inside NUS",
@@ -462,7 +464,6 @@ const _addAlternativeRoutesToOneMap = (oneMapRoute, nusResult) => {
 router.post("/", async (req, res) => {
     const dateObject = new Date();
     auth_token = req.headers['authorization'];
-    console.log("Token received ", auth_token);
     let origin;
     let destination;
     if (auth_token === process.env.ONEMAPAPITOKEN) {
@@ -484,16 +485,17 @@ router.post("/", async (req, res) => {
         });
         const routeResponse = await response;
         const route = await routeResponse.json();
-        console.log("response route: ", route);
-        const nusResultPromise = checkCoords(origin, destination); //this will decide the course of action
-        console.log('nus result promise: ', nusResultPromise);
+        // console.log("response route: ", route);
+        const nusResultPromise = handleRouting(origin, destination); //this will decide the course of action
+        // console.log('nus result promise: ', nusResultPromise);
         const result = await _processData(route);
         const nusResult = await nusResultPromise;
-        console.log("nus result body: ", JSON.stringify(nusResult));
+        // console.log("nus result body: ", JSON.stringify(nusResult));
         if (nusResult.status === 200 || nusResult.status === 201 || nusResult.status === 202) {
           const addedLeg = _addAlternativeRoutesToOneMap(route, nusResult);
           // console.log('added leg: ', JSON.stringify(addedLeg));
           const finalCombinedResult = await _processData(addedLeg);
+      
           return res.json(finalCombinedResult);
         } else {
           return res.json(result);
