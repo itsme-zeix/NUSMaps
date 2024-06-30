@@ -199,7 +199,7 @@ const WalkLegPart: React.FC<WalkLegProps> = ({ walkLeg }) => {
     0
   );
   return (
-    <View style={{ backgroundColor: "green" }}>
+    <View>
       <Pressable onPress={() => console.log("Route pressed!")}>
         <Text>Walk for {totalDistance}m ({formatIntoMinutesAndSeconds(walkLeg.duration)})</Text>
       </Pressable>
@@ -286,7 +286,7 @@ const DetailedRoutingScreen: React.FC<
       <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
         <View style={{ flexDirection: "row" }}>
           <OriginRectangle />
-          <Text style={{ backgroundColor: "red" }}>
+          <Text>
             Starting position: {origin.latitude}, {origin.longitude}
           </Text>
         </View>
@@ -346,7 +346,7 @@ const stylesheet = StyleSheet.create({
   rectangle: {
     width: 4,
     height: 30, // Adjust as needed
-    backgroundColor: "limegreen",
+    // backgroundColor: "limegreen",
     marginLeft: 8,
   },
 });
