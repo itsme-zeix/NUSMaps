@@ -271,7 +271,8 @@ const DetailedRoutingScreen: React.FC<
         <Marker title="Origin" coordinate={{latitude: origin.latitude, longitude: origin.longitude}}/>
         {stopsCoordsArray.map((stop, index) => {
           if (stop.name != "Origin" && stop.name != "Destination" ) {
-          return (<Marker title={stop.name} index = {index} coordinate={{latitude: stop.latitude, longitude: stop.longitude}} image={iconList.STOPCIRCULARMARKER}/>);
+          return (
+              <Marker title={stop.name} key = {index} coordinate={{latitude: stop.latitude, longitude: stop.longitude}} image={iconList.STOPCIRCULARMARKER}/>);
         }})}
         <Marker title="Destination" coordinate={{latitude: destination.latitude, longitude: destination.longitude}}/>
         {polylineArray.length > 0 && (
@@ -346,7 +347,7 @@ const stylesheet = StyleSheet.create({
   rectangle: {
     width: 4,
     height: 30, // Adjust as needed
-    // backgroundColor: "limegreen",
+    backgroundColor: "limegreen",
     marginLeft: 8,
   },
 });

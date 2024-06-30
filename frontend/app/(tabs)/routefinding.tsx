@@ -59,6 +59,7 @@ type DestinationResult = {
 //constants and variables
 const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
 //USE THIS FOR PRODUCTION BUILDS Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
+//const oneMapsAPIToken = Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN;
 //exporter
 export default function App() {
   //hooks
