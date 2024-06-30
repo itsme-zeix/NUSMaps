@@ -120,7 +120,7 @@ const ResultCard: React.FC<SingleResultCardData> = ({
       asChild
       style={styles.resultCard}
     >
-      <Pressable style={{ backgroundColor: "green" }}>
+      <Pressable style={{ backgroundColor: "grey" }}>
         <View>
           <View style={styles.icons}>
             {types.map((icon, index) => {
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
-    backgroundColor: "red",
+    backgroundColor: "grey",
   },
   travelDuration: {
     fontSize: 18,

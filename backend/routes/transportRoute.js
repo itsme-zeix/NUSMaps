@@ -298,7 +298,7 @@ const checkCoords = async (origin, destination) => {
   // console.log("destination: ", destination);
   if (isPointInNUSPolygons(originTurfPoint) && isPointInNUSPolygons(destinationTurfPoint)) {
     //can use directly as result
-    const resultPromise =  await fetch("https://test-nusmaps.onrender.com/NUSBusRoutes", {
+    const resultPromise =  await fetch("https://nusmaps.onrender.com/NUSBusRoutes", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -324,7 +324,7 @@ const checkCoords = async (origin, destination) => {
       // console.log("nus stop: ", nusStop);
       // console.log("nus stop coords: ", nusStopCoords);
       // console.log('destination:', destination);
-      const promiseFromStopToDest = fetch("https://test-nusmaps.onrender.com/NUSBusRoutes", {
+      const promiseFromStopToDest = fetch("https://nusmaps.onrender.com/NUSBusRoutes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -379,7 +379,7 @@ const checkCoords = async (origin, destination) => {
     const promisesArray = [];
     for (nusStop of PUBLICNUSBUSSTOPS) {
       const nusStopCoords = TEMP_NUS_BUS_STOPS_COORDS.get(nusStop);
-      const promiseFromOriginToStop = fetch("https://test-nusmaps.onrender.com/NUSBusRoutes", {
+      const promiseFromOriginToStop = fetch("https://nusmaps.onrender.com/NUSBusRoutes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
