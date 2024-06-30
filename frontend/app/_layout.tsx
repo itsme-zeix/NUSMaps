@@ -39,7 +39,7 @@ export default function RootLayout() {
 
   // One time setup for async storage
   useEffect(() => {
-    const setupData = async () => {
+    const setupLocalStorage = async () => {
       const isInitialized = await AsyncStorage.getItem("isInitialized");
       const lastUpdated = await AsyncStorage.getItem("lastUpdated");
       if (!isInitialized) {
@@ -58,6 +58,12 @@ export default function RootLayout() {
 
         await AsyncStorage.setItem("busStops", JSON.stringify(busStops));
         await AsyncStorage.setItem("isInitialized", "true");
+
+        // Add `isFavorited` field to each bus stop
+        const busStopsWithFavorite = busStops.map((busStop: any) => ({
+          ...busStop,
+          isFavourited: false,
+        }));
       }
       if (isInitialized) {
         // perform updating of data by pinging rest api.
@@ -66,7 +72,7 @@ export default function RootLayout() {
       }
     };
 
-    setupData();
+    setupLocalStorage();
   }, []);
 
   // <Stack.Screen name="DetailedRoutingScreen" component={RouteCard}/>
