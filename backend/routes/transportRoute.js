@@ -171,7 +171,7 @@ const formatLeg = (legArray) => {
       latitude:leg.to.lat,
       longitude:leg.to.lon,
       name: leg.to.name
-    }))
+    }));
     typesArr.push(leg.mode);
     // console.log("leg geometry:",leg.legGeometry);
     const decodedArray = polyline.decode(leg.legGeometry.points);
@@ -222,7 +222,7 @@ const formatPublicTransportLeg = (leg, stopsCoordsArray) => {
       latitude: stop.lat,
       longitude: stop.lon,
       name: stop.name
-    }))
+    }));
     intermediateStopCount += 1;
   };
   // console.log('pt leg completed');
