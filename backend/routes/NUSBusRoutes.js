@@ -177,7 +177,7 @@ const populateNusStops = async () => {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            "Authorization" : NUSNEXTBUSCREDENTIALS
+            "Authorization" : `Basic ${NUSNEXTBUSCREDENTIALS}`
           //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
         },
     });
@@ -412,7 +412,7 @@ const extractCommonBusServices = async (originBusStops, destBusStops) =>  {
             method:"GET",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization" : NUSNEXTBUSCREDENTIALS
+                "Authorization" : `Basic ${NUSNEXTBUSCREDENTIALS}`
               //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
             },
         });
@@ -438,7 +438,7 @@ const extractCommonBusServices = async (originBusStops, destBusStops) =>  {
             method:"GET",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization" : NUSNEXTBUSCREDENTIALS
+                "Authorization" : `Basic ${NUSNEXTBUSCREDENTIALS}`
               //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
             },
         });
