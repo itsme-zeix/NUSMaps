@@ -15,10 +15,10 @@ import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplet
 import { LatLng } from "react-native-maps";
 import Modal from "react-native-modal";
 import Constants from "expo-constants";
-import { SubwayTypeCard } from "@/app/(tabs)/SubwayType";
-import { BusNumberCard } from "@/app/(tabs)/BusNumber";
+import { SubwayTypeCard } from "@/app/SubwayType";
+import { BusNumberCard } from "@/app/BusNumber";
 import { Link } from "expo-router";
-import { TramTypeCard } from "@/app/(tabs)/TramNumber";
+import { TramTypeCard } from "@/app/TramNumber";
 
 //interfaces and types
 type destinationType = {
