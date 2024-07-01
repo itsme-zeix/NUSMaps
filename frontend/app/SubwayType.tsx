@@ -5,7 +5,7 @@ interface MRTServiceType {
     serviceType:string
 };
 
-const SUBWAYICON = require("../../assets/images/subway-icon.png");
+const SUBWAYICON = require("../assets/images/subway-icon.png");
 
 const determineBG = (input:string) => {
     //input is based on routeId
