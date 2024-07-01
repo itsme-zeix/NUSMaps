@@ -289,7 +289,7 @@ function NearbyBusStops({
     queryKey: ["busStopsByLocation"],
     queryFn: () =>
       fetch(
-        `https://test-nusmaps.onrender.com/busStopsByLocation?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}`
+        `https://nusmaps.onrender.com/busStopsByLocation?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}`
       ).then((res) => res.json()),
   });
 
@@ -350,7 +350,7 @@ function NUSBusStops({ refresh }: { refresh: () => void }) {
   } = useQuery({
     queryKey: ["nusBusStops"],
     queryFn: () =>
-      fetch(`https://test-nusmaps.onrender.com/nusBusStops`).then((res) => res.json()),
+      fetch(`https://nusmaps.onrender.com/nusBusStops`).then((res) => res.json()),
   });
 
   if (isPending)
@@ -393,7 +393,7 @@ function NUSBusStops({ refresh }: { refresh: () => void }) {
       </View>
     </ScrollView>
   );
-}
+};
 
 export default function BusStopsScreen() {
   const [refreshLocation, setRefreshLocation] = useState(0);
