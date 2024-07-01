@@ -288,7 +288,7 @@ export default function App() {
   }
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <MapView style={styles.map} provider={PROVIDER_GOOGLE} region={region}>
           {currentLocation && (
             <Marker
@@ -316,7 +316,7 @@ export default function App() {
             setIsVisible={setisResultAttained}
           />
         </View>
-      </SafeAreaView>
+      </View>
     </GestureHandlerRootView>
   );
 }
@@ -326,6 +326,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: "100%",
+    backgroundColor: "white"
   },
   map: {
     width: "100%",
