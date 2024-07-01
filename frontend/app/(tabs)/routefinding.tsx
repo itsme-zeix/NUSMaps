@@ -12,7 +12,6 @@ import Toast from "react-native-toast-message";
 import { ResultScreen } from "@/components/ResultsScreen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { GooglePlaceData } from "react-native-google-places-autocomplete";
-import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "expo-constants";
 
 //interface and types
@@ -26,11 +25,11 @@ interface WalkLeg extends LegBase {
     distance: string;
     direction: string;
   }[];
-};
+}
 
 interface PublicTransportLeg extends LegBase {
   //used to display the routes info
-  startingStopETA: number,
+  startingStopETA: number;
   serviceType: string;
   startingStopName: string;
   destinationStopName: string;
@@ -38,7 +37,7 @@ interface PublicTransportLeg extends LegBase {
   duration: number;
   intermediateStopNames: string[];
   intermediateStopGPSLatLng: LatLng[];
-};
+}
 
 type Leg = PublicTransportLeg | WalkLeg;
 
@@ -48,8 +47,8 @@ interface baseResultsCardType {
   wholeJourneyTiming: string;
   journeyLegs: Leg[]; //an array of all the legs in 1 route
   polylineArray: string[]; //each leg's polyline is a string
-  stopsCoordsArray: string[]
-};
+  stopsCoordsArray: string[];
+}
 
 type DestinationResult = {
   address: string;
@@ -57,10 +56,11 @@ type DestinationResult = {
 } & LatLng;
 
 //constants and variables
-// const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
-//USE THIS FOR PRODUCTION BUILDS 
-const mapsApiKey = Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
-const oneMapsAPIToken = Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN;
+const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
+const oneMapsAPIToken = process.env.EXPO_PUBLIC_ONEMAPAPITOKEN;
+//USE THIS FOR PRODUCTION BUILDS
+// const mapsApiKey = Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
+// const oneMapsAPIToken = Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN;
 //exporter
 export default function App() {
   //hooks
@@ -256,7 +256,9 @@ export default function App() {
         return data.json();
       } catch (error) {
         setRouteErrorMsg("Server issues, please try again later.");
-        console.error("Route could not be found. Please try again later: ", error
+        console.error(
+          "Route could not be found. Please try again later: ",
+          error
         );
         throw new Error("Route could not be found. Please try again later");
       }
@@ -290,7 +292,7 @@ export default function App() {
   }
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <MapView style={styles.map} provider={PROVIDER_GOOGLE} region={region}>
           {currentLocation && (
             <Marker
@@ -303,10 +305,12 @@ export default function App() {
           )}
         </MapView>
         <View style={styles.overlay}>
-          <RouteSearchBar
-            location={currentLocation}
-            getDestinationResult={getDestinationResult}
-          />
+          <View style={{ paddingTop: "5%" }}>
+            <RouteSearchBar
+              location={currentLocation}
+              getDestinationResult={getDestinationResult}
+            />
+          </View>
           <ResultScreen
             origin={{
               latitude: currentLocation.latitude,
@@ -318,7 +322,7 @@ export default function App() {
             setIsVisible={setisResultAttained}
           />
         </View>
-      </SafeAreaView>
+      </View>
     </GestureHandlerRootView>
   );
 }
