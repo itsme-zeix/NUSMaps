@@ -5,7 +5,7 @@ interface TramServiceType {
     serviceType:string
 };
 
-const TRAMICON = require("../../assets/images/tram-icon.png");
+const TRAMICON = require("../assets/images/tram-icon.png");
 
 export const TramTypeCard: React.FC<TramServiceType> = ({serviceType}) => {
     //no need to use state as busNumber won't be changed
