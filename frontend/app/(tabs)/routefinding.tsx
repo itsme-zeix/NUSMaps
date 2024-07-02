@@ -57,8 +57,10 @@ type DestinationResult = {
 } & LatLng;
 
 //constants and variables
-const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
-//USE THIS FOR PRODUCTION BUILDS Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
+// const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
+//USE THIS FOR PRODUCTION BUILDS 
+const mapsApiKey = Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
+const oneMapsAPIToken = Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN;
 //exporter
 export default function App() {
   //hooks
@@ -233,7 +235,7 @@ export default function App() {
     origin: LatLng,
     destination: LatLng
   ): Promise<baseResultsCardType[]> {
-    if (process.env.EXPO_PUBLIC_ONEMAPAPITOKEN) {
+    if (oneMapsAPIToken) {
       try {
         console.log("Origin location:", origin);
         const data = await fetch(
@@ -246,7 +248,7 @@ export default function App() {
             }),
             headers: {
               "Content-Type": "application/json",
-              Authorization: process.env.EXPO_PUBLIC_ONEMAPAPITOKEN,
+              Authorization: oneMapsAPIToken,
               //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
             },
           }

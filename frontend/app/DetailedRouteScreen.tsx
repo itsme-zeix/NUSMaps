@@ -9,7 +9,6 @@ import {
   ImageURISource,
 } from "react-native";
 import { ImageSourcePropType } from "react-native";
-import Constants from "expo-constants";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MapView, {
   PROVIDER_GOOGLE,
@@ -18,8 +17,8 @@ import MapView, {
   LatLng,
   Callout
 } from "react-native-maps";
-import { SubwayTypeCard } from "./SubwayType";
-import { BusNumberCard } from "./BusNumber";
+import { SubwayTypeCard } from "@/app/SubwayType";
+import { BusNumberCard } from "@/app/BusNumber";
 import { TramTypeCard } from "./TramNumber";
 import { useLocalSearchParams } from "expo-router";
 
@@ -271,7 +270,8 @@ const DetailedRoutingScreen: React.FC<
         <Marker title="Origin" coordinate={{latitude: origin.latitude, longitude: origin.longitude}}/>
         {stopsCoordsArray.map((stop, index) => {
           if (stop.name != "Origin" && stop.name != "Destination" ) {
-          return (<Marker title={stop.name} key = {index} coordinate={{latitude: stop.latitude, longitude: stop.longitude}} image={iconList.STOPCIRCULARMARKER}/>);
+          return (
+              <Marker title={stop.name} key = {index} coordinate={{latitude: stop.latitude, longitude: stop.longitude}} image={iconList.STOPCIRCULARMARKER}/>);
         }})}
         <Marker title="Destination" coordinate={{latitude: destination.latitude, longitude: destination.longitude}}/>
         {polylineArray.length > 0 && (
