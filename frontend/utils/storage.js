@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export const getFavouritedBusStops = async () => {
   try {
     const busStops = await AsyncStorage.getItem("busStops");
-    let busStopsArray = []
+    let busStopsArray = [];
     if (busStops !== null) {
       busStopsArray = JSON.parse(busStops);
 
