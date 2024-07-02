@@ -39,7 +39,7 @@ export default function RootLayout() {
 
   // Uncomment to clear existing database for testing
   // AsyncStorage.clear();'
-  
+
   // One time setup for async storage
   useEffect(() => {
     const setupLocalStorage = async () => {
@@ -49,13 +49,13 @@ export default function RootLayout() {
         if (!isInitialized) {
           // Perform API call to retrieve database
           const response = await fetch(
-            `http://localhost:3000/busStopDatabase?lastUpdated=${lastUpdated}`
+            `https://nusmaps.onrender.com:3000/busStopDatabase?lastUpdated=${lastUpdated}`
           );
           if (!response.ok) {
             throw new Error("Network response was not ok");
           }
           const busStops = await response.json();
-          console.log(busStops)
+          console.log(busStops);
           let i = 0;
           // Add `isFavorited` field to each bus stop
           const busStopsWithFavourite = busStops.map((busStop) => ({
