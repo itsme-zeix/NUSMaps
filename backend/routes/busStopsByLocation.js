@@ -119,11 +119,9 @@ async function getArrivalTime(busStopsArray) {
           try {
             const username = process.env.NUSNEXTBUS_USER;
             const password = process.env.NUSNEXTBUS_PASSWORD;
-
             // Encode the credentials
             const credentials = `${username}:${password}`;
             const encodedCredentials = btoa(credentials);
-
             const response = await fetch(
               `https://nnextbus.nus.edu.sg/ShuttleService?busstopname=${stopName}`,
               {
