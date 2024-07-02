@@ -4,7 +4,7 @@ import { View, StyleSheet, Text, Image } from "react-native";
 interface busNumberType {
     busNumber:string
     busType:string
-};
+}
 
 const BUSICON = require("../assets/images/bus-icon.png");
 export const BusNumberCard: React.FC<busNumberType> = ({busNumber, busType}) => {
@@ -15,7 +15,7 @@ export const BusNumberCard: React.FC<busNumberType> = ({busNumber, busType}) => 
             <Image source = {BUSICON}></Image>
             <Text style = {styles.busNumber}>{busNumber}</Text>
         </View>
-    )
+    );
 };
 
 const styles = StyleSheet.create({
@@ -26,7 +26,9 @@ const styles = StyleSheet.create({
         borderRadius:5,
         marginBottom: 5,
         borderColor : "black",
-        flexDirection:"row"
+        flexDirection:"row",
+        justifyContent: "center",
+        alignItems: "center"
     },
     busNumber: {
         color: "black",
@@ -56,7 +58,8 @@ const styles = StyleSheet.create({
     L : {
         backgroundColor: '#BFBFBF'
     }
-})
+});
+
 const busBGMapping = {
     A1: styles.A1,
     A2: styles.A2,
