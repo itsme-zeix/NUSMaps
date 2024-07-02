@@ -17,7 +17,7 @@ export const BusNumberCard: React.FC<busNumberType> = ({busNumber, busType}) => 
             <Image source = {BUSICON}></Image>
             <Text style = {styles.busNumber}>{busNumber}</Text>
         </View>
-    )
+    );
 };
 
 const styles = StyleSheet.create({
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     L : {
         backgroundColor: 'grey'
     }
-})
+});
 const busBGMapping = {
     A1: styles.A1,
     A2: styles.A2,

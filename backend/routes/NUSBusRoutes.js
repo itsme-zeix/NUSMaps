@@ -142,7 +142,7 @@ const saveToSavedWalkingRoutes = () => {
     const arrayFromMap = Array.from(ROUTEHASHTABLE);
     const jsonArrayString = JSON.stringify(arrayFromMap);
     fs.writeFileSync("./routes/savedWalkingPaths.json", jsonArrayString);
-}
+};
 //will be a hashmap, where the key is the string of the json of {location: Latlng, stop_name:string, isFrom:boolean}
 //isFrom == true, then is from location to stop, otherwise is directions from stop to location
 
