@@ -7,6 +7,8 @@ const NO_OF_BUS_STOPS = 14;
 const TEMP_NUS_SHUTTLES_ROUTES = new Map();
 const TEMP_NUS_BUS_STOPS_COORDS = new Map();
 const NUSNEXTBUSCREDENTIALS = btoa(`${process.env.NUSNEXTBUS_USER}:${process.env.NUSNEXTBUS_PASSWORD}`);
+const GOOGLEMAPSAPIKEY = GOOGLEMAPSAPIKEY;
+
 const NUS_STOPS = [];
 
 const NUS_SHUTTLE_ROUTES = [
@@ -128,6 +130,22 @@ function _compareBasedOnDuration(firstItinerary, secondItinerary) {
     return firstItinerary.duration - secondItinerary.duration;
 };
 
+const readFromSavedWalkingRoutes = () => {
+    //returns an array in string form
+    const fileInStr = fs.readFileSync("./routes/savedWalkingPaths.json", "utf-8");
+    // console.log("map of array: ", new Map(JSON.parse(fileInStr)).size);
+    return fileInStr;
+};
+const ROUTEHASHTABLE = readFromSavedWalkingRoutes() === "" ? new Map() : new Map(JSON.parse(readFromSavedWalkingRoutes()));
+const saveToSavedWalkingRoutes = () => {
+    console.log("results captured");
+    const arrayFromMap = Array.from(ROUTEHASHTABLE);
+    const jsonArrayString = JSON.stringify(arrayFromMap);
+    fs.writeFileSync("./routes/savedWalkingPaths.json", jsonArrayString);
+}
+//will be a hashmap, where the key is the string of the json of {location: Latlng, stop_name:string, isFrom:boolean}
+//isFrom == true, then is from location to stop, otherwise is directions from stop to location
+
 router.post("/", async (req, res) => {
     try {
         console.log("origin received: ", req.body.origin);
@@ -156,6 +174,7 @@ router.post("/", async (req, res) => {
         // console.log("formatted final result: ", formattedFinalResult);
         const slicedFormattedFinalResult = formattedFinalResult.slice(0, 3).sort(_compareBasedOnDuration);
         // console.log("sliced formatted final result: ", slicedFormattedFinalResult);
+        saveToSavedWalkingRoutes();
         res.json({viableRoutes, slicedFormattedFinalResult});
     } catch (error) {
         console.error("error: ", error);
@@ -174,7 +193,7 @@ const _populateShuttleRoutes = () => {
 const _populateNusStops = async () => {
 
     let result = await fetch("https://nnextbus.nus.edu.sg/BusStops", {
-        method: "GET",
+        method: "GET", 
         headers: {
             "Content-Type": "application/json",
             "Authorization" : `Basic ${NUSNEXTBUSCREDENTIALS}`
@@ -227,19 +246,59 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
     const destBustStopCoords = TEMP_NUS_BUS_STOPS_COORDS.get(route.destStop);
     const headers = {
         'Content-Type': 'application/json',
-        'X-Goog-Api-Key': process.env.GOOGLEMAPSAPIKEY,
+        // 'X-Goog-Api-Key': GOOGLEMAPSAPIKEY,
         'X-Goog-FieldMask': 'routes.legs.steps.transitDetails'
     };
-    const routeFromOriginToNearestBusStop = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${currentCoords.latitude},${currentCoords.longitude}&destination=${originBusStopCoords.latitude},${originBusStopCoords.longitude}&mode=walking&key=${process.env.GOOGLEMAPSAPIKEY}`, {
-        method:"GET",
-        headers:headers,
+    const walkingFromOriginToBusStopKey = JSON.stringify({
+        from: currentCoords,
+        to: originBusStopCoords
     });
-    const routeFromNearestBusStopToDest = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${destBustStopCoords.latitude},${destBustStopCoords.longitude}&destination=${destinationCoords.latitude},${destinationCoords.longitude}&mode=walking&key=${process.env.GOOGLEMAPSAPIKEY}`, {
-        method:"GET",
-        headers:headers,
+    const walkingFromBusStopToDestKey = JSON.stringify({
+        from: destBustStopCoords,
+        to: destinationCoords
     });
-    const destResult = await routeFromNearestBusStopToDest.json();
-    const originResult = await routeFromOriginToNearestBusStop.json();
+    let routeFromOriginToNearestBusStop;
+    let routeFromNearestBusStopToDest;
+    let originResult;
+    let destResult;
+    
+    // Check and get data for route from origin to nearest bus stop
+    if (ROUTEHASHTABLE.has(walkingFromOriginToBusStopKey)) {
+        try {
+            originResult = JSON.parse(ROUTEHASHTABLE.get(walkingFromOriginToBusStopKey));
+        } catch (error) {
+            console.error('Error parsing JSON for route from origin to nearest bus stop:', error);
+            originResult = null;
+        }
+    }
+    
+    if (!originResult) {
+        routeFromOriginToNearestBusStop = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${currentCoords.latitude},${currentCoords.longitude}&destination=${originBusStopCoords.latitude},${originBusStopCoords.longitude}&mode=walking&key=${GOOGLEMAPSAPIKEY}`, {
+            method: "GET",
+            headers: headers,
+        });
+        originResult = await routeFromOriginToNearestBusStop.json();
+        ROUTEHASHTABLE.set(walkingFromOriginToBusStopKey, JSON.stringify(originResult));
+    }
+    
+    // Check and get data for route from nearest bus stop to destination
+    if (ROUTEHASHTABLE.has(walkingFromBusStopToDestKey)) {
+        try {
+            destResult = JSON.parse(ROUTEHASHTABLE.get(walkingFromBusStopToDestKey));
+        } catch (error) {
+            console.error('Error parsing JSON for route from nearest bus stop to destination:', error);
+            destResult = null;
+        }
+    }
+    
+    if (!destResult) {
+        routeFromNearestBusStopToDest = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${destBustStopCoords.latitude},${destBustStopCoords.longitude}&destination=${destinationCoords.latitude},${destinationCoords.longitude}&mode=walking&key=${GOOGLEMAPSAPIKEY}`, {
+            method: "GET",
+            headers: headers,
+        });
+        destResult = await routeFromNearestBusStopToDest.json();
+        ROUTEHASHTABLE.set(walkingFromBusStopToDestKey, JSON.stringify(destResult));
+    }
     // console.log("sample origin result:", originResult);
     // console.log("walk legs: ", originResult.routes[0].legs);
     // console.log("steps :", originResult.routes[0].legs[0].steps);
@@ -363,6 +422,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
         return undefined;
     }
 };
+
 
 const checkViabilityOfRoute= (route) => {
     const service = route.service;
