@@ -20,12 +20,14 @@ import {
   QueryClient,
   QueryClientProvider,
   useQuery,
+  useMutation,
 } from "@tanstack/react-query";
 import * as Location from "expo-location";
 import { LocationObject } from "expo-location";
 import Toast from "react-native-toast-message";
 import BusStopSearchBar from "@/components/BusStopSearchBar";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
+import { getFavouritedBusStops } from "@/utils/storage";
 
 // INTERFACES
 interface BusService {
@@ -271,6 +273,97 @@ const useUserLocation = (refreshLocation: number) => {
 // PERFORM API QUERY
 const queryClient = new QueryClient();
 
+async function fetchBusArrivalTimes(busStops: any) {
+  const response = await fetch("http://localhost:3000/busArrivalTimes", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(busStops),
+  });
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+  return response.json();
+}
+
+function FavouriteBusStops({ refresh }: { refresh: () => void }) {
+  const [busStops, setBusStops] = useState<BusStop[]>([]);
+  const [dataMutated, setDataMutated] = useState(false);
+
+  const { error, data: favouriteBusStops } = useQuery({
+    queryKey: ["favouriteBusStops"],
+    queryFn: getFavouritedBusStops,
+  });
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: fetchBusArrivalTimes,
+    onSuccess: (data) => {
+      setBusStops(data); // update bus stops with fetched data
+      setDataMutated(true); // set data mutated to true
+    },
+    onError: (error) => {
+      console.error("Error fetching bus arrival times: ", error);
+    },
+  });
+
+  useEffect(() => {
+    if (favouriteBusStops && Array.isArray(favouriteBusStops) && !dataMutated) {
+      mutate(favouriteBusStops);
+    }
+  }, [favouriteBusStops, dataMutated, mutate]);
+
+  // Ensure re-render by setting state properly
+  useEffect(() => {
+    if (dataMutated) {
+      setBusStops((prevBusStops) => {
+        return prevBusStops.map((busStop) => {
+          const updatedBuses = busStop.savedBuses.map((bus) => ({
+            ...bus,
+            timings: bus.timings.map((timing) => calculateMinutesDifference(timing)),
+          }));
+          return { ...busStop, savedBuses: updatedBuses };
+        });
+      });
+    }
+  }, [dataMutated]);
+
+  if (isPending)
+    return <ActivityIndicator size="large" style={{ margin: 20 }} />;
+  if (error)
+    return (
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={isPending} onRefresh={refresh} />
+        }
+      >
+        <View style={{ flex: 1, alignItems: "center", margin: 20 }}>
+          <Text>An error has occurred: {error.message}. </Text>
+          <Text>Pull down to try again.</Text>
+        </View>
+      </ScrollView>
+    );
+
+  return (
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={isPending} onRefresh={refresh} />
+      }
+    >
+      <View>
+        {busStops && Array.isArray(busStops) ? (
+          busStops.map((busStop: BusStop, index: number) => (
+            <ListItem key={index} item={busStop} />
+          ))
+        ) : (
+          <Text>{JSON.stringify(busStops)}</Text>
+        )}
+      </View>
+    </ScrollView>
+  );
+}
+
 // Get nearest bus stops by location and render it. Backend API will return a busStops object with updated bus timings.
 function NearbyBusStops({
   refreshLocation,
@@ -350,7 +443,9 @@ function NUSBusStops({ refresh }: { refresh: () => void }) {
   } = useQuery({
     queryKey: ["nusBusStops"],
     queryFn: () =>
-      fetch(`https://nusmaps.onrender.com/nusBusStops`).then((res) => res.json()),
+      fetch(`https://nusmaps.onrender.com/nusBusStops`).then((res) =>
+        res.json()
+      ),
   });
 
   if (isPending)
@@ -369,12 +464,14 @@ function NUSBusStops({ refresh }: { refresh: () => void }) {
       </ScrollView>
     );
 
-  busStops.map((busStop: BusStop) =>
-    busStop.savedBuses.map((bus: BusService) => {
-      bus.timings[0] = calculateMinutesDifference(bus.timings[0]);
-      bus.timings[1] = calculateMinutesDifference(bus.timings[1]);
-    })
-  );
+  if (busStops && Array.isArray(busStops)) {
+    busStops.forEach((busStop: BusStop) =>
+      busStop.savedBuses.forEach((bus: BusService) => {
+        bus.timings[0] = calculateMinutesDifference(bus.timings[0]);
+        bus.timings[1] = calculateMinutesDifference(bus.timings[1]);
+      })
+    );
+  }
 
   return (
     <ScrollView
@@ -393,7 +490,7 @@ function NUSBusStops({ refresh }: { refresh: () => void }) {
       </View>
     </ScrollView>
   );
-};
+}
 
 export default function BusStopsScreen() {
   const [refreshLocation, setRefreshLocation] = useState(0);
@@ -415,7 +512,7 @@ export default function BusStopsScreen() {
           <BusStopSearchBar />
           <View style={styles.segmentedControlContainer}>
             <SegmentedControl
-              values={["Nearby", "NUS Bus Stops"]}
+              values={["Favourites", "Nearby", "NUS Bus Stops"]}
               selectedIndex={selectedIndex}
               onChange={(event) => {
                 setSelectedIndex(event.nativeEvent.selectedSegmentIndex);
@@ -424,6 +521,8 @@ export default function BusStopsScreen() {
           </View>
           <View style={{ flex: 1 }}>
             {selectedIndex === 0 ? (
+              <FavouriteBusStops refresh={refetchBusStops} />
+            ) : selectedIndex === 1 ? (
               <NearbyBusStops
                 refreshLocation={refreshLocation}
                 refreshUserLocation={refetchUserLocation}
