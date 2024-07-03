@@ -49,7 +49,7 @@ async function getArrivalTime(busStopsArray) {
             // ITERATE AND UPDATE BUS ARRIVAL TIMING
             for (let busObject of busStop.savedBuses) {
               const serviceName = busObject.busNumber;
-              console.log(serviceName)
+              console.log(serviceName);
               if (shuttles[serviceName]) {
                 const shuttle = shuttles[serviceName];
                 if (shuttle._etas) {
@@ -201,8 +201,8 @@ router.post("/", async (req, res) => {
       throw new Error("Request body must be an array");
     }
     await getArrivalTime(busStopsArray);
-    console.log(busStopsArray)
-    console.log(busStopsArray[0].savedBuses[0])
+    console.log(busStopsArray);
+    console.log(busStopsArray[0].savedBuses[0]);
     res.json(busStopsArray);
   } catch (err) {
     console.error(err);
