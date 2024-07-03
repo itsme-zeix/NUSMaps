@@ -33,15 +33,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="busstops"
-        options={{
-          title: 'Bus Stops',
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="busservices"
         options={{
           title: 'Bus Services',
