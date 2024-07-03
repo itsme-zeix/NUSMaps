@@ -1,14 +1,39 @@
-import React, { useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView, Text } from "react-native";
-import BusStopSearchBar from "@/components/BusStopSearchBar";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableWithoutFeedback,
+  LayoutChangeEvent,
+  ScrollView,
+  RefreshControl,
+  Image,
+  ActivityIndicator,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+  useMutation,
+} from "@tanstack/react-query";
+import * as Location from "expo-location";
+import { LocationObject } from "expo-location";
+import Toast from "react-native-toast-message";
+import BusStopSearchBar from "@/components/BusStopSearchBar";
+import SegmentedControl from "@react-native-segmented-control/segmented-control";
+import { getFavouritedBusStops } from "@/utils/storage";
 
-// Define interfaces for BusService and BusStop
+// INTERFACES
 interface BusService {
   busNumber: string;
   timings: string[]; // ISO format
 }
-
 interface BusStop {
   busStopName: string;
   busStopId: string;
@@ -16,182 +41,590 @@ interface BusStop {
   savedBuses: BusService[];
 }
 
-/* FOR TESTING PURPOSES */
-const bus106: BusService = {
-  busNumber: "106",
-  timings: [],
+// UI COMPONENTS
+const ColouredCircle = ({
+  color,
+  size = 50,
+}: {
+  color: string;
+  size?: number;
+}) => {
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: color,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    />
+  );
 };
 
-const bus852: BusService = {
-  busNumber: "852",
-  timings: [],
-};
+// Logic to modify the timings in the BusService object from ISO time to minutes away from now.
+const calculateMinutesDifference = (isoTime: string): string => {
+  if (!isoTime) return "Loading..."; // Handle uninitialized data
 
-const bukitBatokInt: BusStop = {
-  busStopName: "Bukit Batok Int",
-  busStopId: "43009",
-  distanceAway: "~5m away",
-  savedBuses: [bus106, bus852],
-};
-/* END OF TESTING PURPOSES */
-
-// Asynchronous functions
-async function fetchBusTimings(busStops: BusStop[]) {
-  // Function to fetch bus timings
-  try {
-    const response = await fetch(
-      "https://nusmaps.onrender.com/busArrivalTimes", // TODO: add authentication
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(busStops),
-      }
-    );
-    const apiReply = await response.json();
-    return apiReply; // return back busStops array with 'timings' in BusService filled in
-  } catch (error) {
-    console.error("Error fetching data: ", error);
-  }
-}
-
-//helper functions
-const calculateMinutesDifference = (isoTime: string): string | number => { 
-// Calculate the difference in minutes between the current time and the given ISO time
+  // Calculate the difference in minutes between the current time and the given ISO time
   const now = new Date();
   const busTime = new Date(isoTime);
 
   if (isNaN(busTime.getTime())) {
-    // If busTime is invalid, return a default value or handle the error
-    return "N/A";
+    return "N/A"; // Handle invalid state
   }
 
   const differenceInMilliseconds = busTime.getTime() - now.getTime();
   const differenceInMinutes = Math.round(differenceInMilliseconds / 1000 / 60);
-  return differenceInMinutes >= 0 ? differenceInMinutes : 0;
+  return differenceInMinutes >= 0 ? `${differenceInMinutes} min` : "N/A"; // Correctly format the minute output
 };
 
-//components
-const busCard = (bus: BusService) => {
-  // Calculate the arrival times in minutes for 1 bus service
-  const arrivalTimesInMinutes = bus.timings.map((timing: string) =>
-    calculateMinutesDifference(timing)
-  );
+const CollapsibleContainer = ({
+  children,
+  expanded,
+}: {
+  children: React.ReactNode;
+  expanded: boolean;
+}) => {
+  const [height, setHeight] = useState(0);
+  const animatedHeight = useSharedValue(0);
 
-  return (
-    <View style={styles.busCard}>
-      <Text style={{ fontSize: 24 }}> {bus.busNumber} </Text>
-      <Text style={{ fontSize: 10 }}> Arrival Time </Text>
-      <View style={styles.busTimings}>
-        <View style={styles.busTiming}>
-          <Text style={{ color: "#30B800", fontSize: 22 }}>
-            {arrivalTimesInMinutes[0]}
-          </Text>
-          <Text style={{ color: "#30B800", fontSize: 12 }}>min</Text>
-        </View>
-        <View style={styles.busTiming}>
-          <Text style={{ color: "#DE8500", fontSize: 22 }}>
-            {arrivalTimesInMinutes[1]}
-          </Text>
-          <Text style={{ color: "#DE8500", fontSize: 12 }}>min</Text>
-        </View>
-      </View>
-    </View>
-  );
-};
+  const onLayout = (event: LayoutChangeEvent) => {
+    const onLayoutHeight = event.nativeEvent.layout.height;
 
-const busStopCard = (busStop: BusStop) => {
-  //
-  return (
-    <View style={styles.busStopCard}>
-      <View>
-        <Text style={{ fontSize: 20 }}> {busStop.busStopName} </Text>
-        <Text style={{ color: "#626262", fontSize: 10 }}>
-          {busStop.distanceAway}
-        </Text>
-      </View>
-      <View style={styles.busTimings}>
-        {busStop.savedBuses.map((bus: BusService, index: number) => (
-          <View key={index}>{busCard(bus)}</View>
-        ))}
-      </View>
-    </View>
-  );
-};
+    if (onLayoutHeight > 0 && height !== onLayoutHeight) {
+      setHeight(onLayoutHeight);
+    }
+  };
 
-export default function HomeScreen() {
-  const [busStops, setBusStopsData] = useState<BusStop[]>([bukitBatokInt]); // bukitBatokInt FOR TESTING PURPOSES, replace w local storage
-  const [isloadingFirstTime, setIsLoadingFirstTime] = useState(true); // to change
   useEffect(() => {
-    const fetchAndSetBusTimings = async () => {
-      const updatedBusStops = await fetchBusTimings(busStops);
-      setBusStopsData(updatedBusStops);
+    animatedHeight.value = withTiming(expanded ? height : 0);
+  }, [expanded, height]);
+
+  const collapsibleStyle = useAnimatedStyle(() => {
+    return {
+      height: animatedHeight.value,
     };
-
-    fetchAndSetBusTimings(); // Initial fetch
-
-    const interval = setInterval(() => {
-      fetchAndSetBusTimings();
-    }, 30000); // 30000 milliseconds = 30 seconds
-
-    // Cleanup interval on component unmount
-    return () => clearInterval(interval);
-  }, []);
+  });
 
   return (
-    <SafeAreaView style={styles.tabContent}>
-      <BusStopSearchBar />
-      <ScrollView style={styles.scrollView}>
-        {busStops.map((busStop, index) => (
-          <View key={index}>{busStopCard(busStop)}</View>
-        ))}
+    <Animated.View style={[collapsibleStyle, { overflow: "hidden" }]}>
+      <View style={{ position: "absolute" }} onLayout={onLayout}>
+        <View
+          style={{
+            borderBottomColor: "#626262",
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            marginHorizontal: 16,
+          }}
+        />
+        {children}
+      </View>
+    </Animated.View>
+  );
+};
+
+const ListItem = ({ item }: { item: BusStop }) => {
+  //Used to render details for 1 bus stop
+  const [expanded, setExpanded] = useState(false);
+
+  const onItemPress = () => {
+    setExpanded(!expanded);
+  };
+
+  // Function to determine the color based on bus stop name
+  function getColor(busService: string) {
+    switch (busService) {
+      case "A1":
+        return "#FF0000"; // Red
+      case "A2":
+        return "#E4CE0C"; // Yellow
+      case "D1":
+        return "#CD82E2"; // Purple
+      case "D2":
+        return "#6F1B6F"; // Dark Purple
+      case "K":
+        return "#345A9B"; // Blue
+      case "E":
+        return "#00B050"; // Green
+      case "BTC":
+        return "#EE8136"; // Orange
+      case "L":
+        return "#BFBFBF"; // Gray
+      default:
+        return "green"; // Default color for other bus stops
+    }
+  }
+
+  return (
+    <View style={styles.wrap}>
+      <TouchableWithoutFeedback onPress={onItemPress}>
+        <View style={styles.cardContainer}>
+          <View style={styles.textContainer}>
+            <Text style={styles.busStopName}>
+              {item.busStopName.startsWith("NUSSTOP")
+                ? item.busStopName.slice(8)
+                : item.busStopName}
+            </Text>
+            <Text style={styles.distanceAwayText}>
+              {Number(item.distanceAway) < 1
+                ? `~${(Number(item.distanceAway) * 1000).toFixed(0)}m away`
+                : `~${Number(item.distanceAway).toFixed(2)}km away`}
+            </Text>
+          </View>
+          <View style={styles.nusTagAndChevronContainer}>
+            {item.busStopName.startsWith("NUSSTOP") && (
+              <View style={styles.nusTag}>
+                <Text style={styles.nusTagText}>NUS</Text>
+              </View>
+            )}
+            <Image
+              source={
+                expanded
+                  ? require("../../assets/images/chevron_up_blue_icon.png")
+                  : require("../../assets/images/chevron_down_blue_icon.png")
+              }
+              style={styles.chevron}
+            />
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
+
+      <CollapsibleContainer expanded={expanded}>
+        <View style={styles.textContainer}>
+          {item.savedBuses.map((bus: BusService, index: number) => (
+            <View key={index} style={styles.detailRow}>
+              <View style={styles.leftContainer}>
+                <ColouredCircle color={getColor(bus.busNumber)} size={15} />
+                <Text style={[styles.details, styles.busNumber]}>
+                  {bus.busNumber.startsWith("PUB:")
+                    ? bus.busNumber.slice(4)
+                    : bus.busNumber}
+                </Text>
+              </View>
+              <View style={styles.rightContainer}>
+                <Text style={[styles.details, styles.timingText]}>
+                  {bus.timings[0]}
+                </Text>
+                <Text style={[styles.details, styles.timingText]}>
+                  {bus.timings[1]}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      </CollapsibleContainer>
+    </View>
+  );
+};
+
+const useUserLocation = (refreshLocation: number) => {
+  const [location, setLocation] = useState<LocationObject | null>(null);
+  const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
+  const [locationErrorMsg, setLocationErrorMsg] = useState("");
+  const [locationReady, setLocationReady] = useState(false); // this is to only allow querying is getting user's current location is completed.
+
+  const getLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      setPermissionErrorMsg("Permission to access location was denied.");
+      return;
+    }
+    try {
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+      setLocationReady(true);
+    } catch (error) {
+      setLocationErrorMsg(`Failed to obtain location, ${error}`);
+    }
+  };
+
+  useEffect(() => {
+    getLocation();
+  }, [refreshLocation]);
+
+  useEffect(() => {
+    if (permissionErrorMsg) {
+      Toast.show({
+        type: "error",
+        text1: permissionErrorMsg,
+        text2: "Please enable location permissions for NUSMaps.",
+        position: "top",
+        autoHide: true,
+      });
+    }
+  }, [permissionErrorMsg]);
+
+  useEffect(() => {
+    if (locationErrorMsg) {
+      Toast.show({
+        type: "error",
+        text1: locationErrorMsg,
+        text2: "Please try again later",
+        position: "top",
+        autoHide: true,
+      });
+    }
+  }, [locationErrorMsg]);
+
+  return locationReady ? location : null;
+};
+
+// PERFORM API QUERY
+const queryClient = new QueryClient();
+
+async function fetchBusArrivalTimes(busStops: any) {
+  const response = await fetch("http://localhost:3000/busArrivalTimes", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(busStops),
+  });
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+  return response.json();
+}
+
+function FavouriteBusStops({ refresh }: { refresh: () => void }) {
+  const [busStops, setBusStops] = useState<BusStop[]>([]);
+  const [dataMutated, setDataMutated] = useState(false);
+
+  const { error, data: favouriteBusStops } = useQuery({
+    queryKey: ["favouriteBusStops"],
+    queryFn: getFavouritedBusStops,
+  });
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: fetchBusArrivalTimes,
+    onSuccess: (data) => {
+      setBusStops(data); // update bus stops with fetched data
+      setDataMutated(true); // set data mutated to true
+    },
+    onError: (error) => {
+      console.error("Error fetching bus arrival times: ", error);
+    },
+  });
+
+  useEffect(() => {
+    if (favouriteBusStops && Array.isArray(favouriteBusStops) && !dataMutated) {
+      mutate(favouriteBusStops);
+    }
+  }, [favouriteBusStops, dataMutated, mutate]);
+
+  // Ensure re-render by setting state properly
+  useEffect(() => {
+    if (dataMutated) {
+      setBusStops((prevBusStops) => {
+        return prevBusStops.map((busStop) => {
+          const updatedBuses = busStop.savedBuses.map((bus) => ({
+            ...bus,
+            timings: bus.timings.map((timing) => calculateMinutesDifference(timing)),
+          }));
+          return { ...busStop, savedBuses: updatedBuses };
+        });
+      });
+    }
+  }, [dataMutated]);
+
+  if (isPending)
+    return <ActivityIndicator size="large" style={{ margin: 20 }} />;
+  if (error)
+    return (
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={isPending} onRefresh={refresh} />
+        }
+      >
+        <View style={{ flex: 1, alignItems: "center", margin: 20 }}>
+          <Text>An error has occurred: {error.message}. </Text>
+          <Text>Pull down to try again.</Text>
+        </View>
       </ScrollView>
-    </SafeAreaView>
+    );
+
+  return (
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={isPending} onRefresh={refresh} />
+      }
+    >
+      <View>
+        {busStops && Array.isArray(busStops) ? (
+          busStops.map((busStop: BusStop, index: number) => (
+            <ListItem key={index} item={busStop} />
+          ))
+        ) : (
+          <Text>{JSON.stringify(busStops)}</Text>
+        )}
+      </View>
+    </ScrollView>
   );
 }
 
-//stylesheet
+// Get nearest bus stops by location and render it. Backend API will return a busStops object with updated bus timings.
+function NearbyBusStops({
+  refreshLocation,
+  refreshUserLocation,
+}: {
+  refreshLocation: number;
+  refreshUserLocation: () => void;
+}) {
+  const location = useUserLocation(refreshLocation);
+
+  const {
+    isPending,
+    error,
+    data: busStops,
+  } = useQuery({
+    queryKey: ["busStopsByLocation"],
+    queryFn: () =>
+      fetch(
+        `https://nusmaps.onrender.com/busStopsByLocation?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}`
+      ).then((res) => res.json()),
+  });
+
+  if (isPending)
+    return <ActivityIndicator size="large" style={{ margin: 20 }} />;
+  if (error)
+    return (
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={isPending}
+            onRefresh={refreshUserLocation}
+          />
+        }
+      >
+        <View style={{ flex: 1, alignItems: "center", margin: 20 }}>
+          <Text>An error has occurred: {error.message}. </Text>
+          <Text>Pull down to try again.</Text>
+        </View>
+      </ScrollView>
+    );
+
+  busStops.map((busStop: BusStop) =>
+    busStop.savedBuses.map((bus: BusService) => {
+      bus.timings[0] = calculateMinutesDifference(bus.timings[0]);
+      bus.timings[1] = calculateMinutesDifference(bus.timings[1]);
+    })
+  );
+
+  return (
+    <ScrollView
+      refreshControl={
+        <RefreshControl
+          refreshing={isPending}
+          onRefresh={refreshUserLocation}
+        />
+      }
+    >
+      <View>
+        {busStops && Array.isArray(busStops) ? (
+          busStops.map((busStop: BusStop, index: number) => (
+            <ListItem key={index} item={busStop} />
+          ))
+        ) : (
+          <Text>{JSON.stringify(busStops)}</Text>
+        )}
+      </View>
+    </ScrollView>
+  );
+}
+
+// Get all NUS Bus Stops and its associated timings and render it.
+function NUSBusStops({ refresh }: { refresh: () => void }) {
+  const {
+    isPending,
+    error,
+    data: busStops,
+  } = useQuery({
+    queryKey: ["nusBusStops"],
+    queryFn: () =>
+      fetch(`https://nusmaps.onrender.com/nusBusStops`).then((res) =>
+        res.json()
+      ),
+  });
+
+  if (isPending)
+    return <ActivityIndicator size="large" style={{ margin: 20 }} />;
+  if (error)
+    return (
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={isPending} onRefresh={refresh} />
+        }
+      >
+        <View style={{ flex: 1, alignItems: "center", margin: 20 }}>
+          <Text>An error has occurred: {error.message}. </Text>
+          <Text>Pull down to try again.</Text>
+        </View>
+      </ScrollView>
+    );
+
+  if (busStops && Array.isArray(busStops)) {
+    busStops.forEach((busStop: BusStop) =>
+      busStop.savedBuses.forEach((bus: BusService) => {
+        bus.timings[0] = calculateMinutesDifference(bus.timings[0]);
+        bus.timings[1] = calculateMinutesDifference(bus.timings[1]);
+      })
+    );
+  }
+
+  return (
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={isPending} onRefresh={refresh} />
+      }
+    >
+      <View>
+        {busStops && Array.isArray(busStops) ? (
+          busStops.map((busStop: BusStop, index: number) => (
+            <ListItem key={index} item={busStop} />
+          ))
+        ) : (
+          <Text>{JSON.stringify(busStops)}</Text>
+        )}
+      </View>
+    </ScrollView>
+  );
+}
+
+export default function BusStopsScreen() {
+  const [refreshLocation, setRefreshLocation] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0); // State to handle the logic of rendering nearby(0) or NUS(1) bus stops.
+
+  const refetchBusStops = useCallback(() => {
+    queryClient.invalidateQueries();
+  }, [queryClient]);
+
+  const refetchUserLocation = useCallback(() => {
+    setRefreshLocation((prevKey) => prevKey + 1);
+    refetchBusStops();
+  }, [refetchBusStops]);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <View style={{ backgroundColor: "white", flex: 1 }}>
+        <SafeAreaView style={{ flex: 1 }}>
+          <BusStopSearchBar />
+          <View style={styles.segmentedControlContainer}>
+            <SegmentedControl
+              values={["Favourites", "Nearby", "NUS Bus Stops"]}
+              selectedIndex={selectedIndex}
+              onChange={(event) => {
+                setSelectedIndex(event.nativeEvent.selectedSegmentIndex);
+              }}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            {selectedIndex === 0 ? (
+              <FavouriteBusStops refresh={refetchBusStops} />
+            ) : selectedIndex === 1 ? (
+              <NearbyBusStops
+                refreshLocation={refreshLocation}
+                refreshUserLocation={refetchUserLocation}
+              />
+            ) : (
+              <NUSBusStops refresh={refetchBusStops} />
+            )}
+          </View>
+        </SafeAreaView>
+      </View>
+    </QueryClientProvider>
+  );
+}
+
 const styles = StyleSheet.create({
-  tabContent: {
-    flex: 1,
-    flexDirection: "column",
-  },
-  scrollView: {
-    flex: 1,
-    paddingLeft: 16,
-    paddingRight: 16,
-  },
-  busCard: {
-    height: 80,
-    width: 100,
+  wrap: {
     borderColor: "#ccc",
-    borderWidth: 1,
-    padding: 6,
-    marginTop: 8,
-    marginHorizontal: 8,
-    justifyContent: "flex-start",
-  },
-  busTimings: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  busTiming: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "space-between",
-  },
-  busStopCard: {
-    borderColor: "#ccc",
-    borderWidth: 1,
-    marginVertical: 8,
+    borderWidth: 0.5,
+    marginVertical: 5,
+    marginHorizontal: 14,
     borderRadius: 5,
     backgroundColor: "#fff",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 3, height: 3 },
     shadowOpacity: 0.2,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+  },
+  cardContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  image: { width: 50, height: 50, margin: 10, borderRadius: 5 },
+  textContainer: {
+    justifyContent: "space-between",
+    paddingVertical: 16,
+  },
+  busStopName: {
+    fontSize: 16,
+    fontFamily: "Inter-SemiBold",
+    paddingLeft: 14,
+    paddingBottom: 5,
+  },
+  distanceAwayText: {
+    fontSize: 12,
+    fontFamily: "Inter-Medium",
+    color: "#626262",
+    paddingLeft: 14,
+  },
+  busNumber: {
+    fontSize: 13,
+    fontFamily: "Inter-SemiBold",
+  },
+  timingText: {
+    fontSize: 13,
+    fontFamily: "Inter-Medium",
+    width: 50,
+  },
+  details: {
+    margin: 10,
+    textAlign: "right",
+  },
+  detailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+  },
+  leftContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: 16,
+  },
+  rightContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingRight: 16,
+    justifyContent: "center",
+  },
+  nusTagAndChevronContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    paddingRight: 16,
+    marginVertical: 20,
+  },
+  nusTag: {
+    backgroundColor: "#27187E",
+    alignContent: "center",
+    justifyContent: "center",
+    paddingHorizontal: 13,
+    paddingVertical: 7,
+    borderRadius: 20,
+  },
+  nusTagText: {
+    fontSize: 12,
+    fontFamily: "Inter-Bold",
+    color: "#EBF3FE",
+  },
+  chevron: {
+    width: 30,
+    height: 30,
+  },
+  segmentedControlContainer: {
+    marginVertical: 10,
+    marginHorizontal: 20,
   },
 });
