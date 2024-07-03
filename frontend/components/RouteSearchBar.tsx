@@ -18,9 +18,9 @@ interface RouteSearchBarInput {
 };
 
 //constants
-// const apiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
+const apiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
 //USE THIS FOR PRODUCTION BUILDS Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
-const apiKey = Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
+// const apiKey = Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
 //The search bar itself
 export const RouteSearchBar: React.FC<
   RouteSearchBarInput & {
@@ -60,7 +60,10 @@ export const RouteSearchBar: React.FC<
   return (
     <View>
       <GooglePlacesAutocomplete
-        placeholder="Search"
+        placeholder="Where to?"
+        textInputProps={{
+          enterKeyHint: "search"
+        }}
         onPress={(data) => {
           // 'details' is provided when fetchDetails = true
           getDestinationResult(data);
@@ -89,5 +92,9 @@ const styles = StyleSheet.create({
   googleSearchBar: {
     width: "90%",
     alignSelf: "center",
+    borderRadius: 12,
+    shadowColor: "#000000",
+    shadowOpacity: 0.2,
+    shadowOffset: {width: 1, height: 3}
   },
 });

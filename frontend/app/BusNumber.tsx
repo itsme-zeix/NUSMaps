@@ -4,14 +4,12 @@ import { View, StyleSheet, Text, Image } from "react-native";
 interface busNumberType {
     busNumber:string
     busType:string
-};
+}
 
 const BUSICON = require("../assets/images/bus-icon.png");
 export const BusNumberCard: React.FC<busNumberType> = ({busNumber, busType}) => {
     //no need to use state as busNumber won't be changed
-    console.log('bustype: ', busType);
     let busBackgroundColor = busType === "NUS_BUS" ? busBGMapping[busNumber] : styles.PUBLICBUSBG;
-    console.log("busBackgroundcolor: ", busBackgroundColor);
     return (
         <View style = {[styles.busNumberContainer, busBackgroundColor]}>
             <Image source = {BUSICON}></Image>
@@ -28,37 +26,40 @@ const styles = StyleSheet.create({
         borderRadius:5,
         marginBottom: 5,
         borderColor : "black",
-        flexDirection:"row"
+        flexDirection:"row",
+        justifyContent: "center",
+        alignItems: "center"
     },
     busNumber: {
         color: "black",
         fontSize:13
     },
     PUBLICBUSBG: {
-        backgroundColor: '#BBC34A',
+        backgroundColor: 'green',
     },
     D1: {
-        backgroundColor: 'pink'
+        backgroundColor: '#CD82E2'
     },
     D2: {
-        backgroundColor: 'purple'
+        backgroundColor: '#6F1B6F'
     },
     A1: {
-        backgroundColor: 'red'
+        backgroundColor: '#FF0000'
     },
     A2: {
-        backgroundColor: 'yellow'
+        backgroundColor: '#E4CE0C'
     },
     BTC: {
-        backgroundColor: 'orange'
+        backgroundColor: '#EE8136'
     },
     K : {
-        backgroundColor: 'blue'
+        backgroundColor: '#345A9B'
     },
     L : {
-        backgroundColor: 'grey'
+        backgroundColor: '#BFBFBF'
     }
 });
+
 const busBGMapping = {
     A1: styles.A1,
     A2: styles.A2,
