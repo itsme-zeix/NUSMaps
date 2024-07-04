@@ -8,7 +8,7 @@ const fs = require('fs');
 var router = express.Router();
 const NUSNEXTBUSCREDENTIALS = btoa(`${process.env.NUSNEXTBUS_USER}:${process.env.NUSNEXTBUS_PASSWORD}`);
 const ONEMAPAPIKEY = process.env.ONEMAPAPIKEY;
-const ONEMAPAPITOKEN = proces.env.ONEMAPAPITOKEN;
+const ONEMAPAPITOKEN = process.env.ONEMAPAPITOKEN;
 const PUBLICNUSBUSSTOPS = ["CG", "JP-SCH-16151", "RAFFLES", "MUSEUM", "YIH-OPP", "YIH", "SDE3-OPP", "UHC", "UHC-OPP", "IT", "CLB", "UHALL-OPP", "UHALL", "S17", "LT27", "KRB", "KR-MRT", "KR-MRT-OPP"];
 const TEMP_NUS_BUS_STOPS_COORDS = new Map();
 
@@ -200,6 +200,7 @@ const formatWalkLeg = (leg) => {
     endTime: leg.endTime,
     duration: leg.duration,
     walkInfo: walkInfo,
+    distance:leg.distance
   };
 };
 
@@ -300,7 +301,7 @@ const handleRouting = async (origin, destination) => {
     //can use directly as result
     console.log("code 1");
     console.log("failure here")
-    const resultPromise =  await fetch("http://0.0.0.0:3000/NUSBusRoutes", {
+    const resultPromise =  await fetch("https://test-nusmaps.onrender.com/NUSBusRoutes", {
       method: "POST",
       body: JSON.stringify({
         "origin": origin,
@@ -324,7 +325,7 @@ const handleRouting = async (origin, destination) => {
       // console.log("nus stop: ", nusStop);
       // console.log("nus stop coords: ", nusStopCoords);
       // console.log('destination:', destination);
-      const promiseFromStopToDest = fetch("http://0.0.0.0:3000/NUSBusRoutes", {
+      const promiseFromStopToDest = fetch("https://test-nusmaps.onrender.com/NUSBusRoutes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -380,7 +381,7 @@ const handleRouting = async (origin, destination) => {
     const promisesArray = [];
     for (nusStop of PUBLICNUSBUSSTOPS) {
       const nusStopCoords = TEMP_NUS_BUS_STOPS_COORDS.get(nusStop);
-      const promiseFromOriginToStop = fetch("http://0.0.0.0:3000/NUSBusRoutes", {
+      const promiseFromOriginToStop = fetch("https://test-nusmaps.onrender.com/NUSBusRoutes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

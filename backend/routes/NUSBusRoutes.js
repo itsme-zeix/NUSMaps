@@ -7,6 +7,7 @@ const NO_OF_BUS_STOPS = 14;
 const TEMP_NUS_SHUTTLES_ROUTES = new Map();
 const TEMP_NUS_BUS_STOPS_COORDS = new Map();
 const NUSNEXTBUSCREDENTIALS = btoa(`${process.env.NUSNEXTBUS_USER}:${process.env.NUSNEXTBUS_PASSWORD}`);
+
 const WALKINGROUTERURL = "http://nusmapswalkingrouter.southeastasia.cloudapp.azure.com/ors/v2/directions/foot-walking";
 
 const NUS_STOPS = [];
@@ -167,6 +168,7 @@ router.post("/", async (req, res) => {
         const formattedFinalResult = [];
         for (viableRoute of viableRoutes) {
             const busLeg = await formatIntoRoute(req.body.origin, req.body.destination, viableRoute, startTimeAtOrigin);
+            console.log('bus leg:', busLeg);
             if (busLeg !== undefined) {
                 const indexToInsert = binarySearch(formattedFinalResult, busLeg.totalTimeTaken, "totalTimeTaken");
                 formattedFinalResult.splice(indexToInsert, 0, busLeg);
@@ -360,6 +362,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
                 duration:originResult.features[0].properties.summary.duration,
                 intermediateStops:[],
                 steps: originWalkingLegSteps,
+                distance: originResult.features[0].properties.summary.distance,
                 numOfIntermediateStops:1,
             };
             const busTravelTime = route.noOfStops * 2 * 60;
@@ -407,6 +410,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
             duration:destResult.features[0].properties.summary.duration,
             intermediateStops:[],
             steps: destWalkingLegSteps,
+            distance: destResult.features[0].properties.summary.distance,
             numOfIntermediateStops:1,
         };
         // console.log(`walking route from nearest busstop, ${destinationCoords} : ${destResult}`);
