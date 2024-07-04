@@ -300,7 +300,6 @@ const handleRouting = async (origin, destination) => {
   if (isPointInNUSPolygons(originTurfPoint) && isPointInNUSPolygons(destinationTurfPoint)) {
     //can use directly as result
     console.log("code 1");
-    console.log("failure here")
     const resultPromise =  await fetch("https://nusmaps.onrender.com/NUSBusRoutes", {
       method: "POST",
       body: JSON.stringify({
