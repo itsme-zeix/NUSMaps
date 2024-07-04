@@ -5,17 +5,17 @@ import {
   GooglePlaceData,
 } from "react-native-google-places-autocomplete";
 import * as Location from "expo-location";
-import Constants  from "expo-constants";
+import Constants from "expo-constants";
 
 //interfaces
 interface Coords {
   latitude: number;
   longitude: number;
-};
+}
 
 interface RouteSearchBarInput {
   location: Location.LocationObjectCoords;
-};
+}
 
 //constants
 const apiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
@@ -62,14 +62,17 @@ export const RouteSearchBar: React.FC<
       <GooglePlacesAutocomplete
         placeholder="Where to?"
         textInputProps={{
-          enterKeyHint: "search"
+          enterKeyHint: "search",
         }}
         onPress={(data) => {
           // 'details' is provided when fetchDetails = true
           getDestinationResult(data);
         }}
         query={queryParams}
-        styles={{ textInputContainer: styles.googleSearchBar }}
+        enablePoweredByContainer={false}
+        styles={{
+          container: styles.googleSearchBar,
+        }}
       />
     </View>
   );
@@ -95,6 +98,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     shadowColor: "#000000",
     shadowOpacity: 0.2,
-    shadowOffset: {width: 1, height: 3}
+    shadowOffset: { width: 1, height: 3 },
   },
 });
