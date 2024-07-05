@@ -214,8 +214,12 @@ export const ResultScreen: React.FC<
                   <GooglePlacesAutocomplete
                     placeholder="Current location"
                     query={{ queryParams }}
+                    textInputProps={{
+                      placeholderTextColor:"#3987FF",
+                      enterKeyHint: "search"
+                    }}
                     styles={{
-                      container: styles.googleSearchBar,
+                      container: styles.topGoogleSearchBar,
                       textInputContainer: styles.googleSearchBarTextContainer,
                     }}
                   />
@@ -224,8 +228,12 @@ export const ResultScreen: React.FC<
                   <GooglePlacesAutocomplete
                     placeholder={destination.address}
                     query={{ queryParams }}
+                    textInputProps={{
+                      placeholderTextColor:"#000000",
+                      enterKeyHint: "search"
+                    }}
                     styles={{
-                      container: styles.googleSearchBar,
+                      container: styles.bottomGoogleSearchBar,
                       textInputContainer: styles.googleSearchBarTextContainer,
                     }}
                   />
@@ -253,15 +261,21 @@ export const ResultScreen: React.FC<
 //PUT a next ETA timing in the detailed screen then build
 //stylesheet
 const styles = StyleSheet.create({
-  googleSearchBar: {
-    marginTop: 5,
-    marginBottom: 5,
-    paddingTop: 5,
-    paddingBottom: 5,
-    width: "100%",
+  topGoogleSearchBar: {
+    marginTop: "5%",
+    width: "99%",
     borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "#828282",
+    shadowColor: "#000000",
+    shadowOpacity: 0.2,
+    shadowOffset: {width: 1, height: 3},
+  },
+  bottomGoogleSearchBar: {
+    paddingTop: 5,
+    width: "99%",
+    borderRadius: 12,
+    shadowColor: "#000000",
+    shadowOpacity: 0.2,
+    shadowOffset: {width: 1, height: 3},
   },
   googleSearchBarTextContainer: {
     textAlign: "center",
