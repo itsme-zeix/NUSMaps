@@ -302,6 +302,9 @@ const handleRouting = async (origin, destination) => {
     console.log("code 1");
     const resultPromise =  await fetch("https://nusmaps.onrender.com/NUSBusRoutes", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         "origin": origin,
         "destination" : destination
