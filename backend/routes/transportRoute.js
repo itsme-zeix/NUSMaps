@@ -7,6 +7,8 @@ const fs = require('fs');
 
 var router = express.Router();
 const NUSNEXTBUSCREDENTIALS = btoa(`${process.env.NUSNEXTBUS_USER}:${process.env.NUSNEXTBUS_PASSWORD}`);
+const ONEMAPAPIKEY = process.env.ONEMAPAPIKEY;
+const ONEMAPAPITOKEN = process.env.ONEMAPAPITOKEN;
 const PUBLICNUSBUSSTOPS = ["CG", "JP-SCH-16151", "RAFFLES", "MUSEUM", "YIH-OPP", "YIH", "SDE3-OPP", "UHC", "UHC-OPP", "IT", "CLB", "UHALL-OPP", "UHALL", "S17", "LT27", "KRB", "KR-MRT", "KR-MRT-OPP"];
 const TEMP_NUS_BUS_STOPS_COORDS = new Map();
 
@@ -101,8 +103,7 @@ async function _processData(response) {
   
   */
   // console.log("response: ", response);
-  // console.log("response plan: ", response.plan);
-  console.log(response.plan);
+  console.log("response plan: ", response.plan);
   const bestPaths = response.plan.itineraries;
   const baseCardResultsDataStorage = [];
   // console.log("best paths: ", JSON.stringify(bestPaths));
@@ -112,7 +113,6 @@ async function _processData(response) {
     // Only way to not use 'any' type here is to define an interface for the const routes (the json reply above)
     // console.log('current path: ', currPath);
     const [typesArr,leftSideTiming, rightSideTiming, formattedLegArray, combinedRouteGeometry, stopsCoordsArray] = _processItinerary(currPath);
-    // console.log("stopsCoordsArray", stopsCoordsArray);
 
     baseCardResultsDataStorage.push({
       types: typesArr,
@@ -200,6 +200,7 @@ const formatWalkLeg = (leg) => {
     endTime: leg.endTime,
     duration: leg.duration,
     walkInfo: walkInfo,
+    distance:leg.distance
   };
 };
 
@@ -285,31 +286,29 @@ const _sortBasedOnTotalDuration = (firstPlan, secondPlan) => {
 };
 
 const handleRouting = async (origin, destination) => {
+  //error lies here, undefined
   //ALWAYS add this to results returned by onemap and compare
-  console.log("code 1");
   const dateObject = new Date();
   await populateNusStops();
   const originTurfPoint = turf.point([origin.latitude, origin.longitude]);
   const destinationTurfPoint = turf.point([destination.latitude, destination.longitude]);
   const headers = {
-    Authorization: process.env.ONEMAPAPIKEY
+    Authorization: ONEMAPAPIKEY
   };
   // console.log("origin: ", origin);
   // console.log("destination: ", destination);
   if (isPointInNUSPolygons(originTurfPoint) && isPointInNUSPolygons(destinationTurfPoint)) {
     //can use directly as result
+    console.log("code 1");
     const resultPromise =  await fetch("https://nusmaps.onrender.com/NUSBusRoutes", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
       body: JSON.stringify({
         "origin": origin,
         "destination" : destination
       })
     }); //shows top 3 results 
+    console.log("result:", resultPromise);
     const result = await resultPromise.json();
-    // console.log("result:", result);
     return {
       status: 200,
       message: "both points lie inside NUS",
@@ -397,7 +396,7 @@ const handleRouting = async (origin, destination) => {
         `https://www.onemap.gov.sg/api/public/routingsvc/route?start=${nusStopCoords.latitude},${nusStopCoords.longitude}&end=${destination.latitude},${destination.longitude}&routeType=pt&date=${date}&time=${time}&mode=TRANSIT&maxWalkDistance=1000&numItineraries=1`
       );
       const headers = {
-        Authorization: process.env.ONEMAPAPIKEY
+        Authorization: ONEMAPAPIKEY
       };
       const promiseFromStopToDest = fetch(routesUrl, {
         method: "GET",
@@ -466,7 +465,7 @@ router.post("/", async (req, res) => {
     auth_token = req.headers['authorization'];
     let origin;
     let destination;
-    if (auth_token === process.env.ONEMAPAPITOKEN) {
+    if (auth_token === ONEMAPAPITOKEN) {
       origin = req.body.origin;
       destination = req.body.destination;
       let date = format(dateObject, "MM-dd-yyyy");
@@ -476,7 +475,7 @@ router.post("/", async (req, res) => {
       );
       // console.log("routes url:", routesUrl);
       const headers = {
-        Authorization: process.env.ONEMAPAPIKEY
+        Authorization: ONEMAPAPIKEY
       };
       try {
         const response = fetch(routesUrl, {
@@ -488,14 +487,14 @@ router.post("/", async (req, res) => {
         // console.log("response route: ", route);
         const nusResultPromise = handleRouting(origin, destination); //this will decide the course of action
         // console.log('nus result promise: ', nusResultPromise);
-        const result = await _processData(route);
         const nusResult = await nusResultPromise;
+        const result = await _processData(route);
+        // console.log('error here?')
         // console.log("nus result body: ", JSON.stringify(nusResult));
         if (nusResult.status === 200 || nusResult.status === 201 || nusResult.status === 202) {
           const addedLeg = _addAlternativeRoutesToOneMap(route, nusResult);
-          // console.log('added leg: ', JSON.stringify(addedLeg));
           const finalCombinedResult = await _processData(addedLeg);
-      
+          
           return res.json(finalCombinedResult);
         } else {
           return res.json(result);
