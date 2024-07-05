@@ -274,7 +274,7 @@ const useUserLocation = (refreshLocation: number) => {
 const queryClient = new QueryClient();
 
 async function fetchBusArrivalTimes(busStops: any) {
-  const response = await fetch("http://localhost:3000/busArrivalTimes", {
+  const response = await fetch("https://nusmaps.onrender.com/busArrivalTimes", {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -314,14 +314,16 @@ function FavouriteBusStops({ refresh }: { refresh: () => void }) {
     }
   }, [favouriteBusStops, dataMutated, mutate]);
 
-  // Ensure re-render by setting state properly
+  // Ensure re-render by setting state properly & calculate minutes from ISOTime
   useEffect(() => {
     if (dataMutated) {
       setBusStops((prevBusStops) => {
         return prevBusStops.map((busStop) => {
           const updatedBuses = busStop.savedBuses.map((bus) => ({
             ...bus,
-            timings: bus.timings.map((timing) => calculateMinutesDifference(timing)),
+            timings: bus.timings.map((timing) =>
+              calculateMinutesDifference(timing)
+            ),
           }));
           return { ...busStop, savedBuses: updatedBuses };
         });
@@ -380,6 +382,7 @@ function NearbyBusStops({
     data: busStops,
   } = useQuery({
     queryKey: ["busStopsByLocation"],
+    staleTime: 30000, // 30 seconds
     queryFn: () =>
       fetch(
         `https://nusmaps.onrender.com/busStopsByLocation?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}`
@@ -442,6 +445,7 @@ function NUSBusStops({ refresh }: { refresh: () => void }) {
     data: busStops,
   } = useQuery({
     queryKey: ["nusBusStops"],
+    staleTime: 30000, // 30 seconds
     queryFn: () =>
       fetch(`https://nusmaps.onrender.com/nusBusStops`).then((res) =>
         res.json()
@@ -496,14 +500,18 @@ export default function BusStopsScreen() {
   const [refreshLocation, setRefreshLocation] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(0); // State to handle the logic of rendering nearby(0) or NUS(1) bus stops.
 
-  const refetchBusStops = useCallback(() => {
-    queryClient.invalidateQueries();
+  const refetchFavouriteBusStops = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["favouriteBusStops"] });
+  }, [queryClient]);
+
+  const refetchNUSBusStops = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["nusBusStops"] });
   }, [queryClient]);
 
   const refetchUserLocation = useCallback(() => {
     setRefreshLocation((prevKey) => prevKey + 1);
-    refetchBusStops();
-  }, [refetchBusStops]);
+    queryClient.invalidateQueries({ queryKey: ["busStopsByLocation"] });
+  }, [queryClient]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -517,18 +525,23 @@ export default function BusStopsScreen() {
               onChange={(event) => {
                 setSelectedIndex(event.nativeEvent.selectedSegmentIndex);
               }}
+              appearance={"light"}
+              style={{
+                height: 45,
+                width: "93%",
+              }}
             />
           </View>
           <View style={{ flex: 1 }}>
             {selectedIndex === 0 ? (
-              <FavouriteBusStops refresh={refetchBusStops} />
+              <FavouriteBusStops refresh={refetchFavouriteBusStops} />
             ) : selectedIndex === 1 ? (
               <NearbyBusStops
                 refreshLocation={refreshLocation}
                 refreshUserLocation={refetchUserLocation}
               />
             ) : (
-              <NUSBusStops refresh={refetchBusStops} />
+              <NUSBusStops refresh={refetchNUSBusStops} />
             )}
           </View>
         </SafeAreaView>
@@ -624,7 +637,9 @@ const styles = StyleSheet.create({
     height: 30,
   },
   segmentedControlContainer: {
-    marginVertical: 10,
-    marginHorizontal: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    marginBottom: 12,
   },
 });
