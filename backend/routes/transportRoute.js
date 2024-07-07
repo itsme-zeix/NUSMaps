@@ -290,6 +290,8 @@ const handleRouting = async (origin, destination) => {
   //ALWAYS add this to results returned by onemap and compare
   const dateObject = new Date();
   await populateNusStops();
+  console.log('origin received: ', origin);
+  console.log('destination received: ', destination);
   const originTurfPoint = turf.point([origin.latitude, origin.longitude]);
   const destinationTurfPoint = turf.point([destination.latitude, destination.longitude]);
   const headers = {
