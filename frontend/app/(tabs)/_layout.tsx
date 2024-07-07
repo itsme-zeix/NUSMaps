@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-
+import { createStackNavigator } from '@react-navigation/stack';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -24,7 +24,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="routefinding"
+        name="routefindingScreens"
         options={{
           title: 'Search Route',
           tabBarIcon: ({ color, focused }) => (
@@ -44,3 +44,18 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+{/* <Tabs.Screen
+  name="RefactoredResultsScreen"
+  options={{
+    title: 'Results',
+    tabBarButton: () => null,
+  }}
+/>
+ <Tabs.Screen
+  name="DetailedRouteScreen"
+  options={{
+    title: 'Detailed',
+    tabBarButton: () => null,
+  }}
+/> */}
