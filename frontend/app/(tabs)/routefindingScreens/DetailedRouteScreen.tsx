@@ -19,7 +19,7 @@ import MapView, {
 } from "react-native-maps";
 import { SubwayTypeCard } from "@/app/SubwayType";
 import { BusNumberCard } from "@/app/BusNumber";
-import { TramTypeCard } from "../../TramNumber";
+import { TramTypeCard } from "@/app/TramNumber";
 import { useLocalSearchParams } from "expo-router";
 
 interface LegBase {
