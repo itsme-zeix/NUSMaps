@@ -44,18 +44,3 @@ export default function TabLayout() {
     </Tabs>
   );
 }
-
-{/* <Tabs.Screen
-  name="RefactoredResultsScreen"
-  options={{
-    title: 'Results',
-    tabBarButton: () => null,
-  }}
-/>
- <Tabs.Screen
-  name="DetailedRouteScreen"
-  options={{
-    title: 'Detailed',
-    tabBarButton: () => null,
-  }}
-/> */}
