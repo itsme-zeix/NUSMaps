@@ -181,8 +181,8 @@ const ListItem = ({ item }: { item: BusStop }) => {
             <Image
               source={
                 expanded
-                  ? require("../../assets/images/chevron_up_blue_icon.png")
-                  : require("../../assets/images/chevron_down_blue_icon.png")
+                  ? require("@/assets/images/chevron_up_blue_icon.png")
+                  : require("@/assets/images/chevron_down_blue_icon.png")
               }
               style={styles.chevron}
             />

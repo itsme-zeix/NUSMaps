@@ -1,42 +1,48 @@
 import React, { useState } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  TextInput,
-} from "react-native";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import BusStopsSearchBarResultScreen from "./BusStopSearchResultsScreen";
+import { createStackNavigator } from "@react-navigation/stack";
 
 export default function BusStopSearchBar() {
-  const [Query, setQuery] = useState("");
+  const [query, setQuery] = useState("");
+  const [showResults, setShowResults] = useState(false);
 
   const handlePress = () => {
-    console.log("Search bar pressed (to expand)");
+    setShowResults(true);
   };
+
   return (
-    <Pressable
-      onPress={handlePress}
-      style={({ pressed }) => [
-        {
-          backgroundColor: pressed ? "rgb(210, 230, 255)" : "white",
-        },
-        styles.wrapperCustom,
-      ]}
-    >
-      {/* {({ pressed }) => (
-        <Text style={styles.text}>{pressed ? "Pressed!" : "Press Me"}</Text>
-      )} */}
-      <TextInput
-        placeholder="Press me"
-        onChangeText={(newText) => {
-          setQuery(newText);
-          console.log(newText);
-        }}
-        defaultValue={Query}
-      />
-    </Pressable>
+    <View style={styles.container}>
+      <Pressable
+        onPress={handlePress}
+        style={({ pressed }) => [
+          {
+            backgroundColor: pressed ? "rgb(210, 230, 255)" : "white",
+          },
+          styles.wrapperCustom,
+        ]}
+      >
+        <TextInput
+          placeholder="Press me"
+          onChangeText={(newText) => {
+            setQuery(newText);
+            console.log(newText);
+          }}
+          value={query}
+        />
+      </Pressable>
+      {showResults && (
+        <BusStopsSearchBarResultScreen
+          initialQuery={query}
+          onClose={() => setShowResults(false)}
+        />
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {},
   text: {
     fontSize: 14,
     color: "#828282",
