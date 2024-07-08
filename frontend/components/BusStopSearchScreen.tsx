@@ -114,7 +114,7 @@ const BusStopSearchScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={{ marginHorizontal: 10 }}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
-          <Ionicons name="search" size={20} color="gray" />
+          <Text>Close</Text>
         </TouchableOpacity>
         <SearchBar
           placeholder="Search"
