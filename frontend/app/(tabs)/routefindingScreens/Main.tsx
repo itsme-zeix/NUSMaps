@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, BackHandler } from "react-native";
 import MapView, {
   PROVIDER_GOOGLE,
   Marker,
@@ -9,9 +9,9 @@ import MapView, {
 import * as Location from "expo-location";
 import { RouteSearchBar } from "@/components/RouteSearchBar";
 import Toast from "react-native-toast-message";
-import { ResultScreen } from "@/components/ResultsScreen";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { GooglePlaceData } from "react-native-google-places-autocomplete";
+import { useRouter, useSegments } from "expo-router";
 import Constants from "expo-constants";
 
 //interface and types
@@ -20,11 +20,13 @@ interface LegBase {
   //base template for the info that is displayed in the leg
   type: string;
 }
+
 interface WalkLeg extends LegBase {
   walkInfo: {
-    distance: string;
+    distance: number;
     direction: string;
   }[];
+  distance: number;
 }
 
 interface PublicTransportLeg extends LegBase {
@@ -62,8 +64,12 @@ const oneMapsAPIToken = process.env.EXPO_PUBLIC_ONEMAPAPITOKEN;
 // const mapsApiKey = Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
 // const oneMapsAPIToken = Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN;
 //exporter
+
+
 export default function App() {
   //hooks
+  const router = useRouter();
+  const segments = useSegments();
   const [currentLocation, setCurrentLocation] =
     useState<Location.LocationObjectCoords>({
       latitude: 1.3521,
@@ -182,6 +188,7 @@ export default function App() {
   useEffect(() => {
     //function that is executed when destination is changed (a new search result is attained)
     if (isNotInitialExec.current && destination !== DEFAULTDESTINATIONLatLng) {
+      console.log("new destination: ", destination);
       fetchBestRoute(
         {
           latitude: currentLocation.latitude,
@@ -269,9 +276,26 @@ export default function App() {
     }
   }
 
-  async function fetchBestRoute(origin: LatLng, destination: LatLng) {
+  // useEffect( ()=> {
+  //   if (isNotInitialExec.current) {
+  //     router.push({
+  //       pathname: '/RefactoredResultsScreen',
+  //       params: {
+  //         //103.77267902999861,1.29725805425906
+  //         origin: JSON.stringify({longitude:103.77267902999861, latitude: 1.29725805425906}),
+  //         destination: JSON.stringify(destination),
+  //         baseResultsData: JSON.stringify({baseResultsCardData})
+  //       }
+  //     })
+  //   }
+  // }, [baseResultsCardData]);
+
+  async function fetchBestRoute(
+    originCoords: LatLng,
+    destinationCoords: LatLng
+  ) {
     //fetches best route between two points, can pass a check to see if
-    // const {data, error, isLoading} = useQuery({queryKey:['routeData', origin, destination], queryFn:() => fetchRoutesFromServer(origin, destination)});
+    // const {data, error, isLoading} = useQuery({queryKey:['routeData', originCoords, destinationCoords], queryFn:() => fetchRoutesFromServer(origin, destination)});
     // if (isLoading) {
     // console.log("loading...");
     // };
@@ -282,9 +306,22 @@ export default function App() {
     // }
     //issue: Timing issue +
     try {
-      const result = await fetchRoutesFromServer(origin, destination);
+      const result = await fetchRoutesFromServer(
+        originCoords,
+        destinationCoords
+      );
       console.log("finally", result);
       setbaseResultsCardData(result);
+      console.log("data: ", baseResultsCardData);
+      console.log('Current path:', segments.join('/'));
+      router.push({
+        pathname: "../routefindingScreens/ResultsScreen",
+        params: {
+          origin: JSON.stringify(originCoords),
+          destination: JSON.stringify(destination),
+          baseResultsData: JSON.stringify(result),
+        },
+      });
     } catch (error) {
       console.error("parsing error: ", error);
       setRouteErrorMsg("service not available, please try again");
@@ -311,16 +348,6 @@ export default function App() {
               getDestinationResult={getDestinationResult}
             />
           </View>
-          <ResultScreen
-            origin={{
-              latitude: currentLocation.latitude,
-              longitude: currentLocation.longitude,
-            }}
-            destination={destination}
-            baseResultsData={baseResultsCardData}
-            isVisible={isResultAttained}
-            setIsVisible={setisResultAttained}
-          />
         </View>
       </View>
     </GestureHandlerRootView>

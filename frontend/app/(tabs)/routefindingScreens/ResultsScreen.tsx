@@ -13,11 +13,10 @@ import {
 import { ImageSourcePropType } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { LatLng } from "react-native-maps";
-import Modal from "react-native-modal";
 import Constants from "expo-constants";
 import { SubwayTypeCard } from "@/app/SubwayType";
 import { BusNumberCard } from "@/app/BusNumber";
-import { Link } from "expo-router";
+import { useRouter, useLocalSearchParams, useSegments } from "expo-router";
 import { TramTypeCard } from "@/app/TramNumber";
 
 //interfaces and types
@@ -33,10 +32,11 @@ interface LegBase {
 
 interface WalkLeg extends LegBase {
   walkInfo: {
-    distance: string;
+    distance: number;
     direction: string;
   }[];
-};
+  distance:number;
+}
 
 interface PublicTransportLeg extends LegBase {
   //used to display the routes info
@@ -85,15 +85,17 @@ interface IconCatalog {
 
 //stores the paths of the chevrons
 const iconList: IconCatalog = {
-  WALK: require("../assets/images/walk-icon.png"),
-  SUBWAY: require("../assets/images/subway-icon.png"),
-  BUS: require("../assets/images/bus-icon.png"),
-  TRAM: require("../assets/images/tram-icon.png"),
-  RCHEVRON: require(`../assets/images/chevron_right-icon.png`),
-  NUS_BUS: require("../assets/images/bus-icon.png"),
+  WALK: require("@/assets/images/walk-icon.png"),
+  SUBWAY: require("@/assets/images/subway-icon.png"),
+  BUS: require("@/assets/images/bus-icon.png"),
+  TRAM: require("@/assets/images/tram-icon.png"),
+  RCHEVRON: require(`@/assets/images/chevron_right-icon.png`),
+  NUS_BUS: require("@/assets/images/bus-icon.png"),
 };
 
 //constant variables
+// const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY;
+//USE THIS FOR PRODUCTION BUILDS
 const apiKey = Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
 
 //result card(singular card)
@@ -107,20 +109,21 @@ const ResultCard: React.FC<SingleResultCardData> = ({
   const types = resultData.types.flatMap((icon) => [icon, "RCHEVRON"]);
   types.splice(types.length - 1, 1); // remove the last chevron
   console.log(types);
+  const router = useRouter();
+  const segments = useSegments();
+  console.log("curr path: ", segments.join("/"));
+  const nextScreenFunc = () => {
+    router.push({
+    pathname: "../routefindingScreens/DetailedRouteScreen",
+    params: {
+      origin: JSON.stringify(origin),
+      destination: JSON.stringify(destination),
+      baseResultsCardData: JSON.stringify(resultData),
+    },
+  })
+  };
   return (
-    <Link
-      href={{
-        pathname: "/DetailedRouteScreen",
-        params: {
-          baseResultsCardData: JSON.stringify(resultData),
-          destination: JSON.stringify(destination),
-          origin: JSON.stringify(origin),
-        },
-      }}
-      asChild
-      style={styles.resultCard}
-    >
-      <Pressable style={{ backgroundColor: "grey" }}>
+      <Pressable style={[{ backgroundColor: "grey" }, styles.resultCard]} onPress = {nextScreenFunc}>
         <View>
           <View style={styles.icons}>
             {types.map((icon, index) => {
@@ -176,37 +179,36 @@ const ResultCard: React.FC<SingleResultCardData> = ({
           <Text style={styles.travelDuration}>{resultData.journeyTiming}</Text>
         </View>
       </Pressable>
-    </Link>
   );
 };
 
+//   ResultObject & {
+//     isVisible: boolean;
+//     setIsVisible: (isVisible: boolean) => void;
+//   }
 // result screen
-export const ResultScreen: React.FC<
-  ResultObject & {
-    isVisible: boolean;
-    setIsVisible: (isVisible: boolean) => void;
-  }
-> = ({ origin, destination, baseResultsData, isVisible, setIsVisible }) => {
+const _parseParams = (result : string | string[] | undefined) => {
+    return typeof(result) === 'string' ? JSON.parse(result) : undefined;
+};
+
+const RefactoredResultsScreen: React.FC = () => {
+  const {origin, destination, baseResultsData} = useLocalSearchParams();
   const queryParams = {
     key: apiKey,
     language: "en",
     radius: 5000,
     components: "country:sg",
   };
-  console.log("base result cards data:", JSON.stringify(baseResultsData));
-  if (isVisible) {
-    return (
-      <SafeAreaView style={{ flex: 1 }}>
-          <Modal
-            isVisible={isVisible}
-            animationInTiming={200}
-            onBackdropPress={() => setIsVisible(false)}
-            onBackButtonPress={() => setIsVisible(false)}
-            hideModalContentWhileAnimating={true}
-            backdropOpacity={1}
-            backdropColor="white"
-            >
-            <ScrollView>
+  console.log("base result cards data:", baseResultsData);
+  const parsedOrigin = _parseParams(origin);
+  const parsedDestination = _parseParams(destination);
+  const parsedBaseResultsData = _parseParams(baseResultsData);
+  console.log('dest', parsedDestination);
+  if (parsedOrigin && parsedDestination && parsedBaseResultsData) {
+      const typeCastedBaseResultsCard: baseResultsCardType[] = parsedBaseResultsData;
+      return (
+          <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView style={{backgroundColor:"white"}}>
             <View style={{ flex: 1 }}>
               <StatusBar></StatusBar>
               <View style={styles.doubleSearchBarsContainer}>
@@ -215,56 +217,53 @@ export const ResultScreen: React.FC<
                     placeholder="Current location"
                     query={{ queryParams }}
                     textInputProps={{
-                      placeholderTextColor:"#3987FF",
-                      enterKeyHint: "search"
+                        placeholderTextColor:"#3987FF",
+                        enterKeyHint: "search"
                     }}
                     styles={{
-                      container: styles.topGoogleSearchBar,
-                      textInputContainer: styles.googleSearchBarTextContainer,
+                        container: styles.topGoogleSearchBar,
+                        textInputContainer: styles.googleSearchBarTextContainer,
                     }}
-                  />
+                    />
                 </View>
                 <View style={{ flex: 1, alignItems: "center" }}>
                   <GooglePlacesAutocomplete
-                    placeholder={destination.address}
+                    placeholder={parsedDestination.address}
                     query={{ queryParams }}
                     textInputProps={{
-                      placeholderTextColor:"#000000",
-                      enterKeyHint: "search"
+                        placeholderTextColor:"#000000",
+                        enterKeyHint: "search"
                     }}
                     styles={{
-                      container: styles.bottomGoogleSearchBar,
-                      textInputContainer: styles.googleSearchBarTextContainer,
+                        container: styles.bottomGoogleSearchBar,
+                        textInputContainer: styles.googleSearchBarTextContainer,
                     }}
-                  />
+                    />
                 </View>
               </View>
               <View style={styles.resultContainer}>
-                {baseResultsData.map((data, index) => (
+                {typeCastedBaseResultsCard.map((data, index) => (
                   <ResultCard
-                    key={index}
-                    origin={origin}
-                    resultData={data}
-                    destination={destination}
+                  key={index}
+                  origin={parsedOrigin}
+                  resultData={data}
+                  destination={parsedDestination}
                   />
                 ))}
               </View>
             </View>
         </ScrollView>
-          </Modal>
       </SafeAreaView>
     );
-  } else {
-    return;
-  }
+    };   
 };
 //PUT a next ETA timing in the detailed screen then build
 //stylesheet
 const styles = StyleSheet.create({
-  topGoogleSearchBar: {
-    marginTop: "5%",
-    width: "99%",
-    borderRadius: 12,
+    topGoogleSearchBar: {
+        marginTop: "5%",
+        width: "99%",
+        borderRadius: 12,
     shadowColor: "#000000",
     shadowOpacity: 0.2,
     shadowOffset: {width: 1, height: 3},
@@ -320,3 +319,4 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
+export default RefactoredResultsScreen;

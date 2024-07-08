@@ -19,7 +19,7 @@ import MapView, {
 } from "react-native-maps";
 import { SubwayTypeCard } from "@/app/SubwayType";
 import { BusNumberCard } from "@/app/BusNumber";
-import { TramTypeCard } from "./TramNumber";
+import { TramTypeCard } from "@/app/TramNumber";
 import { useLocalSearchParams } from "expo-router";
 
 interface LegBase {
@@ -35,6 +35,7 @@ interface WalkLeg extends LegBase {
     distance: number;
     direction: string;
   }[];
+  distance:number;
 }
 
 type destinationType = {
@@ -81,14 +82,14 @@ interface IconCatalog {
 }
 
 const iconList: IconCatalog = {
-  WALK: require("../assets/images/walk-icon.png"),
-  SUBWAY: require("../assets/images/subway-icon.png"),
-  BUS: require("../assets/images/bus-icon.png"),
-  TRAM: require("../assets/images/tram-icon.png"),
-  RCHEVRON: require(`../assets/images/chevron_right-icon.png`),
-  MARKER: require("../assets/images/location-icon.png"),
-  FLAG: require("../assets/images/finishFlag-icon.png"),
-  STOPCIRCULARMARKER: require("../assets/images/mapCircle-icon.png")
+  WALK: require("@/assets/images/walk-icon.png"),
+  SUBWAY: require("@/assets/images/subway-icon.png"),
+  BUS: require("@/assets/images/bus-icon.png"),
+  TRAM: require("@/assets/images/tram-icon.png"),
+  RCHEVRON: require(`@/assets/images/chevron_right-icon.png`),
+  MARKER: require("@/assets/images/location-icon.png"),
+  FLAG: require("@/assets/images/finishFlag-icon.png"),
+  STOPCIRCULARMARKER: require("@/assets/images/mapCircle-icon.png")
 };
 
 interface PublicTransportLegProps {
@@ -100,7 +101,6 @@ interface WalkLegProps {
 }
 
 const polyline = require("@mapbox/polyline");
-const { format } = require('date-fns');
 
 const OriginRectangle: React.FC = () => {
   return (
@@ -136,9 +136,9 @@ const LegRectangle: React.FC = () => {
   );
 };
 const formatIntoMinutesAndSeconds = (timingInSeconds:number) => {
-  const seconds = timingInSeconds % 60;
-  const minutes  = Math.floor(timingInSeconds / 60);
-  if (minutes !== 0) {
+  const seconds = (timingInSeconds % 60).toFixed(0);
+  const minutes  = Math.floor(timingInSeconds / 60).toFixed(0);
+  if (minutes !== '0') {
     return `${minutes} minutes, ${seconds} seconds`;
   };
   return `${seconds} seconds`;
@@ -193,20 +193,16 @@ const PublicTransportLegPart: React.FC<PublicTransportLegProps> = ({
 
 const WalkLegPart: React.FC<WalkLegProps> = ({ walkLeg }) => {
   //TO-DO: Add details on turns
-  const totalDistance = walkLeg.walkInfo.reduce(
-    (sum, curr) => sum + curr.distance,
-    0
-  );
   return (
     <View>
       <Pressable onPress={() => console.log("Route pressed!")}>
-        <Text>Walk for {totalDistance}m ({formatIntoMinutesAndSeconds(walkLeg.duration)})</Text>
+        <Text>Walk for {walkLeg.distance}m ({formatIntoMinutesAndSeconds(walkLeg.duration)})</Text>
       </Pressable>
     </View>
   );
 };
 
-const DetailedRoutingScreen: React.FC<
+const DetailedRouteScreen: React.FC<
   baseResultsCardType & destinationType & LatLng
 > = () => {
   //add a base current location and end flag
@@ -351,4 +347,4 @@ const stylesheet = StyleSheet.create({
   },
 });
 
-export default DetailedRoutingScreen;
+export default DetailedRouteScreen;
