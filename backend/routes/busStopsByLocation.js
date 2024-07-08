@@ -223,6 +223,8 @@ async function getArrivalTime(busStopsArray) {
             // though that will require some gymnastics with inserting the timings (need to match serviceNo etc).
             // Also, if we simply call the API by bus stop id, certain bus services will be missing because the api only responses for certain bus stops.
             await (async (stopId, serviceNo) => {
+              console.log("bus service no: ", serviceNo);
+              console.log("stop id no: ", stopId);
               try {
                 const response = await fetch(
                   `http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=${stopId}&ServiceNo=${serviceNo}`,
