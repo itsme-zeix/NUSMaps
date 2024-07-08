@@ -1,52 +1,44 @@
-import React, { useState } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  TextInput,
-} from "react-native";
+// src/components/BusStopSearchBar.tsx
+import React from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 export default function BusStopSearchBar() {
-  const [Query, setQuery] = useState("");
+  const navigation = useNavigation();
 
   const handlePress = () => {
-    console.log("Search bar pressed (to expand)");
+    navigation.navigate("BusStopSearchScreen", { initialQuery: "" });
   };
+
   return (
-    <Pressable
-      onPress={handlePress}
-      style={({ pressed }) => [
-        {
-          backgroundColor: pressed ? "rgb(210, 230, 255)" : "white",
-        },
-        styles.wrapperCustom,
-      ]}
-    >
-      {/* {({ pressed }) => (
-        <Text style={styles.text}>{pressed ? "Pressed!" : "Press Me"}</Text>
-      )} */}
-      <TextInput
-        placeholder="Press me"
-        onChangeText={(newText) => {
-          setQuery(newText);
-          console.log(newText);
-        }}
-        defaultValue={Query}
-      />
-    </Pressable>
+    <View style={styles.container}>
+      <Pressable onPress={handlePress} style={styles.searchBar}>
+        {<Ionicons name="search" size={20} color="gray" />}
+        <Text style={styles.buttonText}>Search</Text>
+      </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  text: {
-    fontSize: 14,
-    color: "#828282",
+  container: {
+    alignItems: "center",
+    justifyContent: "center",
   },
-  wrapperCustom: {
-    borderRadius: 12,
-    padding: 13,
-    margin: 16,
+  searchBar: {
+    width: "93%",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginVertical: 16,
     textAlign: "center",
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "#828282",
+    backgroundColor: "#EBEBEC",
+    flexDirection: "row"
+  },
+  buttonText: {
+    fontSize: 16,
+    color: "#909095",
+    paddingLeft: 8,
   },
 });
