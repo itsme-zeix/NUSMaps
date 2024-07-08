@@ -30,13 +30,6 @@ const BusStopSearchScreen = () => {
       try {
         const storedData = await AsyncStorage.getItem("busStops");
         let parsedData = storedData ? JSON.parse(storedData) : [];
-        
-        // Initialize isFavourited property if not present
-        parsedData = parsedData.map((item) => ({
-          ...item,
-          isFavourited: item.isFavourited || false,
-        }));
-
         setData(parsedData);
         setFilteredData(parsedData.slice(0, ITEMS_PER_PAGE)); // Load the first page
       } catch (error) {
