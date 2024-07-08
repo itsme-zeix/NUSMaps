@@ -2,6 +2,7 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 export default function BusStopSearchBar() {
   const navigation = useNavigation();
@@ -12,15 +13,8 @@ export default function BusStopSearchBar() {
 
   return (
     <View style={styles.container}>
-      <Pressable
-        onPress={handlePress}
-        style={({ pressed }) => [
-          {
-            backgroundColor: pressed ? "rgb(210, 230, 255)" : "white",
-          },
-          styles.searchBar,
-        ]}
-      >
+      <Pressable onPress={handlePress} style={styles.searchBar}>
+        {<Ionicons name="search" size={20} color="gray" />}
         <Text style={styles.buttonText}>Search</Text>
       </Pressable>
     </View>
@@ -40,9 +34,11 @@ const styles = StyleSheet.create({
     marginVertical: 16,
     textAlign: "center",
     backgroundColor: "#EBEBEC",
+    flexDirection: "row"
   },
   buttonText: {
     fontSize: 16,
     color: "#909095",
+    paddingLeft: 8,
   },
 });
