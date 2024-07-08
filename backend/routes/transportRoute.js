@@ -289,6 +289,8 @@ const handleRouting = async (origin, destination) => {
   //error lies here, undefined
   //ALWAYS add this to results returned by onemap and compare
   const dateObject = new Date();
+  console.log('origin received: ', origin);
+  console.log('destination received: ', destination);
   await populateNusStops();
   const originTurfPoint = turf.point([origin.latitude, origin.longitude]);
   const destinationTurfPoint = turf.point([destination.latitude, destination.longitude]);
@@ -466,10 +468,12 @@ const _addAlternativeRoutesToOneMap = (oneMapRoute, nusResult) => {
 router.post("/", async (req, res) => {
     const dateObject = new Date();
     auth_token = req.headers['authorization'];
+    console.log('reciived');
     let origin;
     let destination;
     if (auth_token === ONEMAPAPITOKEN) {
       origin = req.body.origin;
+      console.log('origin: ', origin);
       destination = req.body.destination;
       let date = format(dateObject, "MM-dd-yyyy");
       let time = format(dateObject, "HH:MM:SS");

@@ -274,7 +274,8 @@ const useUserLocation = (refreshLocation: number) => {
 const queryClient = new QueryClient();
 
 async function fetchBusArrivalTimes(busStops: any) {
-  const response = await fetch("https://nusmaps.onrender.com/busArrivalTimes", {
+  console.log("fetched bus stops: ", busStops);
+  const response = await fetch("https://test-nusmaps.onrender.com/busArrivalTimes", {
     method: "POST",
     headers: {
       Accept: "application/json",

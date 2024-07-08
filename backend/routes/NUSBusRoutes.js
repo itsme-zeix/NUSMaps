@@ -1,8 +1,9 @@
+require('module-alias/register');
 const express = require("express");
 const polyline = require("@mapbox/polyline");
 const router = express.Router();
 const fs = require('fs');
-
+const path = require("path");
 const NO_OF_BUS_STOPS = 14;
 const TEMP_NUS_SHUTTLES_ROUTES = new Map();
 const TEMP_NUS_BUS_STOPS_COORDS = new Map();
@@ -105,7 +106,8 @@ const _getEncodedPolyLine = (originStopIndex, destStopIndex, service) => {
     originStopCheckpointId = TEMP_SERVICE_CHECKPOINT_BUS_STOP_MAP[service][originStopIndex];
     destStopCheckpointId = TEMP_SERVICE_CHECKPOINT_BUS_STOP_MAP[service][destStopIndex];
     try {
-        const data = fs.readFileSync(`./routes/${service}CheckPointsCorrected.json`, 'utf-8');
+        const filePath = path.join(__dirname, `datafiles/corrected/${service}CheckPointsCorrected.json`);
+        const data = fs.readFileSync(filePath, 'utf-8');
         const checkPointArray = JSON.parse(data).CheckPoint;
         let coordsArray = [];
         let flag = false;
@@ -133,7 +135,8 @@ function _compareBasedOnDuration(firstItinerary, secondItinerary) {
 
 const readFromSavedWalkingRoutes = () => {
     //returns an array in string form
-    const fileInStr = fs.readFileSync("./routes/savedWalkingPaths.json", "utf-8");
+    const filePath = path.join(__dirname, `/datafiles/results/savedWalkingPaths.json`);
+    const fileInStr = fs.readFileSync(filePath, "utf-8");
     // console.log("map of array: ", new Map(JSON.parse(fileInStr)).size);
     return fileInStr;
 };
@@ -142,14 +145,14 @@ const saveToSavedWalkingRoutes = () => {
     console.log("results captured");
     const arrayFromMap = Array.from(ROUTEHASHTABLE);
     const jsonArrayString = JSON.stringify(arrayFromMap);
-    fs.writeFileSync("./routes/savedWalkingPaths.json", jsonArrayString);
+    const filePath = path.join(__dirname, `datafiles/results/savedWalkingPaths.json`);
+    fs.writeFileSync(filePath, jsonArrayString);
 };
 //will be a hashmap, where the key is the string of the json of {location: Latlng, stop_name:string, isFrom:boolean}
 //isFrom == true, then is from location to stop, otherwise is directions from stop to location
 
 router.post("/", async (req, res) => {
     try {
-
         console.log("origin received: ", req.body.origin);
         console.log("destination received: ", req.body.destination);
         await _populateNusStops(); // can be elimintaed once backend postgresql db is implemented
@@ -260,7 +263,8 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
     const originBusStopCoords = TEMP_NUS_BUS_STOPS_COORDS.get(route.startStop);
     const destBustStopCoords = TEMP_NUS_BUS_STOPS_COORDS.get(route.destStop);
     const headers = {
-        'Content-Type': 'application/json',
+        // 'Content-Type': 'application/json',
+        'accept': 'application/geo+json'
     };
     const walkingFromOriginToBusStopKey = JSON.stringify({
         from: currentCoords,
@@ -617,7 +621,8 @@ const binarySearch = (arr, element, attribute) => {
 const _populateCorrectedCheckpoints = (service) => {
     _populateNusStops();
     _populateShuttleRoutes();
-    const data = fs.readFileSync(`${service}CheckPoints.json`, 'utf-8');
+    const filePath = path.join(__dirname, `datafiles/original/${service}CheckPoints.json`);
+    const data = fs.readFileSync(filePath, 'utf-8');
     const checkPointArray = JSON.parse(data).CheckPointResult.CheckPoint;
     const route = TEMP_NUS_SHUTTLES_ROUTES.get(service);
     const newArray = [];

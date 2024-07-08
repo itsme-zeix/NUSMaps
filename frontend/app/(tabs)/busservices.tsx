@@ -2,9 +2,6 @@ import React from "react";
 import { StyleSheet, View, Text } from "react-native";
 import MapView, {
   PROVIDER_GOOGLE,
-  Marker,
-  Region,
-  Polygon,
   Polyline,
 } from "react-native-maps";
 
