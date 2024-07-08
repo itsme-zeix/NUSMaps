@@ -11,7 +11,8 @@ import {
 } from "react-native";
 import { SearchBar, Icon } from "@rneui/base";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const ITEMS_PER_PAGE = 20; // Number of items to load per page
 
@@ -24,6 +25,7 @@ const BusStopSearchScreen = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [page, setPage] = useState(1); // Current page
   const [loading, setLoading] = useState(false);
+  const [searchBarRef, setSearchBarRef] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,6 +44,14 @@ const BusStopSearchScreen = () => {
   useEffect(() => {
     updateSearch(initialQuery);
   }, [initialQuery]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (searchBarRef) {
+        searchBarRef.focus();
+      }
+    }, [searchBarRef])
+  );
 
   const updateSearch = (search) => {
     setSearch(search);
@@ -104,14 +114,16 @@ const BusStopSearchScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={{ marginHorizontal: 10 }}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
-          <Text>Close</Text>
+          <Ionicons name="search" size={20} color="gray" />
         </TouchableOpacity>
         <SearchBar
           placeholder="Search"
           onChangeText={updateSearch}
           value={search}
           platform="ios"
-          searchIcon
+          searchIcon={<Ionicons name="search" size={20} color="gray" />}
+          autoFocus={true}
+          ref={(ref) => setSearchBarRef(ref)}
         />
         <FlatList
           data={filteredData}
