@@ -59,9 +59,9 @@ export default function RootLayout() {
           console.log(busStops);
           let i = 0;
           // Add `isFavorited` field to each bus stop
-          const busStopsWithFavourite = busStops.map((busStop) => ({
+          const busStopsWithFavourite = busStops.map((busStop: any) => ({
             ...busStop,
-            isFavourited: i++ < 5,
+            isFavourited: false,
           }));
 
           await AsyncStorage.setItem(
