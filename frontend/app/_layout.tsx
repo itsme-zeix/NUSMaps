@@ -12,11 +12,7 @@ import "react-native-reanimated";
 import Toast from "react-native-toast-message";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery,
-} from "@tanstack/react-query";
+import { StatusBar } from "react-native";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -36,6 +32,11 @@ export default function RootLayout() {
   if (!loaded) {
     return null;
   }
+
+  // Forces dark status bar text (ignores device light/dark mode).
+  useEffect(() => {
+    StatusBar.setBarStyle("dark-content");
+  }, []);
 
   // Uncomment to clear existing database for testing
   // AsyncStorage.clear();'
