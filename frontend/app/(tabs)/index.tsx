@@ -9,6 +9,7 @@ import {
   RefreshControl,
   Image,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
@@ -28,7 +29,6 @@ import Toast from "react-native-toast-message";
 import BusStopSearchBar from "@/components/BusStopSearchBar";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { getFavouritedBusStops } from "@/utils/storage";
-import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import BusStopSearchScreen from "@/components/BusStopSearchScreen";
 
@@ -89,7 +89,7 @@ const ColouredCircle = ({
 
 // Logic to modify the timings in the BusService object from ISO time to minutes away from now.
 const calculateMinutesDifference = (isoTime: string): string => {
-  if (!isoTime) return "Loading..."; // Handle uninitialized data
+  if (!isoTime) return "Loading"; // Handle uninitialized data
 
   // Calculate the difference in minutes between the current time and the given ISO time
   const now = new Date();
@@ -227,10 +227,16 @@ const ListItem = ({ item }: { item: BusStop }) => {
                 </Text>
               </View>
               <View style={styles.rightContainer}>
-                <Text style={[styles.details, styles.timingText]}>
+                <Text
+                  style={[styles.details, styles.timingText]}
+                  numberOfLines={1}
+                >
                   {bus.timings[0]}
                 </Text>
-                <Text style={[styles.details, styles.timingText]}>
+                <Text
+                  style={[styles.details, styles.timingText]}
+                  numberOfLines={1}
+                >
                   {bus.timings[1]}
                 </Text>
               </View>
@@ -357,8 +363,8 @@ function FavouriteBusStops({ refresh }: { refresh: () => void }) {
   }, [dataMutated]);
 
   const handleRefresh = () => {
-    setDataMutated(false);  // Reset dataMutated to allow re-fetching
-    refresh();  // Trigger the refresh function passed as prop
+    setDataMutated(false); // Reset dataMutated to allow re-fetching
+    refresh(); // Trigger the refresh function passed as prop
   };
 
   if (isPending)
