@@ -1,13 +1,13 @@
 import React from "react";
-import { View, StyleSheet, Text, Image } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { determineFontColor } from "./determineFontColor";
 
 interface MRTServiceType {
-    serviceType:string
-};
+    serviceType: string;
+}
 
-const SUBWAYICON = require("@/assets/images/subway-icon.png");
-
-const determineBG = (input:string) => {
+const determineBG = (input: string) => {
     //input is based on routeId
     if (input === "NS") {
         return "red";
@@ -27,27 +27,33 @@ const determineBG = (input:string) => {
     }
 };
 
-export const SubwayTypeCard: React.FC<MRTServiceType> = ({serviceType}) => {
-    //no need to use state as busNumber won't be changed
+export const SubwayTypeCard: React.FC<MRTServiceType> = ({ serviceType }) => {
+    const bgColor = determineBG(serviceType);
+    const fontColor = determineFontColor(bgColor);
+
     return (
-        <View style = {[styles.MRTNumberContainer, {backgroundColor: determineBG(serviceType)}]}>
-            <Image source = {SUBWAYICON} ></Image>
-            <Text style = {styles.MRTNumber}>{serviceType}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <MaterialIcons name="train" size={26} color="#434343" style={{ marginRight: 3 }} />
+            <View style={[styles.MRTNumberContainer, { backgroundColor: bgColor }]}>
+                <Text style={[styles.MRTNumber, { color: fontColor }]}>{serviceType}</Text>
+            </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     MRTNumberContainer: {
-        paddingHorizontal: 10,
-        borderRadius:5,
-        borderColor : "black",
+        paddingHorizontal: 6,
+        paddingVertical: 6,
+        borderRadius: 10,
+        marginBottom: 5,
+        borderColor: "black",
         flexDirection: "row",
-        paddingVertical:5,
-        marginBottom:5
+        justifyContent: "center",
+        alignItems: "center",
     },
     MRTNumber: {
-        color: "black",
-        fontSize:13
+        fontFamily: "Inter-Bold",
+        fontSize: 15,
     },
 });
