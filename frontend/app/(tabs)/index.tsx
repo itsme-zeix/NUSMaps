@@ -29,6 +29,30 @@ import BusStopSearchBar from "@/components/BusStopSearchBar";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { getFavouritedBusStops } from "@/utils/storage";
 import axios from 'axios';
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import BusStopSearchScreen from "@/components/BusStopSearchScreen";
+
+// STACK NAVIGATOR TO HANDLE BUS STOP SEARCHING
+const Stack = createStackNavigator();
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Stack.Navigator initialRouteName="MainScreen">
+        <Stack.Screen
+          name="BusStopsScreen"
+          component={BusStopsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="BusStopSearchScreen"
+          component={BusStopSearchScreen}
+          options={{ headerShown: false }}
+        />
+      </Stack.Navigator>
+    </QueryClientProvider>
+  );
+}
 
 // INTERFACES
 interface BusService {
@@ -182,8 +206,8 @@ const ListItem = ({ item }: { item: BusStop }) => {
             <Image
               source={
                 expanded
-                  ? require("../../assets/images/chevron_up_blue_icon.png")
-                  : require("../../assets/images/chevron_down_blue_icon.png")
+                  ? require("@/assets/images/chevron_up_blue_icon.png")
+                  : require("@/assets/images/chevron_down_blue_icon.png")
               }
               style={styles.chevron}
             />
@@ -297,6 +321,7 @@ function FavouriteBusStops({ refresh }: { refresh: () => void }) {
   const { error, data: favouriteBusStops } = useQuery({
     queryKey: ["favouriteBusStops"],
     queryFn: getFavouritedBusStops,
+    refetchOnWindowFocus: true,
   });
 
   const { mutate, isPending } = useMutation({
@@ -333,6 +358,11 @@ function FavouriteBusStops({ refresh }: { refresh: () => void }) {
     }
   }, [dataMutated]);
 
+  const handleRefresh = () => {
+    setDataMutated(false);  // Reset dataMutated to allow re-fetching
+    refresh();  // Trigger the refresh function passed as prop
+  };
+
   if (isPending)
     return <ActivityIndicator size="large" style={{ margin: 20 }} />;
   if (error)
@@ -352,7 +382,7 @@ function FavouriteBusStops({ refresh }: { refresh: () => void }) {
   return (
     <ScrollView
       refreshControl={
-        <RefreshControl refreshing={isPending} onRefresh={refresh} />
+        <RefreshControl refreshing={isPending} onRefresh={handleRefresh} />
       }
     >
       <View>
@@ -498,7 +528,7 @@ function NUSBusStops({ refresh }: { refresh: () => void }) {
   );
 }
 
-export default function BusStopsScreen() {
+function BusStopsScreen() {
   const [refreshLocation, setRefreshLocation] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(0); // State to handle the logic of rendering nearby(0) or NUS(1) bus stops.
 
