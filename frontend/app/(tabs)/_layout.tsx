@@ -16,10 +16,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: "Bus Stops",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
-              name={focused ? "home" : "home-outline"}
+              name={focused ? "bus" : "bus-outline"}
               color={color}
             />
           ),
@@ -31,7 +31,7 @@ export default function TabLayout() {
           title: "Search Route",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
-              name={focused ? "code-slash" : "code-slash-outline"}
+              name={focused ? "map" : "map-outline"}
               color={color}
             />
           ),
@@ -40,10 +40,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="busservices"
         options={{
-          title: "Bus Services",
+          title: "NUS Bus Location",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
-              name={focused ? "code-slash" : "code-slash-outline"}
+              name={focused ? "location" : "location-outline"}
               color={color}
             />
           ),
