@@ -30,6 +30,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
+        backgroundColor: "#728473",
     },
     LRTNumber: {
         fontFamily: "Inter-Bold",
