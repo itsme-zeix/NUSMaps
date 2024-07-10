@@ -221,8 +221,8 @@ const RefactoredResultsScreen: React.FC = () => {
     const typeCastedBaseResultsCard: baseResultsCardType[] =
       parsedBaseResultsData;
     return (
-      <SafeAreaView style={{ flex: 1 }}>
-        <View style={{ backgroundColor: "white" }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+        <View>
           <StatusBar></StatusBar>
           <View style={styles.doubleSearchBarsContainer}>
             <View style={{ flex: 1, alignItems: "center" }}>
