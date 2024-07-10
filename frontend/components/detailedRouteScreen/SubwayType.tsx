@@ -16,7 +16,7 @@ const determineBG = (input: string) => {
     } else if (input === "EW" || input === "CG") {
         return "#00953B";
     } else if (input === "NE") {
-        return "##9E27B5";
+        return "#9E27B5";
     } else if (input === "CC") {
         return "#FF9E17";
     } else if (input === "TE") {
