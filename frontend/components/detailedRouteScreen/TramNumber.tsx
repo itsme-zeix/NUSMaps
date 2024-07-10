@@ -11,7 +11,7 @@ interface TramServiceType {
 
 export const TramTypeCard: React.FC<TramServiceType> = ({serviceType}) => {
     return (
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
             <MaterialIcons name="tram" size={26} color="#434343" style={{ marginRight: 3 }} />
             <View style = {styles.LRTNumberContainer}>
                 <Text style = {styles.LRTNumber}>{serviceType}</Text>
@@ -25,7 +25,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 6,
         paddingVertical: 6,
         borderRadius: 10,
-        marginBottom: 5,
         borderColor: "black",
         flexDirection: "row",
         justifyContent: "center",

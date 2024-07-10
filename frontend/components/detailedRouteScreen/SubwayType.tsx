@@ -32,7 +32,7 @@ export const SubwayTypeCard: React.FC<MRTServiceType> = ({ serviceType }) => {
     const fontColor = determineFontColor(bgColor);
 
     return (
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
             <MaterialIcons name="train" size={26} color="#434343" style={{ marginRight: 3 }} />
             <View style={[styles.MRTNumberContainer, { backgroundColor: bgColor }]}>
                 <Text style={[styles.MRTNumber, { color: fontColor }]}>{serviceType}</Text>
@@ -46,7 +46,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 6,
         paddingVertical: 6,
         borderRadius: 10,
-        marginBottom: 5,
         borderColor: "black",
         flexDirection: "row",
         justifyContent: "center",

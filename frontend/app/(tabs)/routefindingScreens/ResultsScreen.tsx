@@ -16,8 +16,9 @@ import { LatLng } from "react-native-maps";
 import Constants from "expo-constants";
 import { SubwayTypeCard } from "@/components/detailedRouteScreen/SubwayType";
 import { BusNumberCard } from "@/components/detailedRouteScreen/BusNumber";
-import { useRouter, useLocalSearchParams, useSegments } from "expo-router";
 import { TramTypeCard } from "@/components/detailedRouteScreen/TramNumber";
+import { useRouter, useLocalSearchParams, useSegments } from "expo-router";
+import { MaterialIcons } from "@expo/vector-icons";
 
 //interfaces and types
 type destinationType = {
@@ -73,23 +74,18 @@ interface SingleResultCardData {
   resultData: baseResultsCardType;
 }
 
+// Define a type for all possible icon names
+type IconName = keyof typeof MaterialIcons.glyphMap;
+
 interface IconCatalog {
-  WALK: ImageSourcePropType;
-  SUBWAY: ImageSourcePropType;
-  BUS: ImageSourcePropType;
-  TRAM: ImageSourcePropType;
-  RCHEVRON: ImageSourcePropType;
-  NUS_BUS: ImageSourcePropType;
+  WALK: IconName;
+  RCHEVRON: IconName;
 }
 
-//stores the paths of the chevrons
+// Define the icon list with the correct types
 const iconList: IconCatalog = {
-  WALK: require("@/assets/images/walk-icon.png"),
-  SUBWAY: require("@/assets/images/subway-icon.png"),
-  BUS: require("@/assets/images/bus-icon.png"),
-  TRAM: require("@/assets/images/tram-icon.png"),
-  RCHEVRON: require(`@/assets/images/chevron_right-icon.png`),
-  NUS_BUS: require("@/assets/images/bus-icon.png"),
+  WALK: "directions-walk",
+  RCHEVRON: "chevron-right",
 };
 
 //constant variables
@@ -126,62 +122,78 @@ const ResultCard: React.FC<SingleResultCardData> = ({
       style={[{ backgroundColor: "white" }, styles.resultCard]}
       onPress={nextScreenFunc}
     >
-      <View>
-        <View style={styles.icons}>
-          {types.map((icon, index) => {
-            if (icon === "BUS" || icon === "NUS_BUS") {
-              const ptLeg = resultData.journeyLegs[
-                index / 2
-              ] as PublicTransportLeg;
-              console.log("pt leg:", ptLeg);
-              return (
-                <View
-                  key={index}
-                  style={{ flexDirection: "row", alignItems: "center" }}
-                >
-                  <BusNumberCard
-                    busNumber={ptLeg.serviceType}
-                    busType={ptLeg.type}
-                  />
-                </View>
-              );
-            } else if (icon === "SUBWAY") {
-              const ptLeg = resultData.journeyLegs[
-                index / 2
-              ] as PublicTransportLeg;
-              return (
-                <View
-                  key={index}
-                  style={{ flexDirection: "row", alignItems: "center" }}
-                >
-                  <SubwayTypeCard serviceType={ptLeg.serviceType} />
-                </View>
-              );
-            } else if (icon === "TRAM") {
-              const ptLeg = resultData.journeyLegs[
-                index / 2
-              ] as PublicTransportLeg;
-              return (
-                <View
-                  key={index}
-                  style={{ flexDirection: "row", alignItems: "center" }}
-                >
-                  <TramTypeCard serviceType={ptLeg.serviceType} />
-                </View>
-              );
-            } else {
-              return (
-                <Image
-                  key={index}
-                  source={iconList[icon as keyof IconCatalog]}
-                  style={{ flexDirection: "row", alignItems: "center" }}
-                />
-              );
-            }
-          })}
-          <Text>{resultData.wholeJourneyTiming}</Text>
+      <View style={{ flexDirection: "column" }}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <View style={styles.icons}>
+            {types.map((icon, index) => {
+              if (icon === "BUS" || icon === "NUS_BUS") {
+                const ptLeg = resultData.journeyLegs[
+                  index / 2
+                ] as PublicTransportLeg;
+                console.log("pt leg:", ptLeg);
+                return (
+                  <View
+                    key={index}
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <BusNumberCard
+                      busNumber={ptLeg.serviceType}
+                      busType={ptLeg.type}
+                    />
+                  </View>
+                );
+              } else if (icon === "SUBWAY") {
+                const ptLeg = resultData.journeyLegs[
+                  index / 2
+                ] as PublicTransportLeg;
+                return (
+                  <View
+                    key={index}
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <SubwayTypeCard serviceType={ptLeg.serviceType} />
+                  </View>
+                );
+              } else if (icon === "TRAM") {
+                const ptLeg = resultData.journeyLegs[
+                  index / 2
+                ] as PublicTransportLeg;
+                return (
+                  <View
+                    key={index}
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
+                    <TramTypeCard serviceType={ptLeg.serviceType} />
+                  </View>
+                );
+              } else {
+                return (
+                  <View
+                    style={{
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <MaterialIcons
+                      key={index}
+                      size={22}
+                      name={iconList[icon as keyof IconCatalog]}
+                      color="#434343"
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    />
+                  </View>
+                );
+              }
+            })}
+          </View>
+          <View style={{ alignItems: "center", justifyContent: "center" }}>
+            <Text style={styles.travelDuration}>
+              {resultData.journeyTiming}
+            </Text>
+          </View>
         </View>
-        <Text style={styles.travelDuration}>{resultData.journeyTiming}</Text>
+
+        <Text>{resultData.wholeJourneyTiming}</Text>
       </View>
     </Pressable>
   );
@@ -308,21 +320,24 @@ const styles = StyleSheet.create({
     //has two children, transport routes, and the timing on the end
     height: 150,
     width: "93%",
-    marginTop: 30,
-    justifyContent: "space-evenly",
+    marginTop: 18,
+    paddingHorizontal: 10,
+    justifyContent: "center",
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "#828282",
+    borderColor: "#E0E0E0",
+    shadowColor: "#000000",
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 3 },
   },
   icons: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
+    justifyContent: "flex-start",
     backgroundColor: "white",
   },
   travelDuration: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: "Inter-Bold",
   },
 });
 export default RefactoredResultsScreen;
