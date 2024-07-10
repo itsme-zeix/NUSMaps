@@ -10,17 +10,17 @@ interface MRTServiceType {
 const determineBG = (input: string) => {
     //input is based on routeId
     if (input === "NS") {
-        return "red";
+        return "#E1241D";
     } else if (input === "DT") {
-        return "#338AFF";
+        return "#0056B8";
     } else if (input === "EW" || input === "CG") {
-        return "#33FF3C";
+        return "#00953B";
     } else if (input === "NE") {
-        return "#8D33FF";
+        return "##9E27B5";
     } else if (input === "CC") {
-        return "#FFF633";
+        return "#FF9E17";
     } else if (input === "TE") {
-        return "#A53C03";
+        return "#9D5A18";
     } else {
         //error
         return "black";
