@@ -172,20 +172,14 @@ const ResultCard: React.FC<SingleResultCardData> = ({
               }
             })}
           </View>
-          <View
-            style={{
-              alignItems: "center",
-              justifyContent: "center",
-              marginRight: 8,
-            }}
-          >
+          <View style={styles.travelDurationContainer}>
             <Text style={styles.travelDuration}>
               {resultData.journeyTiming}
             </Text>
           </View>
         </View>
       </View>
-      <View style={{ marginLeft: 5 }}>
+      <View style={styles.startAndEndTimeContainer}>
         <Text>{resultData.wholeJourneyTiming}</Text>
       </View>
     </Pressable>
@@ -303,16 +297,15 @@ const styles = StyleSheet.create({
     marginTop: 50,
     marginBottom: 50,
     justifyContent: "flex-start",
-    alignContent: "flex-start",
     alignItems: "center",
   },
   resultCard: {
     //has two children, transport routes, and the timing on the end
-    height: 130,
+    height: 150,
     width: "93%",
     marginTop: 18,
     paddingHorizontal: 10,
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "#E0E0E0",
@@ -322,21 +315,31 @@ const styles = StyleSheet.create({
   },
   iconsContainer: {
     marginLeft: 5,
+    marginTop: 15,
     maxWidth: "80%",
     flexWrap: "wrap",
     flexDirection: "row",
     justifyContent: "flex-start",
+    alignItems: "center",
     backgroundColor: "white",
   },
   iconWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8, // Adjust this value to set the margin between wrapped lines
+    marginBottom: 12, // Adjust this value to set the margin between wrapped lines
     marginRight: -4, // Optional: Add some space between icons in the same line
+  },
+  travelDurationContainer: {
+    marginRight: 10,
+    marginTop: 27,
   },
   travelDuration: {
     fontSize: 18,
     fontFamily: "Inter-Bold",
+  },
+  startAndEndTimeContainer: {
+    marginLeft: 5,
+    marginBottom: 15,
   },
 });
 export default RefactoredResultsScreen;
