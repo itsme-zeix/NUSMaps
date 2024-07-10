@@ -14,7 +14,7 @@ export const BusNumberCard: React.FC<busNumberType> = ({ busNumber, busType }) =
   const fontColor = determineFontColor(backgroundColor);
 
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
+    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center"  }}>
       <Ionicons name="bus" size={23} color="#434343" style={{ marginRight: 3 }} />
       <View style={[styles.busNumberContainer, busBackgroundColor]}>
         <Text style={[styles.busNumber, { color: fontColor }]}>{busNumber}</Text>

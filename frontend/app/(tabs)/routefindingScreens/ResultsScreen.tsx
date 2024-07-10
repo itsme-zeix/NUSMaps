@@ -124,7 +124,7 @@ const ResultCard: React.FC<SingleResultCardData> = ({
     >
       <View style={{ flexDirection: "column" }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <View style={styles.icons}>
+          <View style={styles.iconsContainer}>
             {types.map((icon, index) => {
               if (icon === "BUS" || icon === "NUS_BUS") {
                 const ptLeg = resultData.journeyLegs[
@@ -134,7 +134,7 @@ const ResultCard: React.FC<SingleResultCardData> = ({
                 return (
                   <View
                     key={index}
-                    style={{ flexDirection: "row", alignItems: "center" }}
+                    style={styles.iconWrapper}
                   >
                     <BusNumberCard
                       busNumber={ptLeg.serviceType}
@@ -149,7 +149,7 @@ const ResultCard: React.FC<SingleResultCardData> = ({
                 return (
                   <View
                     key={index}
-                    style={{ flexDirection: "row", alignItems: "center" }}
+                    style={styles.iconWrapper}
                   >
                     <SubwayTypeCard serviceType={ptLeg.serviceType} />
                   </View>
@@ -161,19 +161,14 @@ const ResultCard: React.FC<SingleResultCardData> = ({
                 return (
                   <View
                     key={index}
-                    style={{ flexDirection: "row", alignItems: "center" }}
+                    style={styles.iconWrapper}
                   >
                     <TramTypeCard serviceType={ptLeg.serviceType} />
                   </View>
                 );
               } else {
                 return (
-                  <View
-                    style={{
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
+                  <View style={styles.iconWrapper} >
                     <MaterialIcons
                       key={index}
                       size={22}
@@ -186,13 +181,14 @@ const ResultCard: React.FC<SingleResultCardData> = ({
               }
             })}
           </View>
-          <View style={{ alignItems: "center", justifyContent: "center" }}>
+          <View style={{ alignItems: "center", justifyContent: "center", marginRight: 8 }}>
             <Text style={styles.travelDuration}>
               {resultData.journeyTiming}
             </Text>
           </View>
         </View>
-
+      </View>
+      <View style={{ marginLeft: 5 }}>
         <Text>{resultData.wholeJourneyTiming}</Text>
       </View>
     </Pressable>
@@ -318,11 +314,11 @@ const styles = StyleSheet.create({
   },
   resultCard: {
     //has two children, transport routes, and the timing on the end
-    height: 150,
+    height: 130,
     width: "93%",
     marginTop: 18,
     paddingHorizontal: 10,
-    justifyContent: "center",
+    justifyContent: "space-around",
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "#E0E0E0",
@@ -330,10 +326,19 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowOffset: { width: 0, height: 3 },
   },
-  icons: {
+  iconsContainer: {
+    marginLeft: 5,
+    maxWidth: "80%",
+    flexWrap: "wrap",
     flexDirection: "row",
     justifyContent: "flex-start",
     backgroundColor: "white",
+  },
+  iconWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8, // Adjust this value to set the margin between wrapped lines
+    marginRight: -4, // Optional: Add some space between icons in the same line
   },
   travelDuration: {
     fontSize: 18,
