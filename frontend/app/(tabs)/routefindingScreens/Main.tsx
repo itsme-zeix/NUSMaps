@@ -213,12 +213,16 @@ export default function App() {
     //sometimes doesnt always get called when clicked on
     const reversedDestinationLatLng = await getLatLngFromId(data.place_id);
     console.log("reversed: ", reversedDestinationLatLng);
-    setDestination({
-      latitude: reversedDestinationLatLng.latitude,
-      longitude: reversedDestinationLatLng.longitude,
-      address: data.description,
-      placeId: data.place_id,
-    });
+    if (reversedDestinationLatLng != undefined) {
+      setDestination({
+        latitude: reversedDestinationLatLng.latitude,
+        longitude: reversedDestinationLatLng.longitude,
+        address: data.description,
+        placeId: data.place_id,
+      });
+    } else {
+      return undefined;
+    }
   }
 
   async function getLatLngFromId(placeId: string) {

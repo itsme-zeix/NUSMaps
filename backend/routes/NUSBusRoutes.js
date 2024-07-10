@@ -4,6 +4,7 @@ const polyline = require("@mapbox/polyline");
 const router = express.Router();
 const fs = require('fs');
 const path = require("path");
+const axios = require("axios");
 const NO_OF_BUS_STOPS = 14;
 const TEMP_NUS_SHUTTLES_ROUTES = new Map();
 const TEMP_NUS_BUS_STOPS_COORDS = new Map();
@@ -198,15 +199,14 @@ const _populateShuttleRoutes = () => {
 
 const _populateNusStops = async () => {
 
-    let result = await fetch("https://nnextbus.nus.edu.sg/BusStops", {
-        method: "GET", 
+    let result = await axios.get("https://nnextbus.nus.edu.sg/BusStops", {
         headers: {
             "Content-Type": "application/json",
             "Authorization" : `Basic ${NUSNEXTBUSCREDENTIALS}`
           //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
         },
     });
-    result = await result.json();
+    result = result.data;
     busStops = result.BusStopsResult.busstops;
     for (busStop of busStops) {
         NUS_STOPS.push(
@@ -290,11 +290,10 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
     }
     
     if (!originResult) {   
-        routeFromOriginToNearestBusStop = await fetch(`${WALKINGROUTERURL}?start=${currentCoords.longitude},${currentCoords.latitude}&end=${originBusStopCoords.longitude},${originBusStopCoords.latitude}`, {
-            method: "GET",
+        routeFromOriginToNearestBusStop = await axios.get(`${WALKINGROUTERURL}?start=${currentCoords.longitude},${currentCoords.latitude}&end=${originBusStopCoords.longitude},${originBusStopCoords.latitude}`, {
             headers: headers,
         });
-        originResult = await routeFromOriginToNearestBusStop.json();
+        originResult = routeFromOriginToNearestBusStop.data;
         ROUTEHASHTABLE.set(walkingFromOriginToBusStopKey, JSON.stringify(originResult));
     }
     
@@ -309,11 +308,10 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
     }
     
     if (!destResult) {
-        routeFromNearestBusStopToDest = await fetch(`${WALKINGROUTERURL}?start=${destBustStopCoords.longitude},${destBustStopCoords.latitude}&end=${destinationCoords.longitude},${destinationCoords.latitude}`, {
-            method: "GET",
+        routeFromNearestBusStopToDest = await axios.get(`${WALKINGROUTERURL}?start=${destBustStopCoords.longitude},${destBustStopCoords.latitude}&end=${destinationCoords.longitude},${destinationCoords.latitude}`, {
             headers: headers,
         });
-        destResult = await routeFromNearestBusStopToDest.json();
+        destResult = routeFromNearestBusStopToDest.data;
         ROUTEHASHTABLE.set(walkingFromBusStopToDestKey, JSON.stringify(destResult));
     }
     // console.log("sample origin result:", originResult);
@@ -493,15 +491,14 @@ const extractCommonBusServices = async (originBusStops, destBusStops) =>  {
     // console.log("origin shuttle service querying starts here");
     for (busStop of originBusStops) {
         // console.log("busstop name: ", busStop.name);
-        let result = await fetch(`https://nnextbus.nus.edu.sg/ShuttleService?busstopname=${busStop.name}`, {
-            method:"GET",
+        let result = await axios.get(`https://nnextbus.nus.edu.sg/ShuttleService?busstopname=${busStop.name}`, {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization" : `Basic ${NUSNEXTBUSCREDENTIALS}`
               //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
             },
         });
-        result = await result.json();
+        result = result.data;
         for (shuttle of result.ShuttleServiceResult.shuttles) {
             // console.log("current shuttle: ", shuttle);
             if (shuttle._etas !== undefined && shuttle._etas.length !== 0) {
@@ -519,15 +516,14 @@ const extractCommonBusServices = async (originBusStops, destBusStops) =>  {
     for (busStop of destBusStops) {
         // console.log("busstop name: ", busStop.name);
         //logging the next few etas, when i want it to log only 
-        let result = await fetch(`https://nnextbus.nus.edu.sg/ShuttleService?busstopname=${busStop.name}`, {
-            method:"GET",
+        let result = await axios.get(`https://nnextbus.nus.edu.sg/ShuttleService?busstopname=${busStop.name}`, {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization" : `Basic ${NUSNEXTBUSCREDENTIALS}`
               //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
             },
         });
-        result = await result.json();
+        result = result.data;
         for (shuttle of result.ShuttleServiceResult.shuttles) {
             if (shuttle._etas !== undefined && shuttle._etas.length !== 0) {
                 let nextETAsInSecondsArr = [];
