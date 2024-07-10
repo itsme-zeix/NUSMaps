@@ -556,7 +556,7 @@ function BusStopsScreen() {
           <BusStopSearchBar />
           <View style={styles.segmentedControlContainer}>
             <SegmentedControl
-              values={["Favourites", "Nearby", "NUS Bus Stops"]}
+              values={["Favourites", "Nearby", "NUS"]}
               selectedIndex={selectedIndex}
               onChange={(event) => {
                 setSelectedIndex(event.nativeEvent.selectedSegmentIndex);
