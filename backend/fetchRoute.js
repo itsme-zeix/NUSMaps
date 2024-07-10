@@ -1,6 +1,7 @@
 const { format } = require('date-fns');
 const dotenv = require("dotenv").config();
 var express = require("express");
+const axios = require('axios');
 
 var router = express.Router();
 const PUBLICTRANSPORTTYPES = ["BUS", "MRT", "TRAM"];
@@ -127,11 +128,10 @@ router.post("/", async (req, res) => {
         Authorization: `${process.env.ONEMAPAPIKEY}`,
       };
       try {
-        const response = await fetch(routesUrl, {
-          method: "GET",
+        const response = await axios.get(routesUrl, {
           headers: headers,
         });
-        const route = await response.json();
+        const route = await response.data;
         return _processData(route);
       } catch (err) {
         console.error(err); //log the error from "route not found"
