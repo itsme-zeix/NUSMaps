@@ -1,7 +1,6 @@
 import React from "react";
 import {
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   Text,
   View,
@@ -10,6 +9,7 @@ import {
   Platform,
   Pressable,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { ImageSourcePropType } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { LatLng } from "react-native-maps";
@@ -132,10 +132,7 @@ const ResultCard: React.FC<SingleResultCardData> = ({
                 ] as PublicTransportLeg;
                 console.log("pt leg:", ptLeg);
                 return (
-                  <View
-                    key={index}
-                    style={styles.iconWrapper}
-                  >
+                  <View key={index} style={styles.iconWrapper}>
                     <BusNumberCard
                       busNumber={ptLeg.serviceType}
                       busType={ptLeg.type}
@@ -147,10 +144,7 @@ const ResultCard: React.FC<SingleResultCardData> = ({
                   index / 2
                 ] as PublicTransportLeg;
                 return (
-                  <View
-                    key={index}
-                    style={styles.iconWrapper}
-                  >
+                  <View key={index} style={styles.iconWrapper}>
                     <SubwayTypeCard serviceType={ptLeg.serviceType} />
                   </View>
                 );
@@ -159,16 +153,13 @@ const ResultCard: React.FC<SingleResultCardData> = ({
                   index / 2
                 ] as PublicTransportLeg;
                 return (
-                  <View
-                    key={index}
-                    style={styles.iconWrapper}
-                  >
+                  <View key={index} style={styles.iconWrapper}>
                     <TramTypeCard serviceType={ptLeg.serviceType} />
                   </View>
                 );
               } else {
                 return (
-                  <View style={styles.iconWrapper} >
+                  <View style={styles.iconWrapper}>
                     <MaterialIcons
                       key={index}
                       size={22}
@@ -181,7 +172,13 @@ const ResultCard: React.FC<SingleResultCardData> = ({
               }
             })}
           </View>
-          <View style={{ alignItems: "center", justifyContent: "center", marginRight: 8 }}>
+          <View
+            style={{
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: 8,
+            }}
+          >
             <Text style={styles.travelDuration}>
               {resultData.journeyTiming}
             </Text>
@@ -222,8 +219,7 @@ const RefactoredResultsScreen: React.FC = () => {
       parsedBaseResultsData;
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-        <View>
-          <StatusBar></StatusBar>
+        <View style={{ flex: 1 }}>
           <View style={styles.doubleSearchBarsContainer}>
             <View style={{ flex: 1, alignItems: "center" }}>
               <GooglePlacesAutocomplete
@@ -295,8 +291,6 @@ const styles = StyleSheet.create({
   },
   doubleSearchBarsContainer: {
     height: 150,
-    marginTop: Platform.OS === "ios" ? 20 : StatusBar.currentHeight,
-    paddingTop: 18,
     width: "100%",
     justifyContent: "center",
     alignContent: "flex-start",
@@ -335,8 +329,8 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   iconWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 8, // Adjust this value to set the margin between wrapped lines
     marginRight: -4, // Optional: Add some space between icons in the same line
   },
