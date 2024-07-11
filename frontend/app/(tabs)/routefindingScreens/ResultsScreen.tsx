@@ -10,9 +10,8 @@ import {
   Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ImageSourcePropType } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
-import { LatLng } from "react-native-maps";
+import MapView, { Marker, LatLng, PROVIDER_GOOGLE } from "react-native-maps";
 import Constants from "expo-constants";
 import { SubwayTypeCard } from "@/components/detailedRouteScreen/SubwayType";
 import { BusNumberCard } from "@/components/detailedRouteScreen/BusNumber";
@@ -204,8 +203,8 @@ const RefactoredResultsScreen: React.FC = () => {
     components: "country:sg",
   };
   console.log("base result cards data:", baseResultsData);
-  const parsedOrigin = _parseParams(origin);
-  const parsedDestination = _parseParams(destination);
+  const parsedOrigin: LatLng = _parseParams(origin);
+  const parsedDestination: destinationType = _parseParams(destination);
   const parsedBaseResultsData = _parseParams(baseResultsData);
   console.log("dest", parsedDestination);
   if (parsedOrigin && parsedDestination && parsedBaseResultsData) {
@@ -214,6 +213,34 @@ const RefactoredResultsScreen: React.FC = () => {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
         <View style={{ flex: 1 }}>
+          <View style={{ width: "100%", height: "50%" }}>
+            <MapView
+              provider={PROVIDER_GOOGLE}
+              style={{ width: "100%", height: "100%" }}
+              initialRegion={{
+                latitude: (parsedOrigin.latitude + parsedDestination.latitude) / 2,
+                longitude: (parsedOrigin.longitude + parsedDestination.longitude) / 2,
+                latitudeDelta: Math.abs(parsedOrigin.latitude - parsedDestination.latitude) * 2,
+                longitudeDelta:
+                  Math.abs(parsedOrigin.longitude - parsedDestination.longitude) * 2,
+              }}
+              >
+              <Marker
+                title="Origin"
+                coordinate={{
+                  latitude: parsedOrigin.latitude,
+                  longitude: parsedOrigin.longitude,
+                }}
+              />
+              <Marker
+                title="Destination"
+                coordinate={{
+                  latitude: parsedDestination.latitude,
+                  longitude: parsedDestination.longitude,
+                }}
+              />
+            </MapView>
+          </View>
           <View style={styles.doubleSearchBarsContainer}>
             <View style={{ flex: 1, alignItems: "center" }}>
               <GooglePlacesAutocomplete
@@ -284,14 +311,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   doubleSearchBarsContainer: {
-    height: 150,
+    position: "absolute",
+    height: 140,
     width: "100%",
     justifyContent: "center",
     alignContent: "flex-start",
   },
   resultContainer: {
     width: "100%",
-    height: "60%",
+    height: "100%",
     top: 1,
     flex: 1,
     marginTop: 50,
@@ -316,7 +344,7 @@ const styles = StyleSheet.create({
   iconsContainer: {
     marginLeft: 5,
     marginTop: 15,
-    maxWidth: "80%",
+    maxWidth: "70%",
     flexWrap: "wrap",
     flexDirection: "row",
     justifyContent: "flex-start",
