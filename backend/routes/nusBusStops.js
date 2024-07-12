@@ -2,7 +2,7 @@ const dotenv = require("dotenv").config();
 const express = require("express");
 const router = express.Router();
 const { Client } = require("pg");
-
+const axios = require("axios");
 // Create bus stop objects (based on interface defined in front end, see comment inside the method) using bus stop info retrieved from database in getNUSBusStops method.
 async function generateBusStopsObject(stop) {
   // Interface in our tsx frontend for reference so we can reuse them when returning JSON.
@@ -93,10 +93,9 @@ async function getArrivalTime(busStopsArray) {
         const credentials = `${username}:${password}`;
         const encodedCredentials = btoa(credentials);
 
-        const response = await fetch(
+        const response = await axios.get(
           `https://nnextbus.nus.edu.sg/ShuttleService?busstopname=${stopName}`,
           {
-            method: "GET",
             headers: {
               Authorization: `Basic ${encodedCredentials}`,
             },
@@ -104,18 +103,17 @@ async function getArrivalTime(busStopsArray) {
         );
 
         // Check if the response is ok and has a body
-        if (!response.ok) {
+        if (response.status !== 200) {
           throw new Error(
             `HTTP error from NUSNextBus API! status: ${response.status}`
           );
         }
 
-        const text = await response.text();
-        if (!text) {
+        if (!response.data) {
           throw new Error("Empty response body from NUSNextBus API");
         }
 
-        const NUSReply = JSON.parse(text);
+        const NUSReply = response.data;
         // We will process the NUSReply in a 2 step process:
         // 1) reformat reply such that we can search the buses by name in a dict.
         // 2) iterate through buses in our bus stop objects and retrieve the timings based on the name.

@@ -29,6 +29,7 @@ import Toast from "react-native-toast-message";
 import BusStopSearchBar from "@/components/BusStopSearchBar";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { getFavouritedBusStops } from "@/utils/storage";
+import axios from 'axios';
 import { createStackNavigator } from "@react-navigation/stack";
 import BusStopSearchScreen from "@/components/BusStopSearchScreen";
 
@@ -304,18 +305,19 @@ const useUserLocation = (refreshLocation: number) => {
 const queryClient = new QueryClient();
 
 async function fetchBusArrivalTimes(busStops: any) {
-  const response = await fetch("https://nusmaps.onrender.com/busArrivalTimes", {
-    method: "POST",
+  console.log("fetched bus stops: ", busStops);
+  const response = await axios.post("https://test-nusmaps.onrender.com/busArrivalTimes", 
+    busStops,
+    {
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(busStops),
   });
-  if (!response.ok) {
+  if (response.status !== 200) {
     throw new Error("Network response was not ok");
   }
-  return response.json();
+  return response.data;
 }
 
 function FavouriteBusStops({ refresh }: { refresh: () => void }) {

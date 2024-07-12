@@ -6,7 +6,7 @@ interface busNumberType {
     busType:string
 }
 
-const BUSICON = require("../assets/images/bus-icon.png");
+const BUSICON = require("@/assets/images/bus-icon.png");
 export const BusNumberCard: React.FC<busNumberType> = ({busNumber, busType}) => {
     //no need to use state as busNumber won't be changed
     let busBackgroundColor = busType === "NUS_BUS" ? busBGMapping[busNumber] : styles.PUBLICBUSBG;

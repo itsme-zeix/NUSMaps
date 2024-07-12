@@ -13,8 +13,10 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { GooglePlaceData } from "react-native-google-places-autocomplete";
 import { useRouter, useSegments } from "expo-router";
 import Constants from "expo-constants";
+import axios from 'axios';
 
 //interface and types
+
 
 interface LegBase {
   //base template for the info that is displayed in the leg
@@ -211,32 +213,46 @@ export default function App() {
     //sometimes doesnt always get called when clicked on
     const reversedDestinationLatLng = await getLatLngFromId(data.place_id);
     console.log("reversed: ", reversedDestinationLatLng);
-    setDestination({
-      latitude: reversedDestinationLatLng.latitude,
-      longitude: reversedDestinationLatLng.longitude,
-      address: data.description,
-      placeId: data.place_id,
-    });
+    if (reversedDestinationLatLng != undefined) {
+      setDestination({
+        latitude: reversedDestinationLatLng.latitude,
+        longitude: reversedDestinationLatLng.longitude,
+        address: data.description,
+        placeId: data.place_id,
+      });
+    } else {
+      return undefined;
+    }
   }
 
   async function getLatLngFromId(placeId: string) {
     //reverses geocoding
-    const response = await fetch(
-      `https://places.googleapis.com/v1/places/${placeId}?fields=location&key=${mapsApiKey}`
-    );
-    if (response.status === 200) {
-      const jsonObject = await response.json();
+    try {
+      console.log('error here');
+      const response = await axios.get(
+        `https://places.googleapis.com/v1/places/${placeId}?fields=location&key=${mapsApiKey}`
+      );
+      const jsonResultOject = response.data;
+      console.log('result object:', jsonResultOject);
       const result = {
-        latitude: jsonObject.location.latitude,
-        longitude: jsonObject.location.longitude,
+        latitude: jsonResultOject.location.latitude,
+        longitude: jsonResultOject.location.longitude
       };
       return result;
-    } else {
-      throw new Error(
-        `Error fetching destination's coordinates: ${response.status}`
-      );
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          console.error(`HTTP error: ${error.response.status}`);
+        } else if (error.request) {
+          console.error("Request error: No response received");
+        } else {
+          console.error("Error:", error.message);
+        };
+      } else {
+        console.error("Non axios error:", error);
+      }
     }
-  }
+  }; 
 
   async function fetchRoutesFromServer(
     origin: LatLng,
@@ -245,22 +261,22 @@ export default function App() {
     if (oneMapsAPIToken) {
       try {
         console.log("Origin location:", origin);
-        const data = await fetch(
+        const response = await axios.post(
           "https://nusmaps.onrender.com/transportRoute",
-          {
-            method: "POST",
-            body: JSON.stringify({
+            {
               origin: origin,
               destination: destination,
-            }),
-            headers: {
+            },
+            {
+              headers: {
               "Content-Type": "application/json",
               Authorization: oneMapsAPIToken,
               //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
             },
           }
         );
-        return data.json();
+        console.log("response data fetchRoutesFromServer", response.data);
+        return response.data;
       } catch (error) {
         setRouteErrorMsg("Server issues, please try again later.");
         console.error(
@@ -276,19 +292,6 @@ export default function App() {
     }
   }
 
-  // useEffect( ()=> {
-  //   if (isNotInitialExec.current) {
-  //     router.push({
-  //       pathname: '/RefactoredResultsScreen',
-  //       params: {
-  //         //103.77267902999861,1.29725805425906
-  //         origin: JSON.stringify({longitude:103.77267902999861, latitude: 1.29725805425906}),
-  //         destination: JSON.stringify(destination),
-  //         baseResultsData: JSON.stringify({baseResultsCardData})
-  //       }
-  //     })
-  //   }
-  // }, [baseResultsCardData]);
 
   async function fetchBestRoute(
     originCoords: LatLng,

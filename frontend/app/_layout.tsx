@@ -13,6 +13,12 @@ import Toast from "react-native-toast-message";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "react-native";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
+import axios from 'axios';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -49,13 +55,13 @@ export default function RootLayout() {
         const lastUpdated = await AsyncStorage.getItem("lastUpdated");
         if (!isInitialized) {
           // Perform API call to retrieve database
-          const response = await fetch(
+          const response = await axios.get(
             `https://nusmaps.onrender.com:3000/busStopDatabase?lastUpdated=${lastUpdated}`
           );
-          if (!response.ok) {
+          if (response.status !== 200) {
             throw new Error("Network response was not ok");
           }
-          const busStops = await response.json();
+          const busStops = await response.data;
           console.log(busStops);
           let i = 0;
           // Add `isFavorited` field to each bus stop

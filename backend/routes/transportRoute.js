@@ -4,6 +4,7 @@ var express = require("express");
 var polyline = require("@mapbox/polyline");
 const turf = require('@turf/turf');
 const fs = require('fs');
+const axios = require('axios');
 
 var router = express.Router();
 const NUSNEXTBUSCREDENTIALS = btoa(`${process.env.NUSNEXTBUS_USER}:${process.env.NUSNEXTBUS_PASSWORD}`);
@@ -13,15 +14,14 @@ const PUBLICNUSBUSSTOPS = ["CG", "JP-SCH-16151", "RAFFLES", "MUSEUM", "YIH-OPP",
 const TEMP_NUS_BUS_STOPS_COORDS = new Map();
 
 const populateNusStops = async () => {
-  let result = await fetch("https://nnextbus.nus.edu.sg/BusStops", {
-      method: "GET",
+  let result = await axios.get("https://nnextbus.nus.edu.sg/BusStops", {
       headers: {
           "Content-Type": "application/json",
           "Authorization" : `Basic ${NUSNEXTBUSCREDENTIALS}`
         //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
       },
   });
-  result = await result.json();
+  result = result.data;
   busStops = result.BusStopsResult.busstops;
   for (busStop of busStops) {
       TEMP_NUS_BUS_STOPS_COORDS.set(busStop.name, {"latitude": busStop.latitude, "longitude":busStop.longitude});
@@ -289,6 +289,8 @@ const handleRouting = async (origin, destination) => {
   //error lies here, undefined
   //ALWAYS add this to results returned by onemap and compare
   const dateObject = new Date();
+  console.log('origin received: ', origin);
+  console.log('destination received: ', destination);
   await populateNusStops();
   console.log('origin received: ', origin);
   console.log('destination received: ', destination);
@@ -302,18 +304,19 @@ const handleRouting = async (origin, destination) => {
   if (isPointInNUSPolygons(originTurfPoint) && isPointInNUSPolygons(destinationTurfPoint)) {
     //can use directly as result
     console.log("code 1");
-    const resultPromise =  await fetch("https://nusmaps.onrender.com/NUSBusRoutes", {
-      method: "POST",
+    const resultPromise =  await axios.post("https://nusmaps.onrender.com/NUSBusRoutes", 
+      {
+        "origin": origin,
+        "destination" : destination
+      }, 
+      {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        "origin": origin,
-        "destination" : destination
-      })
+
     }); //shows top 3 results 
     console.log("result:", resultPromise);
-    const result = await resultPromise.json();
+    const result = resultPromise.data;
     return {
       status: 200,
       message: "both points lie inside NUS",
@@ -329,23 +332,22 @@ const handleRouting = async (origin, destination) => {
       // console.log("nus stop: ", nusStop);
       // console.log("nus stop coords: ", nusStopCoords);
       // console.log('destination:', destination);
-      const promiseFromStopToDest = fetch("https://nusmaps.onrender.com/NUSBusRoutes", {
-        method: "POST",
+      const promiseFromStopToDest = axios.post("https://nusmaps.onrender.com/NUSBusRoutes", 
+        {
+          origin: nusStopCoords,
+          destination: destination
+        }
+        , {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          "origin": nusStopCoords,
-          "destination" : destination
-        })
       });
       let date = format(dateObject, "MM-dd-yyyy");
       let time = format(dateObject, "HH:MM:SS");
       const routesUrl = encodeURI(
         `https://www.onemap.gov.sg/api/public/routingsvc/route?start=${origin.latitude},${origin.longitude}&end=${nusStopCoords.latitude},${nusStopCoords.longitude}&routeType=pt&date=${date}&time=${time}&mode=TRANSIT&maxWalkDistance=1000&numItineraries=1`
       );
-      const promiseFromOriginToStop = fetch(routesUrl, {
-        method: "GET",
+      const promiseFromOriginToStop = axios.get(routesUrl, {
         headers: headers,
       });
       promisesArray.push([promiseFromOriginToStop, promiseFromStopToDest]);
@@ -355,10 +357,10 @@ const handleRouting = async (origin, destination) => {
       Promise.all(responses.map(response => {
         // console.log("Response status:", response.status);
         // console.log("Response status text:", response.statusText);
-        if (!response.ok) {
+        if (response.status !== 200) {
           throw new Error(`Network response was not ok: ${response.statusText}`);
         } else {
-          return response.json();
+          return response.data;
         }})));
     const responseBodiesArray = await Promise.all(jsonPromisesArray);
     // console.log("all: ", responseBodiesArray);
@@ -385,15 +387,15 @@ const handleRouting = async (origin, destination) => {
     const promisesArray = [];
     for (nusStop of PUBLICNUSBUSSTOPS) {
       const nusStopCoords = TEMP_NUS_BUS_STOPS_COORDS.get(nusStop);
-      const promiseFromOriginToStop = fetch("https://nusmaps.onrender.com/NUSBusRoutes", {
-        method: "POST",
+      const promiseFromOriginToStop = axios.post("https://nusmaps.onrender.com/NUSBusRoutes", 
+        {
+          origin: origin,
+          destination: nusStopCoords,
+        },
+        {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          "origin": origin,
-          "destination" : nusStopCoords
-        })
       });
       let date = format(dateObject, "MM-dd-yyyy");
       let time = format(dateObject, "HH:MM:SS");
@@ -403,8 +405,7 @@ const handleRouting = async (origin, destination) => {
       const headers = {
         Authorization: ONEMAPAPIKEY
       };
-      const promiseFromStopToDest = fetch(routesUrl, {
-        method: "GET",
+      const promiseFromStopToDest = axios.get(routesUrl, {
         headers: headers,
       });
       promisesArray.push([promiseFromOriginToStop, promiseFromStopToDest]);
@@ -415,10 +416,10 @@ const handleRouting = async (origin, destination) => {
         console.log("Response status:", response.status);
         console.log("Response status text:", response.statusText);
 
-        if (!response.ok) {
+        if (response.status !== 200) {
           throw new Error(`Network response was not ok: ${response.statusText}`);
         } else {
-          return response.json();
+          return response.data;
         }})));
     const responseBodiesArray = await Promise.all(jsonPromisesArray);
     // console.log("all: ", responseBodiesArray);
@@ -468,10 +469,12 @@ const _addAlternativeRoutesToOneMap = (oneMapRoute, nusResult) => {
 router.post("/", async (req, res) => {
     const dateObject = new Date();
     auth_token = req.headers['authorization'];
+    console.log('reciived');
     let origin;
     let destination;
     if (auth_token === ONEMAPAPITOKEN) {
       origin = req.body.origin;
+      console.log('origin: ', origin);
       destination = req.body.destination;
       let date = format(dateObject, "MM-dd-yyyy");
       let time = format(dateObject, "HH:MM:SS");

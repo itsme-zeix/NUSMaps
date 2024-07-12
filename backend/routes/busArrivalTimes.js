@@ -1,7 +1,7 @@
 const dotenv = require("dotenv").config();
 const express = require("express");
 const router = express.Router();
-
+const axios = require("axios");
 async function getArrivalTime(busStopsArray) {
   await Promise.all(
     busStopsArray.map(async (busStop) => {
@@ -14,10 +14,9 @@ async function getArrivalTime(busStopsArray) {
             // Encode the credentials
             const credentials = `${username}:${password}`;
             const encodedCredentials = btoa(credentials);
-            const response = await fetch(
+            const response = await axios.get(
               `https://nnextbus.nus.edu.sg/ShuttleService?busstopname=${stopName}`,
               {
-                method: "GET",
                 headers: {
                   Authorization: `Basic ${encodedCredentials}`,
                 },
@@ -25,18 +24,17 @@ async function getArrivalTime(busStopsArray) {
             );
 
             // Check if the response is ok and has a body
-            if (!response.ok) {
+            if (response.status !== 200) {
               throw new Error(
                 `HTTP error from NUSNextBus API! status: ${response.status}`
               );
             }
 
-            const text = await response.text();
-            if (!text) {
+            if (!response.data) {
               throw new Error("Empty response body from NUSNextBus API");
             }
 
-            const NUSReply = JSON.parse(text);
+            const NUSReply = response.data;
             // We will process the NUSReply in a 2 step process:
             // 1) reformat reply such that we can search the buses by name in a dict.
             // 2) iterate through buses in our bus stop objects and retrieve the timings based on the name.
@@ -117,10 +115,9 @@ async function getArrivalTime(busStopsArray) {
             // Also, if we simply call the API by bus stop id, certain bus services will be missing because the api only responses for certain bus stops.
             await (async (stopId, serviceNo) => {
               try {
-                const response = await fetch(
+                const response = await axios.get(
                   `http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=${stopId}&ServiceNo=${serviceNo}`,
                   {
-                    method: "GET",
                     headers: {
                       AccountKey: process.env.LTA_DATAMALL_KEY,
                     },
@@ -128,18 +125,17 @@ async function getArrivalTime(busStopsArray) {
                 );
 
                 // Check if the response is ok and has a body
-                if (!response.ok) {
+                if (response.status !== 200) {
                   throw new Error(
                     `HTTP error from datamall! status: ${response.status}`
                   );
                 }
 
-                const text = await response.text();
-                if (!text) {
+                if (!response.data) {
                   throw new Error("Empty response body from datamall");
                 }
 
-                const datamallReply = JSON.parse(text);
+                const datamallReply = response.data;
                 if (!datamallReply.Services) {
                   throw new Error("Unexpected response format from datamall");
                 }
