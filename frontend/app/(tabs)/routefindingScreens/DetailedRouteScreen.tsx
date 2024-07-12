@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   ScrollView,
@@ -21,6 +21,8 @@ import { SubwayTypeCard } from "@/components/detailedRouteScreen/SubwayType";
 import { BusNumberCard } from "@/components/detailedRouteScreen/BusNumber";
 import { TramTypeCard } from "@/components/detailedRouteScreen/TramNumber";
 import { useLocalSearchParams } from "expo-router";
+import { TouchableOpacity } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 
 interface LegBase {
   //base template for the info that is displayed in the leg
@@ -94,10 +96,13 @@ const iconList: IconCatalog = {
 
 interface PublicTransportLegProps {
   ptLeg: PublicTransportLeg;
+  expanded: boolean;
+  setExpanded: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 interface WalkLegProps {
   walkLeg: WalkLeg;
+  legHeight: number;
 }
 
 const polyline = require("@mapbox/polyline");
@@ -105,36 +110,98 @@ const polyline = require("@mapbox/polyline");
 const OriginRectangle: React.FC = () => {
   return (
     <View style={stylesheet.barContainer}>
-      <Image
-        source={iconList["MARKER"]}
-        style={{ width: 20, height: 20 }}
-      ></Image>
-      <View style={stylesheet.rectangle}></View>
-    </View>
-  );
-};
-
-const DestinationFlag: React.FC = () => {
-  return (
-    <View style={stylesheet.barContainer}>
-      <View style={stylesheet.circle}>
-        <Image
-          source={iconList["FLAG"]}
-          style={{ width: 20, height: 20 }}
-        ></Image>
+      <View style={{ justifyContent: "center", alignItems: "center" }}>
+        <View style={stylesheet.circleIconWrapper}>
+          <MaterialIcons name="my-location" size={20} color="#1B73E9" />
+        </View>
       </View>
     </View>
   );
 };
 
-const LegRectangle: React.FC = () => {
+const DestinationRectangle: React.FC = () => {
   return (
     <View style={stylesheet.barContainer}>
-      <View style={stylesheet.circle} />
-      <View style={stylesheet.rectangle} />
+      <View style={{ justifyContent: "center", alignItems: "center" }}>
+        <View style={stylesheet.circleIconWrapper}>
+          <MaterialIcons name="location-pin" size={20} color="crimson" />
+        </View>
+      </View>
     </View>
   );
 };
+
+interface LegRectangleProps {
+  height: number;
+  legType: string;
+  expanded: boolean;
+  leg: Leg;
+}
+
+const LegRectangle: React.FC<LegRectangleProps> = ({
+  height,
+  legType,
+  expanded,
+  leg,
+}) => {
+  const isWalk = legType === "WALK";
+
+  // Type guard to allow for intermediateStopCount to be called.
+  function isPublicTransportLeg(leg: any): leg is PublicTransportLeg {
+    return leg && typeof leg.intermediateStopCount === "number";
+  }
+
+  // Use the type guard to assert leg type
+  const adjustedHeight = isWalk
+    ? height
+    : isPublicTransportLeg(leg) && expanded
+    ? height + (leg.intermediateStopCount - 1) * 16
+    : height; // lineHeight = 16 set in publicTransportLegPart
+
+  return (
+    <View style={stylesheet.barContainer}>
+      <View style={{ justifyContent: "center", alignItems: "center" }}>
+        {isWalk && (
+          <View style={[{ height }, stylesheet.dotContainer]}>
+            {Array.from({ length: Math.ceil(height / 15) }).map((_, i) => (
+              <View key={i} style={stylesheet.dot} />
+            ))}
+          </View>
+        )}
+        <View style={stylesheet.circleIconWrapper}>
+          {isWalk ? (
+            <MaterialIcons name="directions-walk" size={20} />
+          ) : legType === "BUS" ? (
+            <MaterialIcons name="directions-bus" size={20} />
+          ) : legType === "NUS_BUS" ? (
+            <MaterialIcons name="directions-bus" size={20} />
+          ) : legType === "TRAM" ? (
+            <MaterialIcons name="tram" size={20} />
+          ) : legType === "SUBWAY" ? (
+            <MaterialIcons name="subway" size={20} />
+          ) : legType === "TRAIN" ? (
+            <MaterialIcons name="train" size={20} />
+          ) : (
+            <View style={stylesheet.circleIconWrapper} />
+          )}
+        </View>
+        {isWalk ? (
+          <View style={[{ height }, stylesheet.dotContainer]}>
+            {Array.from({ length: Math.ceil(height / 10) }).map((_, i) => (
+              <View key={i} style={stylesheet.dot} />
+            ))}
+          </View>
+        ) : (
+          <View
+            style={[stylesheet.solidRectangle, { height: adjustedHeight }]}
+          />
+        )}
+        {!isWalk && <View style={stylesheet.circleIconWrapper} />}
+      </View>
+    </View>
+  );
+};
+
 const formatIntoMinutesAndSeconds = (timingInSeconds: number) => {
   const seconds = (timingInSeconds % 60).toFixed(0);
   const minutes = Math.floor(timingInSeconds / 60).toFixed(0);
@@ -146,14 +213,19 @@ const formatIntoMinutesAndSeconds = (timingInSeconds: number) => {
 
 const PublicTransportLegPart: React.FC<PublicTransportLegProps> = ({
   ptLeg,
+  expanded,
+  setExpanded,
 }) => {
   //TO-DO: put in Tram type
   console.log("type:", ptLeg.type);
   console.log("duration:", ptLeg.duration);
+
   return (
-    <View>
+    <View style={stylesheet.legDetails}>
       <Pressable onPress={() => console.log("route pressed!")}>
-        <Text>{ptLeg.startingStopName}</Text>
+        <Text style={{ fontFamily: "Inter-SemiBold" }}>
+          {ptLeg.startingStopName}
+        </Text>
         <View style={{ flexDirection: "row" }}>
           {ptLeg.type === "SUBWAY" && (
             <SubwayTypeCard serviceType={ptLeg.serviceType} />
@@ -168,39 +240,58 @@ const PublicTransportLegPart: React.FC<PublicTransportLegProps> = ({
             </Text>
           )}
           {ptLeg.type === "WALK" && (
-            <Image source={iconList[ptLeg.type as keyof IconCatalog]} />
+            <View>
+              <Image source={iconList[ptLeg.type as keyof IconCatalog]} />
+            </View>
           )}
           {ptLeg.type === "TRAM" && (
             // <Image source={iconList[ptLeg.type as keyof IconCatalog]} />
             <TramTypeCard serviceType={ptLeg.serviceType} />
           )}
         </View>
-        <View style={{ flexDirection: "row" }}>
-          <Text>
-            {" "}
-            Ride {ptLeg.intermediateStopCount} stops (
-            {Math.ceil(ptLeg.duration / 60)} min)
+        <View style={{ flexDirection: "column" }}>
+          <View>
+            <TouchableOpacity onPress={() => setExpanded(!expanded)}>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <MaterialIcons
+                  name={expanded ? "expand-less" : "expand-more"}
+                  size={20}
+                  color="#434343"
+                />
+                <Text>
+                  {" "}
+                  Ride {ptLeg.intermediateStopCount} stops (
+                  {Math.ceil(ptLeg.duration / 60)} min)
+                </Text>
+              </View>
+            </TouchableOpacity>
+            {expanded && (
+              <View>
+                {ptLeg.intermediateStopNames.map((stop, index) => (
+                  <Text key={index} style={{ lineHeight: 16 }}>
+                    {stop}
+                  </Text>
+                ))}
+              </View>
+            )}
+          </View>
+
+          <Text style={{ fontFamily: "Inter-Semibold" }}>
+            {ptLeg.destinationStopName}
           </Text>
-          <Image source={iconList["RCHEVRON"]}></Image>
-        </View>
-        <View>
-          {ptLeg.intermediateStopNames.map((stop, index) => {
-            return <Text key={index}>{stop}</Text>;
-          })}
-          <Text> {ptLeg.destinationStopName}</Text>
         </View>
       </Pressable>
     </View>
   );
 };
 
-const WalkLegPart: React.FC<WalkLegProps> = ({ walkLeg }) => {
+const WalkLegPart: React.FC<WalkLegProps> = ({ walkLeg, legHeight }) => {
   //TO-DO: Add details on turns
   return (
-    <View>
+    <View style={stylesheet.legDetails}>
       <Pressable onPress={() => console.log("Route pressed!")}>
-        <Text>
-          Walk for {walkLeg.distance}m (
+        <Text style={{ marginTop: legHeight }}>
+          Walk for {Math.round(walkLeg.distance)}m (
           {formatIntoMinutesAndSeconds(walkLeg.duration)})
         </Text>
       </Pressable>
@@ -260,6 +351,8 @@ const DetailedRouteScreen: React.FC<
     baseResultsCardData.stopsCoordsArray.map((str) => {
       return JSON.parse(str);
     });
+  const [expanded, setExpanded] = useState(false);
+
   return (
     <SafeAreaView style={stylesheet.SafeAreaView}>
       <MapView
@@ -312,33 +405,51 @@ const DetailedRouteScreen: React.FC<
         )}
       </MapView>
       <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
-        <View style={{ flexDirection: "row" }}>
-          <OriginRectangle />
-          <Text>
-            Starting position: {origin.latitude}, {origin.longitude}
-          </Text>
+        <View style={{ marginVertical: 15, marginHorizontal: 20 }}>
+          <View style={{ flexDirection: "row" }}>
+            <OriginRectangle />
+            <View style={stylesheet.legDetails}>
+              <Text style={{ fontFamily: "Inter-SemiBold" }}>
+                Current Location
+              </Text>
+            </View>
+          </View>
+          {baseResultsCardData.journeyLegs.map((leg, index) => {
+            console.log("leg type", leg.type);
+            // Calculate the height based on the content of each leg
+            let legHeight = leg.type === "WALK" ? 20 : 40; // Adjust these values as needed
+            return (
+              <React.Fragment key={index}>
+                <View style={{ flexDirection: "row" }}>
+                  <LegRectangle
+                    height={legHeight}
+                    legType={leg.type}
+                    expanded={expanded}
+                    leg={leg}
+                  />
+                  {(leg.type === "BUS" ||
+                    leg.type === "SUBWAY" ||
+                    leg.type === "NUS_BUS" ||
+                    leg.type === "TRAM") && (
+                    <PublicTransportLegPart
+                      ptLeg={leg as PublicTransportLeg}
+                      expanded={expanded}
+                      setExpanded={setExpanded}
+                    />
+                  )}
+                  {leg.type === "WALK" && (
+                    <WalkLegPart
+                      walkLeg={leg as WalkLeg}
+                      legHeight={legHeight}
+                    />
+                  )}
+                </View>
+              </React.Fragment>
+            );
+          })}
+          <DestinationRectangle />
+          <Text>Destination: {destination.address}</Text>
         </View>
-        {baseResultsCardData.journeyLegs.map((leg, index) => {
-          console.log("leg type", leg.type);
-          return (
-            <React.Fragment key={index}>
-              <View style={{ flexDirection: "row" }}>
-                <LegRectangle />
-                {(leg.type === "BUS" ||
-                  leg.type === "SUBWAY" ||
-                  leg.type === "NUS_BUS" ||
-                  leg.type === "TRAM") && (
-                  <PublicTransportLegPart ptLeg={leg as PublicTransportLeg} />
-                )}
-                {leg.type === "WALK" && (
-                  <WalkLegPart walkLeg={leg as WalkLeg} />
-                )}
-              </View>
-            </React.Fragment>
-          );
-        })}
-        <DestinationFlag />
-        <Text>Destination: {destination.address}</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -374,11 +485,38 @@ const stylesheet = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: "grey",
   },
-  rectangle: {
-    width: 4,
+  solidRectangle: {
+    width: 18,
     height: 30, // Adjust as needed
-    backgroundColor: "limegreen",
-    marginLeft: 8,
+    backgroundColor: "green",
+  },
+  dotContainer: {
+    justifyContent: "space-around",
+    alignItems: "center",
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "grey",
+    opacity: 0.5,
+    marginVertical: 8,
+  },
+  circleIconWrapper: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#00000",
+    shadowOpacity: 0.4,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  legDetails: {
+    justifyContent: "flex-start",
+    marginLeft: 10,
+    marginTop: 7,
   },
 });
 
