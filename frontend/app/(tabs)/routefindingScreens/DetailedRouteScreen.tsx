@@ -354,7 +354,7 @@ const DetailedRouteScreen: React.FC<
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <SafeAreaView style={stylesheet.SafeAreaView}>
+    <View style={stylesheet.SafeAreaView}>
       <MapView
         style={stylesheet.MapView}
         provider={PROVIDER_GOOGLE}
@@ -451,7 +451,7 @@ const DetailedRouteScreen: React.FC<
           <Text>Destination: {destination.address}</Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -463,6 +463,7 @@ const stylesheet = StyleSheet.create({
   MapView: {
     flex: 1,
     height: "30%",
+    width: "100%"
   },
   ResultContainer: {
     flex: 1,
