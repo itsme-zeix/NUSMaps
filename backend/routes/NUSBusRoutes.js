@@ -10,7 +10,7 @@ const TEMP_NUS_SHUTTLES_ROUTES = new Map();
 const TEMP_NUS_BUS_STOPS_COORDS = new Map();
 const NUSNEXTBUSCREDENTIALS = btoa(`${process.env.NUSNEXTBUS_USER}:${process.env.NUSNEXTBUS_PASSWORD}`);
 const WALKINGROUTERURL = "http://nusmapswalkingrouter.southeastasia.cloudapp.azure.com/ors/v2/directions/foot-walking";
-const WALKINGROUTEMULTIPLIER = 1.5;
+const WALKINGROUTEMULTIPLIER = 1.25;
 
 const NUS_STOPS = [];
 
@@ -146,7 +146,7 @@ function _compareBasedOnWeight(firstItinerary, secondItinerary) {
     return _getWeight(firstItinerary) - _getWeight(secondItinerary);
 };
 function _getWeight(itinerary) {
-    return itinerary.duration + itinerary.walkTime * 7; 
+    return itinerary.duration + itinerary.walkTime * 12; 
 }
 
 const readFromSavedWalkingRoutes = () => {
