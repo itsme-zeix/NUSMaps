@@ -28,10 +28,11 @@ import Toast from "react-native-toast-message";
 import BusStopSearchBar from "@/components/BusStopSearchBar";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { getFavouritedBusStops } from "@/utils/storage";
-import axios from 'axios';
+import axios from "axios";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import BusStopSearchScreen from "@/components/BusStopSearchScreen";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 // STACK NAVIGATOR TO HANDLE BUS STOP SEARCHING
 const Stack = createStackNavigator();
@@ -300,14 +301,16 @@ const queryClient = new QueryClient();
 
 async function fetchBusArrivalTimes(busStops: any) {
   console.log("fetched bus stops: ", busStops);
-  const response = await axios.post("https://test-nusmaps.onrender.com/busArrivalTimes", 
+  const response = await axios.post(
+    "https://nusmaps.onrender.com/busArrivalTimes",
     busStops,
     {
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-  });
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }
+  );
   if (response.status !== 200) {
     throw new Error("Network response was not ok");
   }
@@ -336,7 +339,12 @@ function FavouriteBusStops({ refresh }: { refresh: () => void }) {
   });
 
   useEffect(() => {
-    if (favouriteBusStops && Array.isArray(favouriteBusStops) && !dataMutated) {
+    if (
+      favouriteBusStops &&
+      Array.isArray(favouriteBusStops) &&
+      favouriteBusStops.length > 0 &&
+      !dataMutated
+    ) {
       mutate(favouriteBusStops);
     }
   }, [favouriteBusStops, dataMutated, mutate]);
@@ -359,9 +367,18 @@ function FavouriteBusStops({ refresh }: { refresh: () => void }) {
   }, [dataMutated]);
 
   const handleRefresh = () => {
-    setDataMutated(false);  // Reset dataMutated to allow re-fetching
-    refresh();  // Trigger the refresh function passed as prop
+    setDataMutated(false); // Reset dataMutated to allow re-fetching
+    refresh(); // Trigger the refresh function passed as prop
   };
+
+  if (favouriteBusStops && favouriteBusStops.length === 0) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <Text style={{ fontFamily: "Inter-SemiBold", fontSize: 18, color: "#848484" }}> No bus stops have been favourited yet! </Text>
+        <MaterialCommunityIcons name="ghost" size={80} color={"#848484"} style={{ marginTop: 10 }}/>
+      </View>
+    );
+  }
 
   if (isPending)
     return <ActivityIndicator size="large" style={{ margin: 20 }} />;
