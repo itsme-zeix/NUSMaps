@@ -10,6 +10,7 @@ const TEMP_NUS_SHUTTLES_ROUTES = new Map();
 const TEMP_NUS_BUS_STOPS_COORDS = new Map();
 const NUSNEXTBUSCREDENTIALS = btoa(`${process.env.NUSNEXTBUS_USER}:${process.env.NUSNEXTBUS_PASSWORD}`);
 const WALKINGROUTERURL = "http://nusmapswalkingrouter.southeastasia.cloudapp.azure.com/ors/v2/directions/foot-walking";
+const WALKINGROUTEMULTIPLIER = 1.5;
 
 const NUS_STOPS = [];
 
@@ -346,7 +347,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
                 });
             };
             // console.log("originWalkingLegSteps: ", originWalkingLegSteps);
-            const originWalkingLegEndTime = startTimeAtOrigin + originResult.features[0].properties.segments[0].duration * 1000;
+            const originWalkingLegEndTime = startTimeAtOrigin + originResult.features[0].properties.segments[0].duration * 1000 * WALKINGROUTEMULTIPLIER;
             originWalkingLeg = {
                 startTime: startTimeAtOrigin,
                 endTime: originWalkingLegEndTime,
@@ -376,7 +377,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
                 },
                 rentedBike: false,
                 transitLeg: false,
-                duration:originResult.features[0].properties.summary.duration,
+                duration:originResult.features[0].properties.summary.duration * WALKINGROUTEMULTIPLIER,
                 intermediateStops:[],
                 steps: originWalkingLegSteps,
                 distance: originResult.features[0].properties.summary.distance,
@@ -387,7 +388,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
             if (bestOriginBusServiceETA === undefined) return undefined;
             const busLegStartTime = originWalkingLegEndTime + bestOriginBusServiceETA * 1000;
             const destWalkingLegStartTime = busLegStartTime + busTravelTime * 1000;
-            const destWalkingLegEndTime = destWalkingLegStartTime + destResult.features[0].properties.segments[0].duration * 1000;
+            const destWalkingLegEndTime = destWalkingLegStartTime + destResult.features[0].properties.segments[0].duration * 1000 * WALKINGROUTEMULTIPLIER;
             const destWalkingLegSteps = [];
             for (step of destResult.features[0].properties.segments[0].steps) {
                 destWalkingLegSteps.push({
@@ -424,7 +425,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
             },
             rentedBike: false,
             transitLeg: false,
-            duration:destResult.features[0].properties.summary.duration,
+            duration:destResult.features[0].properties.summary.duration * WALKINGROUTEMULTIPLIER,
             intermediateStops:[],
             steps: destWalkingLegSteps,
             distance: destResult.features[0].properties.summary.distance,
@@ -432,8 +433,8 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
         };
         // console.log(`walking route from nearest busstop, ${destinationCoords} : ${destResult}`);
         // console.log("time in seconds: ", destResult.routes[0].legs[0].duration.value);
-        totalTimeTaken += originResult.features[0].properties.segments[0].duration;
-        totalTimeTaken += destResult.features[0].properties.segments[0].duration ;
+        totalTimeTaken += originResult.features[0].properties.segments[0].duration * WALKINGROUTEMULTIPLIER;
+        totalTimeTaken += destResult.features[0].properties.segments[0].duration * WALKINGROUTEMULTIPLIER;
         totalTimeTaken += busTravelTime; //HARDCODED FOR NOW, CHANGE LATER
         totalTimeTaken += bestOriginBusServiceETA;
         // console.log("ETA: ", bestOriginBusServiceETA);
