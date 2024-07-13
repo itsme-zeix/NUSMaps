@@ -5,11 +5,10 @@ const router = express.Router();
 const fs = require('fs');
 const path = require("path");
 const axios = require("axios");
-const NO_OF_BUS_STOPS = 14;
+const NO_OF_BUS_STOPS = 8;
 const TEMP_NUS_SHUTTLES_ROUTES = new Map();
 const TEMP_NUS_BUS_STOPS_COORDS = new Map();
 const NUSNEXTBUSCREDENTIALS = btoa(`${process.env.NUSNEXTBUS_USER}:${process.env.NUSNEXTBUS_PASSWORD}`);
-
 const WALKINGROUTERURL = "http://nusmapswalkingrouter.southeastasia.cloudapp.azure.com/ors/v2/directions/foot-walking";
 
 const NUS_STOPS = [];
@@ -34,15 +33,26 @@ const TEMP_SERVICE_CHECKPOINT_BUS_STOP_MAP = {
     "L":[1, 92, 166, 261],
 };
 
+const AVERAGE_BUS_TIMINGS = {
+    //approximate timings in seconds
+    "A1": 240,
+    "A2": 140,
+    "BTC": 150,
+    "D1": 160,
+    "D2": 180,
+    "K": 150,
+    "L": 130
+};
+
 const _getBusLeg = (route, busTravelTime, busLegStartTime, originBusStopCoords, destBusStopCoords, ETAFromOriginBusStop) => {
     const originStopIndex = route.originStopIndex;
     const destStopIndex = route.destStopIndex;
     const service = route.service;
     const intermediateStops = _extractIntermediateStopsArray(originStopIndex, destStopIndex, service, busLegStartTime);
     const polyline = _getEncodedPolyLine(originStopIndex, destStopIndex, service);
-    console.log("origin service etas: ", route.originServiceETAs);
-    console.log("bus travel time: ", busTravelTime);
-    console.log("polyline: ", polyline);
+    // console.log("origin service etas: ", route.originServiceETAs);
+    // console.log("bus travel time: ", busTravelTime);
+    // console.log("polyline: ", polyline);
     return {
         startTime: busLegStartTime,
         endTime: busLegStartTime + (busTravelTime * 1000),
@@ -130,9 +140,13 @@ const _getEncodedPolyLine = (originStopIndex, destStopIndex, service) => {
     }
 };
 
-function _compareBasedOnDuration(firstItinerary, secondItinerary) {
-    return firstItinerary.duration - secondItinerary.duration;
+function _compareBasedOnWeight(firstItinerary, secondItinerary) {
+    //weight will be 
+    return _getWeight(firstItinerary) - _getWeight(secondItinerary);
 };
+function _getWeight(itinerary) {
+    return itinerary.duration + itinerary.walkTime * 7; 
+}
 
 const readFromSavedWalkingRoutes = () => {
     //returns an array in string form
@@ -143,7 +157,7 @@ const readFromSavedWalkingRoutes = () => {
 };
 const ROUTEHASHTABLE = readFromSavedWalkingRoutes() === "" ? new Map() : new Map(JSON.parse(readFromSavedWalkingRoutes()));
 const saveToSavedWalkingRoutes = () => {
-    console.log("results captured");
+    // console.log("results captured");
     const arrayFromMap = Array.from(ROUTEHASHTABLE);
     const jsonArrayString = JSON.stringify(arrayFromMap);
     const filePath = path.join(__dirname, `datafiles/results/savedWalkingPaths.json`);
@@ -154,8 +168,8 @@ const saveToSavedWalkingRoutes = () => {
 
 router.post("/", async (req, res) => {
     try {
-        console.log("origin received: ", req.body.origin);
-        console.log("destination received: ", req.body.destination);
+        // console.log("origin received: ", req.body.origin);
+        // console.log("destination received: ", req.body.destination);
         await _populateNusStops(); // can be elimintaed once backend postgresql db is implemented
         // console.log("nus stops after calling fun: ", NUS_STOPS);
         const startTimeAtOrigin = Date.now();
@@ -172,15 +186,14 @@ router.post("/", async (req, res) => {
         const formattedFinalResult = [];
         for (viableRoute of viableRoutes) {
             const busLeg = await formatIntoRoute(req.body.origin, req.body.destination, viableRoute, startTimeAtOrigin);
-            console.log('bus leg:', busLeg);
+            // console.log('bus leg:', busLeg);
             if (busLeg !== undefined) {
-                const indexToInsert = binarySearch(formattedFinalResult, busLeg.totalTimeTaken, "totalTimeTaken");
-                formattedFinalResult.splice(indexToInsert, 0, busLeg);
+                formattedFinalResult.push(busLeg);
             };
         };
-        console.log("formatted final result: ", formattedFinalResult);
         saveToSavedWalkingRoutes();
-        const slicedFormattedFinalResult = formattedFinalResult.slice(0, 3).sort(_compareBasedOnDuration);
+        const slicedFormattedFinalResult = formattedFinalResult.slice(0, 3).sort(_compareBasedOnWeight);
+        // console.log("formatted final result arranged in order: ", slicedFormattedFinalResult);
         // console.log("sliced formatted final result: ", slicedFormattedFinalResult);
         res.json({viableRoutes, slicedFormattedFinalResult});
     } catch (error) {
@@ -294,6 +307,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
             headers: headers,
         });
         originResult = routeFromOriginToNearestBusStop.data;
+        // console.log('walking route result for origin', originResult);
         ROUTEHASHTABLE.set(walkingFromOriginToBusStopKey, JSON.stringify(originResult));
     }
     
@@ -312,6 +326,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
             headers: headers,
         });
         destResult = routeFromNearestBusStopToDest.data;
+        console.log('walking route result for dest', destResult);
         ROUTEHASHTABLE.set(walkingFromBusStopToDestKey, JSON.stringify(destResult));
     }
     // console.log("sample origin result:", originResult);
@@ -323,7 +338,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
         // console.log("polyline of originLeg: ", originResult.routes[0].overview_polyline);
         try {
             const originWalkingLegSteps = [];
-            console.log(JSON.stringify(originResult));
+            // console.log(JSON.stringify(originResult));
             for (step of originResult.features[0].properties.segments[0].steps) {
                 originWalkingLegSteps.push({
                     "distance": step.distance.value,
@@ -367,7 +382,7 @@ const formatIntoRoute = async (currentCoords,destinationCoords,route, startTimeA
                 distance: originResult.features[0].properties.summary.distance,
                 numOfIntermediateStops:1,
             };
-            const busTravelTime = route.noOfStops * 2 * 60;
+            const busTravelTime = route.noOfStops * AVERAGE_BUS_TIMINGS[route.service];
             const bestOriginBusServiceETA = _extractBusServiceETA(route.originServiceETAs, originResult.features[0].properties.summary.duration); //the time the user has to wait at the bus stop before the next shuttle arrives
             if (bestOriginBusServiceETA === undefined) return undefined;
             const busLegStartTime = originWalkingLegEndTime + bestOriginBusServiceETA * 1000;
@@ -558,17 +573,19 @@ const extractCommonBusServices = async (originBusStops, destBusStops) =>  {
     return possibleBusStops;
 };
 
-const _calculateEuclideanDistance = (pointLat, pointLongitude, busStopLat, busStopLongitude) => {
-    const R  = 6371.0; // approximate radius of Earth in km
-    const latRadOrigin = _degToRad(pointLat);
-    const longRadOrigin = _degToRad(pointLongitude);
-    const busStopLatRad = _degToRad(busStopLat);
-    const busStopLongitudeRad = _degToRad(busStopLongitude);
-    const dLat = busStopLatRad - latRadOrigin;
-    const dLong = busStopLongitudeRad - longRadOrigin;
-    const a = Math.pow(dLong * Math.cos((busStopLatRad + latRadOrigin) / 2), 2) + Math.pow(dLat, 2);
-    const distance = R * Math.sqrt(a);
-    return distance;
+const _calculateHaversineDistance = (lat1, lon1, lat2, lon2) => {
+    const toRadians = (degrees) => (degrees * Math.PI) / 180;
+    const R = 6371; // Radius of the Earth in km
+    const dLat = toRadians(lat2 - lat1);
+    const dLon = toRadians(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRadians(lat1)) *
+        Math.cos(toRadians(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c * 1000; // Distance in m
 };
 
 const findNearestBusStopsFromPoints = (pointCoords, noOfBusStops) => {
@@ -576,13 +593,12 @@ const findNearestBusStopsFromPoints = (pointCoords, noOfBusStops) => {
     const pointLongitude = pointCoords.longitude;
     // console.log("point lat: ", pointLat);
     // console.log("NUS STOPS at this point: ", NUS_STOPS);
-    const busStopsSortedByDist = []; //will be an array of json, sorted by the first kv, distance
+    let busStopsSortedByDist = []; //will be an array of json, sorted by the first kv, distance
     for (busStop of NUS_STOPS) {
         const busStopLat = busStop.latitude;
         const busStopLongitude = busStop.longitude;
-        const dist = _calculateEuclideanDistance(pointLat, pointLongitude, busStopLat, busStopLongitude);
-        const index = binarySearch(busStopsSortedByDist, dist, "distance");
-        busStopsSortedByDist.splice(index, 0, {
+        const dist = _calculateHaversineDistance(pointLat, pointLongitude, busStopLat, busStopLongitude);
+        busStopsSortedByDist.push({
             "name": busStop.name,
             "distance" : dist,
             "latLng": {
@@ -591,27 +607,11 @@ const findNearestBusStopsFromPoints = (pointCoords, noOfBusStops) => {
             }
         });
     };
+    busStopsSortedByDist = busStopsSortedByDist.sort((x, y) => {
+        return x.distance - y.distance;
+    });
     // console.log("bus stops array after slicing:", busStopsSortedByDist.slice(0, noOfBusStops));
     return busStopsSortedByDist.slice(0, noOfBusStops);
-};
-
-const binarySearch = (arr, element, attribute) => {
-    //returns the index to insert an element in a sorted array, based on an attribute
-    let left = 0;
-    let right = arr.length;
-    while (true) {
-        mid = Math.floor((right - left) / 2) + left;
-        if (left >= right) {
-            return left;
-        } else if (arr[mid][attribute] < element) {
-            //recurse on the right
-            left = mid + 1;
-        } else if (arr[mid][attribute] == element) {
-            return mid;
-        } else {
-            right = mid;
-        }
-    }
 };
 
 const _populateCorrectedCheckpoints = (service) => {
@@ -623,7 +623,7 @@ const _populateCorrectedCheckpoints = (service) => {
     const route = TEMP_NUS_SHUTTLES_ROUTES.get(service);
     const newArray = [];
     for (checkpoint of checkPointArray) {
-        if (checkpoint == undefined) console.log(checkpoint);
+        // if (checkpoint == undefined) console.log(checkpoint);
         let flag = true;
         for (let index = 0; index < TEMP_SERVICE_CHECKPOINT_BUS_STOP_MAP[service].length; index++) {
             if (checkpoint.PointID === index) {
