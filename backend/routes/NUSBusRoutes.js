@@ -10,7 +10,7 @@ const TEMP_NUS_SHUTTLES_ROUTES = new Map();
 const TEMP_NUS_BUS_STOPS_COORDS = new Map();
 const NUSNEXTBUSCREDENTIALS = btoa(`${process.env.NUSNEXTBUS_USER}:${process.env.NUSNEXTBUS_PASSWORD}`);
 const WALKINGROUTERURL = "http://nusmapswalkingrouter.southeastasia.cloudapp.azure.com/ors/v2/directions/foot-walking";
-const WALKINGROUTEMULTIPLIER = 1.25;
+const WALKINGROUTEMULTIPLIER = 1.5;
 
 const NUS_STOPS = [];
 
@@ -37,12 +37,12 @@ const TEMP_SERVICE_CHECKPOINT_BUS_STOP_MAP = {
 const AVERAGE_BUS_TIMINGS = {
     //approximate timings in seconds
     "A1": 240,
-    "A2": 140,
-    "BTC": 150,
-    "D1": 160,
-    "D2": 180,
-    "K": 150,
-    "L": 130
+    "A2": 180,
+    "BTC": 190,
+    "D1": 200,
+    "D2": 240,
+    "K": 210,
+    "L": 190
 };
 
 const _getBusLeg = (route, busTravelTime, busLegStartTime, originBusStopCoords, destBusStopCoords, ETAFromOriginBusStop) => {
