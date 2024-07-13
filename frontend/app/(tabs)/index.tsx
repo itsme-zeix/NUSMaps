@@ -9,6 +9,7 @@ import {
   RefreshControl,
   Image,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
@@ -91,7 +92,7 @@ const ColouredCircle = ({
 
 // Logic to modify the timings in the BusService object from ISO time to minutes away from now.
 const calculateMinutesDifference = (isoTime: string): string => {
-  if (!isoTime) return "Loading..."; // Handle uninitialized data
+  if (!isoTime) return "Loading"; // Handle uninitialized data
 
   // Calculate the difference in minutes between the current time and the given ISO time
   const now = new Date();
@@ -229,10 +230,16 @@ const ListItem = ({ item }: { item: BusStop }) => {
                 </Text>
               </View>
               <View style={styles.rightContainer}>
-                <Text style={[styles.details, styles.timingText]}>
+                <Text
+                  style={[styles.details, styles.timingText]}
+                  numberOfLines={1}
+                >
                   {bus.timings[0]}
                 </Text>
-                <Text style={[styles.details, styles.timingText]}>
+                <Text
+                  style={[styles.details, styles.timingText]}
+                  numberOfLines={1}
+                >
                   {bus.timings[1]}
                 </Text>
               </View>
@@ -569,7 +576,7 @@ function BusStopsScreen() {
           <BusStopSearchBar />
           <View style={styles.segmentedControlContainer}>
             <SegmentedControl
-              values={["Favourites", "Nearby", "NUS Bus Stops"]}
+              values={["Favourites", "Nearby", "NUS"]}
               selectedIndex={selectedIndex}
               onChange={(event) => {
                 setSelectedIndex(event.nativeEvent.selectedSegmentIndex);

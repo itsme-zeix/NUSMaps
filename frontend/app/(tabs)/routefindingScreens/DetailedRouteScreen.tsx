@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   ScrollView,
@@ -15,19 +15,21 @@ import MapView, {
   Marker,
   Polyline,
   LatLng,
-  Callout
+  Callout,
 } from "react-native-maps";
-import { SubwayTypeCard } from "@/app/SubwayType";
-import { BusNumberCard } from "@/app/BusNumber";
-import { TramTypeCard } from "@/app/TramNumber";
+import { SubwayTypeCard } from "@/components/detailedRouteScreen/SubwayType";
+import { BusNumberCard } from "@/components/detailedRouteScreen/BusNumber";
+import { TramTypeCard } from "@/components/detailedRouteScreen/TramNumber";
 import { useLocalSearchParams } from "expo-router";
+import { TouchableOpacity } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 
 interface LegBase {
   //base template for the info that is displayed in the leg
   type: string;
-  startTime: number, //start and end time only defined for buses(+ nus buses) for now
-  endTime: number,
-  duration:number,
+  startTime: number; //start and end time only defined for buses(+ nus buses) for now
+  endTime: number;
+  duration: number;
 }
 
 interface WalkLeg extends LegBase {
@@ -35,7 +37,7 @@ interface WalkLeg extends LegBase {
     distance: number;
     direction: string;
   }[];
-  distance:number;
+  distance: number;
 }
 
 type destinationType = {
@@ -45,7 +47,7 @@ type destinationType = {
 
 interface PublicTransportLeg extends LegBase {
   //used to display the routes info
-  startingStopETA: number, //only defined for nus buses, for now
+  startingStopETA: number; //only defined for nus buses, for now
   serviceType: string;
   startingStopName: string;
   destinationStopName: string;
@@ -53,12 +55,12 @@ interface PublicTransportLeg extends LegBase {
   duration: number;
   intermediateStopNames: string[];
   intermediateStopGPSLatLng: LatLng[];
-};
+}
 
 type Leg = PublicTransportLeg | WalkLeg;
 
 type stopCoords = {
-  name:string
+  name: string;
 } & LatLng;
 
 interface baseResultsCardType {
@@ -67,8 +69,8 @@ interface baseResultsCardType {
   wholeJourneyTiming: string;
   journeyLegs: Leg[]; //an array of all the legs in 1 route
   polylineArray: string[]; //each leg's polyline is a string
-  stopsCoordsArray: string[]
-};
+  stopsCoordsArray: string[];
+}
 
 interface IconCatalog {
   WALK: ImageSourcePropType;
@@ -89,15 +91,18 @@ const iconList: IconCatalog = {
   RCHEVRON: require(`@/assets/images/chevron_right-icon.png`),
   MARKER: require("@/assets/images/location-icon.png"),
   FLAG: require("@/assets/images/finishFlag-icon.png"),
-  STOPCIRCULARMARKER: require("@/assets/images/mapCircle-icon.png")
+  STOPCIRCULARMARKER: require("@/assets/images/mapCircle-icon.png"),
 };
 
 interface PublicTransportLegProps {
   ptLeg: PublicTransportLeg;
+  expanded: boolean;
+  setExpanded: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 interface WalkLegProps {
   walkLeg: WalkLeg;
+  legHeight: number;
 }
 
 const polyline = require("@mapbox/polyline");
@@ -105,98 +110,190 @@ const polyline = require("@mapbox/polyline");
 const OriginRectangle: React.FC = () => {
   return (
     <View style={stylesheet.barContainer}>
-      <Image
-        source={iconList["MARKER"]}
-        style={{ width: 20, height: 20 }}
-      ></Image>
-      <View style={stylesheet.rectangle}></View>
-    </View>
-  );
-};
-
-const DestinationFlag: React.FC = () => {
-  return (
-    <View style={stylesheet.barContainer}>
-      <View style={stylesheet.circle}>
-        <Image
-          source={iconList["FLAG"]}
-          style={{ width: 20, height: 20 }}
-        ></Image>
+      <View style={{ justifyContent: "center", alignItems: "center" }}>
+        <View style={stylesheet.circleIconWrapper}>
+          <MaterialIcons name="my-location" size={20} color="#1B73E9" />
+        </View>
       </View>
     </View>
   );
 };
 
-const LegRectangle: React.FC = () => {
+const DestinationRectangle: React.FC = () => {
   return (
     <View style={stylesheet.barContainer}>
-      <View style={stylesheet.circle} />
-      <View style={stylesheet.rectangle} />
+      <View style={{ justifyContent: "center", alignItems: "center" }}>
+        <View style={stylesheet.circleIconWrapper}>
+          <MaterialIcons name="location-pin" size={20} color="crimson" />
+        </View>
+      </View>
     </View>
   );
 };
-const formatIntoMinutesAndSeconds = (timingInSeconds:number) => {
+
+interface LegRectangleProps {
+  height: number;
+  legType: string;
+  expanded: boolean;
+  leg: Leg;
+}
+
+const LegRectangle: React.FC<LegRectangleProps> = ({
+  height,
+  legType,
+  expanded,
+  leg,
+}) => {
+  const isWalk = legType === "WALK";
+
+  // Type guard to allow for intermediateStopCount to be called.
+  function isPublicTransportLeg(leg: any): leg is PublicTransportLeg {
+    return leg && typeof leg.intermediateStopCount === "number";
+  }
+
+  // Use the type guard to assert leg type
+  const adjustedHeight = isWalk
+    ? height
+    : isPublicTransportLeg(leg) && expanded
+    ? height + (leg.intermediateStopCount - 1) * 16
+    : height; // lineHeight = 16 set in publicTransportLegPart
+
+  return (
+    <View style={stylesheet.barContainer}>
+      <View style={{ justifyContent: "center", alignItems: "center" }}>
+        {isWalk && (
+          <View style={[{ height }, stylesheet.dotContainer]}>
+            {Array.from({ length: Math.ceil(height / 15) }).map((_, i) => (
+              <View key={i} style={stylesheet.dot} />
+            ))}
+          </View>
+        )}
+        <View style={stylesheet.circleIconWrapper}>
+          {isWalk ? (
+            <MaterialIcons name="directions-walk" size={20} />
+          ) : legType === "BUS" ? (
+            <MaterialIcons name="directions-bus" size={20} />
+          ) : legType === "NUS_BUS" ? (
+            <MaterialIcons name="directions-bus" size={20} />
+          ) : legType === "TRAM" ? (
+            <MaterialIcons name="tram" size={20} />
+          ) : legType === "SUBWAY" ? (
+            <MaterialIcons name="subway" size={20} />
+          ) : legType === "TRAIN" ? (
+            <MaterialIcons name="train" size={20} />
+          ) : (
+            <View style={stylesheet.circleIconWrapper} />
+          )}
+        </View>
+        {isWalk ? (
+          <View style={[{ height }, stylesheet.dotContainer]}>
+            {Array.from({ length: Math.ceil(height / 10) }).map((_, i) => (
+              <View key={i} style={stylesheet.dot} />
+            ))}
+          </View>
+        ) : (
+          <View
+            style={[stylesheet.solidRectangle, { height: adjustedHeight }]}
+          />
+        )}
+        {!isWalk && <View style={stylesheet.circleIconWrapper} />}
+      </View>
+    </View>
+  );
+};
+
+const formatIntoMinutesAndSeconds = (timingInSeconds: number) => {
   const seconds = (timingInSeconds % 60).toFixed(0);
-  const minutes  = Math.floor(timingInSeconds / 60).toFixed(0);
-  if (minutes !== '0') {
+  const minutes = Math.floor(timingInSeconds / 60).toFixed(0);
+  if (minutes !== "0") {
     return `${minutes} minutes, ${seconds} seconds`;
-  };
+  }
   return `${seconds} seconds`;
 };
 
 const PublicTransportLegPart: React.FC<PublicTransportLegProps> = ({
   ptLeg,
+  expanded,
+  setExpanded,
 }) => {
   //TO-DO: put in Tram type
   console.log("type:", ptLeg.type);
   console.log("duration:", ptLeg.duration);
+
   return (
-    <View>
+    <View style={stylesheet.legDetails}>
       <Pressable onPress={() => console.log("route pressed!")}>
-        <Text>{ptLeg.startingStopName}</Text>
+        <Text style={{ fontFamily: "Inter-SemiBold" }}>
+          {ptLeg.startingStopName}
+        </Text>
         <View style={{ flexDirection: "row" }}>
           {ptLeg.type === "SUBWAY" && (
             <SubwayTypeCard serviceType={ptLeg.serviceType} />
           )}
-          {(ptLeg.type === "BUS" || ptLeg.type === "NUS_BUS")  && (
-              <BusNumberCard busNumber={ptLeg.serviceType} busType={ptLeg.type} />
-          )} 
+          {(ptLeg.type === "BUS" || ptLeg.type === "NUS_BUS") && (
+            <BusNumberCard busNumber={ptLeg.serviceType} busType={ptLeg.type} />
+          )}
           {ptLeg.type === "NUS_BUS" && (
-            <Text>Wait for {formatIntoMinutesAndSeconds(ptLeg.startingStopETA)} for the next bus</Text>
-          )} 
+            <Text>
+              Wait for {formatIntoMinutesAndSeconds(ptLeg.startingStopETA)} for
+              the next bus
+            </Text>
+          )}
           {ptLeg.type === "WALK" && (
-            <Image source={iconList[ptLeg.type as keyof IconCatalog]} />
+            <View>
+              <Image source={iconList[ptLeg.type as keyof IconCatalog]} />
+            </View>
           )}
           {ptLeg.type === "TRAM" && (
             // <Image source={iconList[ptLeg.type as keyof IconCatalog]} />
             <TramTypeCard serviceType={ptLeg.serviceType} />
           )}
         </View>
-        <View style={{ flexDirection: "row" }}>
-          <Text>
-            {" "}
-            Ride {ptLeg.intermediateStopCount} stops (
-            {Math.ceil(ptLeg.duration / 60)} min)
+        <View style={{ flexDirection: "column" }}>
+          <View>
+            <TouchableOpacity onPress={() => setExpanded(!expanded)}>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <MaterialIcons
+                  name={expanded ? "expand-less" : "expand-more"}
+                  size={20}
+                  color="#434343"
+                />
+                <Text>
+                  {" "}
+                  Ride {ptLeg.intermediateStopCount} stops (
+                  {Math.ceil(ptLeg.duration / 60)} min)
+                </Text>
+              </View>
+            </TouchableOpacity>
+            {expanded && (
+              <View>
+                {ptLeg.intermediateStopNames.map((stop, index) => (
+                  <Text key={index} style={{ lineHeight: 16 }}>
+                    {stop}
+                  </Text>
+                ))}
+              </View>
+            )}
+          </View>
+
+          <Text style={{ fontFamily: "Inter-Semibold" }}>
+            {ptLeg.destinationStopName}
           </Text>
-          <Image source={iconList["RCHEVRON"]}></Image>
-        </View>
-        <View>
-          {ptLeg.intermediateStopNames.map((stop, index) => {
-            return <Text key={index}>{stop}</Text>;
-          })}
-          <Text> {ptLeg.destinationStopName}</Text>
         </View>
       </Pressable>
     </View>
   );
 };
 
-const WalkLegPart: React.FC<WalkLegProps> = ({ walkLeg }) => {
+const WalkLegPart: React.FC<WalkLegProps> = ({ walkLeg, legHeight }) => {
   //TO-DO: Add details on turns
   return (
-    <View>
+    <View style={stylesheet.legDetails}>
       <Pressable onPress={() => console.log("Route pressed!")}>
-        <Text>Walk for {walkLeg.distance}m ({formatIntoMinutesAndSeconds(walkLeg.duration)})</Text>
+        <Text style={{ marginTop: legHeight }}>
+          Walk for {Math.round(walkLeg.distance)}m (
+          {formatIntoMinutesAndSeconds(walkLeg.duration)})
+        </Text>
       </Pressable>
     </View>
   );
@@ -208,9 +305,7 @@ const DetailedRouteScreen: React.FC<
   //add a base current location and end flag
   const params = useLocalSearchParams();
   console.log("destination type:", params.destination);
-  let destination: destinationType = JSON.parse(
-    params.destination as string
-  );
+  let destination: destinationType = JSON.parse(params.destination as string);
   console.log("dest:", destination);
   let origin: LatLng = JSON.parse(params.origin as string);
   console.log("origin:", origin);
@@ -224,10 +319,13 @@ const DetailedRouteScreen: React.FC<
   let polylineArray: string[] = [];
   if (
     baseResultsCardData.polylineArray == undefined &&
-    origin.latitude != destination.latitude && 
+    origin.latitude != destination.latitude &&
     origin.longitude != destination.longitude
   ) {
-    console.log("base results card data: ", JSON.stringify(baseResultsCardData));
+    console.log(
+      "base results card data: ",
+      JSON.stringify(baseResultsCardData)
+    );
     // console.log("stop coords array as str: ", JSON.stringify(baseResultsCardData).)
     console.error(
       "no routing received despite differing origins and destination"
@@ -243,15 +341,20 @@ const DetailedRouteScreen: React.FC<
   //     longitude: latLngPair[1]
   //   }));
   // }
-  for (let arr of (polyline.decode(polylineArray))) {
+  for (let arr of polyline.decode(polylineArray)) {
     formatted_array.push({
       latitude: arr[0],
-      longitude:arr[1]
+      longitude: arr[1],
     });
-  };
-  const stopsCoordsArray:stopCoords[] = baseResultsCardData.stopsCoordsArray.map((str) => {return JSON.parse(str);});
+  }
+  const stopsCoordsArray: stopCoords[] =
+    baseResultsCardData.stopsCoordsArray.map((str) => {
+      return JSON.parse(str);
+    });
+  const [expanded, setExpanded] = useState(false);
+
   return (
-    <SafeAreaView style={stylesheet.SafeAreaView}>
+    <View style={stylesheet.SafeAreaView}>
       <MapView
         style={stylesheet.MapView}
         provider={PROVIDER_GOOGLE}
@@ -263,13 +366,35 @@ const DetailedRouteScreen: React.FC<
             Math.abs(origin.longitude - destination.longitude) * 2,
         }}
       >
-        <Marker title="Origin" coordinate={{latitude: origin.latitude, longitude: origin.longitude}}/>
+        <Marker
+          title="Origin"
+          coordinate={{
+            latitude: origin.latitude,
+            longitude: origin.longitude,
+          }}
+        />
         {stopsCoordsArray.map((stop, index) => {
-          if (stop.name != "Origin" && stop.name != "Destination" ) {
-          return (
-              <Marker title={stop.name} key = {index} coordinate={{latitude: stop.latitude, longitude: stop.longitude}} image={iconList.STOPCIRCULARMARKER}/>);
-        }})}
-        <Marker title="Destination" coordinate={{latitude: destination.latitude, longitude: destination.longitude}}/>
+          if (stop.name != "Origin" && stop.name != "Destination") {
+            return (
+              <Marker
+                title={stop.name}
+                key={index}
+                coordinate={{
+                  latitude: stop.latitude,
+                  longitude: stop.longitude,
+                }}
+                image={iconList.STOPCIRCULARMARKER}
+              />
+            );
+          }
+        })}
+        <Marker
+          title="Destination"
+          coordinate={{
+            latitude: destination.latitude,
+            longitude: destination.longitude,
+          }}
+        />
         {polylineArray.length > 0 && (
           <Polyline
             coordinates={formatted_array}
@@ -280,32 +405,53 @@ const DetailedRouteScreen: React.FC<
         )}
       </MapView>
       <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
-        <View style={{ flexDirection: "row" }}>
-          <OriginRectangle />
-          <Text>
-            Starting position: {origin.latitude}, {origin.longitude}
-          </Text>
+        <View style={{ marginVertical: 15, marginHorizontal: 20 }}>
+          <View style={{ flexDirection: "row" }}>
+            <OriginRectangle />
+            <View style={stylesheet.legDetails}>
+              <Text style={{ fontFamily: "Inter-SemiBold" }}>
+                Current Location
+              </Text>
+            </View>
+          </View>
+          {baseResultsCardData.journeyLegs.map((leg, index) => {
+            console.log("leg type", leg.type);
+            // Calculate the height based on the content of each leg
+            let legHeight = leg.type === "WALK" ? 20 : 40; // Adjust these values as needed
+            return (
+              <React.Fragment key={index}>
+                <View style={{ flexDirection: "row" }}>
+                  <LegRectangle
+                    height={legHeight}
+                    legType={leg.type}
+                    expanded={expanded}
+                    leg={leg}
+                  />
+                  {(leg.type === "BUS" ||
+                    leg.type === "SUBWAY" ||
+                    leg.type === "NUS_BUS" ||
+                    leg.type === "TRAM") && (
+                    <PublicTransportLegPart
+                      ptLeg={leg as PublicTransportLeg}
+                      expanded={expanded}
+                      setExpanded={setExpanded}
+                    />
+                  )}
+                  {leg.type === "WALK" && (
+                    <WalkLegPart
+                      walkLeg={leg as WalkLeg}
+                      legHeight={legHeight}
+                    />
+                  )}
+                </View>
+              </React.Fragment>
+            );
+          })}
+          <DestinationRectangle />
+          <Text>Destination: {destination.address}</Text>
         </View>
-        {baseResultsCardData.journeyLegs.map((leg, index) => {
-          console.log("leg type", leg.type);
-          return (
-            <React.Fragment key={index}>
-              <View style={{ flexDirection: "row" }}>
-                <LegRectangle />
-                {(leg.type === "BUS" || leg.type === "SUBWAY" || leg.type === "NUS_BUS" || leg.type === "TRAM") && (
-                  <PublicTransportLegPart ptLeg={leg as PublicTransportLeg} />
-                )}
-                {leg.type === "WALK" && (
-                  <WalkLegPart walkLeg={leg as WalkLeg} />
-                )}
-              </View>
-            </React.Fragment>
-          );
-        })}
-        <DestinationFlag />
-        <Text>Destination: {destination.address}</Text> 
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -317,6 +463,7 @@ const stylesheet = StyleSheet.create({
   MapView: {
     flex: 1,
     height: "30%",
+    width: "100%"
   },
   ResultContainer: {
     flex: 1,
@@ -339,11 +486,38 @@ const stylesheet = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: "grey",
   },
-  rectangle: {
-    width: 4,
+  solidRectangle: {
+    width: 18,
     height: 30, // Adjust as needed
-    backgroundColor: "limegreen",
-    marginLeft: 8,
+    backgroundColor: "green",
+  },
+  dotContainer: {
+    justifyContent: "space-around",
+    alignItems: "center",
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "grey",
+    opacity: 0.5,
+    marginVertical: 8,
+  },
+  circleIconWrapper: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#00000",
+    shadowOpacity: 0.4,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  legDetails: {
+    justifyContent: "flex-start",
+    marginLeft: 10,
+    marginTop: 7,
   },
 });
 

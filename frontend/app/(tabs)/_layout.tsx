@@ -1,8 +1,6 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { createStackNavigator } from "@react-navigation/stack";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
-import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function TabLayout() {
@@ -11,17 +9,17 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: "#0163CF",
         headerShown: false,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: "Bus Stops",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
-              name={focused ? "home" : "home-outline"}
+              name={focused ? "bus" : "bus-outline"}
               color={color}
             />
           ),
@@ -33,7 +31,7 @@ export default function TabLayout() {
           title: "Search Route",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
-              name={focused ? "code-slash" : "code-slash-outline"}
+              name={focused ? "map" : "map-outline"}
               color={color}
             />
           ),
@@ -42,10 +40,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="busservices"
         options={{
-          title: "Bus Services",
+          title: "NUS Bus Location",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
-              name={focused ? "code-slash" : "code-slash-outline"}
+              name={focused ? "location" : "location-outline"}
               color={color}
             />
           ),

@@ -1,7 +1,6 @@
 import React from "react";
 import {
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   Text,
   View,
@@ -10,14 +9,15 @@ import {
   Platform,
   Pressable,
 } from "react-native";
-import { ImageSourcePropType } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
-import { LatLng } from "react-native-maps";
+import MapView, { Marker, LatLng, PROVIDER_GOOGLE } from "react-native-maps";
 import Constants from "expo-constants";
-import { SubwayTypeCard } from "@/app/SubwayType";
-import { BusNumberCard } from "@/app/BusNumber";
+import { SubwayTypeCard } from "@/components/detailedRouteScreen/SubwayType";
+import { BusNumberCard } from "@/components/detailedRouteScreen/BusNumber";
+import { TramTypeCard } from "@/components/detailedRouteScreen/TramNumber";
 import { useRouter, useLocalSearchParams, useSegments } from "expo-router";
-import { TramTypeCard } from "@/app/TramNumber";
+import { MaterialIcons } from "@expo/vector-icons";
 
 //interfaces and types
 type destinationType = {
@@ -28,19 +28,19 @@ type destinationType = {
 interface LegBase {
   //base template for the info that is displayed in the leg
   type: string;
-};
+}
 
 interface WalkLeg extends LegBase {
   walkInfo: {
     distance: number;
     direction: string;
   }[];
-  distance:number;
+  distance: number;
 }
 
 interface PublicTransportLeg extends LegBase {
   //used to display the routes info
-  startingStopETA: number,
+  startingStopETA: number;
   serviceType: string;
   startingStopName: string;
   destinationStopName: string;
@@ -48,10 +48,9 @@ interface PublicTransportLeg extends LegBase {
   duration: number;
   intermediateStopNames: string[];
   intermediateStopGPSLatLng: LatLng[];
-};
+}
 
 type Leg = PublicTransportLeg | WalkLeg;
-
 
 interface baseResultsCardType {
   types: string[];
@@ -59,8 +58,8 @@ interface baseResultsCardType {
   wholeJourneyTiming: string;
   journeyLegs: Leg[]; //an array of all the legs in 1 route
   polylineArray: string[]; //each leg's polyline is a string
-  stopsCoordsArray: string[]
-};
+  stopsCoordsArray: string[];
+}
 
 interface ResultObject {
   origin: LatLng;
@@ -74,23 +73,18 @@ interface SingleResultCardData {
   resultData: baseResultsCardType;
 }
 
+// Define a type for all possible icon names
+type IconName = keyof typeof MaterialIcons.glyphMap;
+
 interface IconCatalog {
-  WALK: ImageSourcePropType;
-  SUBWAY: ImageSourcePropType;
-  BUS: ImageSourcePropType;
-  TRAM: ImageSourcePropType;
-  RCHEVRON: ImageSourcePropType;
-  NUS_BUS: ImageSourcePropType;
+  WALK: IconName;
+  RCHEVRON: IconName;
 }
 
-//stores the paths of the chevrons
+// Define the icon list with the correct types
 const iconList: IconCatalog = {
-  WALK: require("@/assets/images/walk-icon.png"),
-  SUBWAY: require("@/assets/images/subway-icon.png"),
-  BUS: require("@/assets/images/bus-icon.png"),
-  TRAM: require("@/assets/images/tram-icon.png"),
-  RCHEVRON: require(`@/assets/images/chevron_right-icon.png`),
-  NUS_BUS: require("@/assets/images/bus-icon.png"),
+  WALK: "directions-walk",
+  RCHEVRON: "chevron-right",
 };
 
 //constant variables
@@ -114,18 +108,22 @@ const ResultCard: React.FC<SingleResultCardData> = ({
   console.log("curr path: ", segments.join("/"));
   const nextScreenFunc = () => {
     router.push({
-    pathname: "../routefindingScreens/DetailedRouteScreen",
-    params: {
-      origin: JSON.stringify(origin),
-      destination: JSON.stringify(destination),
-      baseResultsCardData: JSON.stringify(resultData),
-    },
-  })
+      pathname: "../routefindingScreens/DetailedRouteScreen",
+      params: {
+        origin: JSON.stringify(origin),
+        destination: JSON.stringify(destination),
+        baseResultsCardData: JSON.stringify(resultData),
+      },
+    });
   };
   return (
-      <Pressable style={[{ backgroundColor: "grey" }, styles.resultCard]} onPress = {nextScreenFunc}>
-        <View>
-          <View style={styles.icons}>
+    <Pressable
+      style={[{ backgroundColor: "white" }, styles.resultCard]}
+      onPress={nextScreenFunc}
+    >
+      <View style={{ flexDirection: "column" }}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <View style={styles.iconsContainer}>
             {types.map((icon, index) => {
               if (icon === "BUS" || icon === "NUS_BUS") {
                 const ptLeg = resultData.journeyLegs[
@@ -133,11 +131,11 @@ const ResultCard: React.FC<SingleResultCardData> = ({
                 ] as PublicTransportLeg;
                 console.log("pt leg:", ptLeg);
                 return (
-                  <View
-                    key={index}
-                    style={{ flexDirection: "row", alignItems: "center" }}
-                  >
-                    <BusNumberCard busNumber={ptLeg.serviceType} busType={ptLeg.type}/>
+                  <View key={index} style={styles.iconWrapper}>
+                    <BusNumberCard
+                      busNumber={ptLeg.serviceType}
+                      busType={ptLeg.type}
+                    />
                   </View>
                 );
               } else if (icon === "SUBWAY") {
@@ -145,10 +143,7 @@ const ResultCard: React.FC<SingleResultCardData> = ({
                   index / 2
                 ] as PublicTransportLeg;
                 return (
-                  <View
-                    key={index}
-                    style={{ flexDirection: "row", alignItems: "center" }}
-                  >
+                  <View key={index} style={styles.iconWrapper}>
                     <SubwayTypeCard serviceType={ptLeg.serviceType} />
                   </View>
                 );
@@ -157,28 +152,36 @@ const ResultCard: React.FC<SingleResultCardData> = ({
                   index / 2
                 ] as PublicTransportLeg;
                 return (
-                  <View
-                    key={index}
-                    style={{ flexDirection: "row", alignItems: "center" }}
-                  >
+                  <View key={index} style={styles.iconWrapper}>
                     <TramTypeCard serviceType={ptLeg.serviceType} />
                   </View>
                 );
               } else {
                 return (
-                  <Image
-                    key={index}
-                    source={iconList[icon as keyof IconCatalog]}
-                    style={{ flexDirection: "row", alignItems: "center" }}
-                  />
+                  <View style={styles.iconWrapper}>
+                    <MaterialIcons
+                      key={index}
+                      size={22}
+                      name={iconList[icon as keyof IconCatalog]}
+                      color="#434343"
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    />
+                  </View>
                 );
               }
             })}
-            <Text>{resultData.wholeJourneyTiming}</Text>
           </View>
-          <Text style={styles.travelDuration}>{resultData.journeyTiming}</Text>
+          <View style={styles.travelDurationContainer}>
+            <Text style={styles.travelDuration}>
+              {resultData.journeyTiming}
+            </Text>
+          </View>
         </View>
-      </Pressable>
+      </View>
+      <View style={styles.startAndEndTimeContainer}>
+        <Text>{resultData.wholeJourneyTiming}</Text>
+      </View>
+    </Pressable>
   );
 };
 
@@ -187,12 +190,12 @@ const ResultCard: React.FC<SingleResultCardData> = ({
 //     setIsVisible: (isVisible: boolean) => void;
 //   }
 // result screen
-const _parseParams = (result : string | string[] | undefined) => {
-    return typeof(result) === 'string' ? JSON.parse(result) : undefined;
+const _parseParams = (result: string | string[] | undefined) => {
+  return typeof result === "string" ? JSON.parse(result) : undefined;
 };
 
 const RefactoredResultsScreen: React.FC = () => {
-  const {origin, destination, baseResultsData} = useLocalSearchParams();
+  const { origin, destination, baseResultsData } = useLocalSearchParams();
   const queryParams = {
     key: apiKey,
     language: "en",
@@ -200,123 +203,171 @@ const RefactoredResultsScreen: React.FC = () => {
     components: "country:sg",
   };
   console.log("base result cards data:", baseResultsData);
-  const parsedOrigin = _parseParams(origin);
-  const parsedDestination = _parseParams(destination);
+  const parsedOrigin: LatLng = _parseParams(origin);
+  const parsedDestination: destinationType = _parseParams(destination);
   const parsedBaseResultsData = _parseParams(baseResultsData);
-  console.log('dest', parsedDestination);
+  console.log("dest", parsedDestination);
   if (parsedOrigin && parsedDestination && parsedBaseResultsData) {
-      const typeCastedBaseResultsCard: baseResultsCardType[] = parsedBaseResultsData;
-      return (
-          <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView style={{backgroundColor:"white"}}>
-            <View style={{ flex: 1 }}>
-              <StatusBar></StatusBar>
-              <View style={styles.doubleSearchBarsContainer}>
-                <View style={{ flex: 1, alignItems: "center" }}>
-                  <GooglePlacesAutocomplete
-                    placeholder="Current location"
-                    query={{ queryParams }}
-                    textInputProps={{
-                        placeholderTextColor:"#3987FF",
-                        enterKeyHint: "search"
-                    }}
-                    styles={{
-                        container: styles.topGoogleSearchBar,
-                        textInputContainer: styles.googleSearchBarTextContainer,
-                    }}
-                    />
-                </View>
-                <View style={{ flex: 1, alignItems: "center" }}>
-                  <GooglePlacesAutocomplete
-                    placeholder={parsedDestination.address}
-                    query={{ queryParams }}
-                    textInputProps={{
-                        placeholderTextColor:"#000000",
-                        enterKeyHint: "search"
-                    }}
-                    styles={{
-                        container: styles.bottomGoogleSearchBar,
-                        textInputContainer: styles.googleSearchBarTextContainer,
-                    }}
-                    />
-                </View>
-              </View>
-              <View style={styles.resultContainer}>
-                {typeCastedBaseResultsCard.map((data, index) => (
-                  <ResultCard
+    const typeCastedBaseResultsCard: baseResultsCardType[] =
+      parsedBaseResultsData;
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+        <View style={{ flex: 1 }}>
+          <View style={{ width: "100%", height: "50%" }}>
+            <MapView
+              provider={PROVIDER_GOOGLE}
+              style={{ width: "100%", height: "100%" }}
+              initialRegion={{
+                latitude: (parsedOrigin.latitude + parsedDestination.latitude) / 2,
+                longitude: (parsedOrigin.longitude + parsedDestination.longitude) / 2,
+                latitudeDelta: Math.abs(parsedOrigin.latitude - parsedDestination.latitude) * 2,
+                longitudeDelta:
+                  Math.abs(parsedOrigin.longitude - parsedDestination.longitude) * 2,
+              }}
+              >
+              <Marker
+                title="Origin"
+                coordinate={{
+                  latitude: parsedOrigin.latitude,
+                  longitude: parsedOrigin.longitude,
+                }}
+              />
+              <Marker
+                title="Destination"
+                coordinate={{
+                  latitude: parsedDestination.latitude,
+                  longitude: parsedDestination.longitude,
+                }}
+              />
+            </MapView>
+          </View>
+          <View style={styles.doubleSearchBarsContainer}>
+            <View style={{ flex: 1, alignItems: "center" }}>
+              <GooglePlacesAutocomplete
+                placeholder="Current location"
+                query={{ queryParams }}
+                textInputProps={{
+                  placeholderTextColor: "#3987FF",
+                  enterKeyHint: "search",
+                }}
+                styles={{
+                  container: styles.topGoogleSearchBar,
+                  textInputContainer: styles.googleSearchBarTextContainer,
+                }}
+              />
+            </View>
+            <View style={{ flex: 1, alignItems: "center" }}>
+              <GooglePlacesAutocomplete
+                placeholder={parsedDestination.address}
+                query={{ queryParams }}
+                textInputProps={{
+                  placeholderTextColor: "#000000",
+                  enterKeyHint: "search",
+                }}
+                styles={{
+                  container: styles.bottomGoogleSearchBar,
+                  textInputContainer: styles.googleSearchBarTextContainer,
+                }}
+              />
+            </View>
+          </View>
+          <ScrollView>
+            <View style={styles.resultContainer}>
+              {typeCastedBaseResultsCard.map((data, index) => (
+                <ResultCard
                   key={index}
                   origin={parsedOrigin}
                   resultData={data}
                   destination={parsedDestination}
-                  />
-                ))}
-              </View>
+                />
+              ))}
             </View>
-        </ScrollView>
+          </ScrollView>
+        </View>
       </SafeAreaView>
     );
-    };   
+  }
 };
 //PUT a next ETA timing in the detailed screen then build
 //stylesheet
 const styles = StyleSheet.create({
-    topGoogleSearchBar: {
-        marginTop: "5%",
-        width: "99%",
-        borderRadius: 12,
-    shadowColor: "#000000",
-    shadowOpacity: 0.2,
-    shadowOffset: {width: 1, height: 3},
-  },
-  bottomGoogleSearchBar: {
-    paddingTop: 5,
-    width: "99%",
+  topGoogleSearchBar: {
+    marginTop: "5%",
+    width: "93%",
     borderRadius: 12,
     shadowColor: "#000000",
     shadowOpacity: 0.2,
-    shadowOffset: {width: 1, height: 3},
+    shadowOffset: { width: 1, height: 3 },
+  },
+  bottomGoogleSearchBar: {
+    paddingTop: 5,
+    width: "93%",
+    borderRadius: 12,
+    shadowColor: "#000000",
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 1, height: 3 },
   },
   googleSearchBarTextContainer: {
     textAlign: "center",
   },
   doubleSearchBarsContainer: {
-    height: 150,
-    marginTop: Platform.OS === "ios" ? 20 : StatusBar.currentHeight,
-    paddingTop: 18,
+    position: "absolute",
+    height: 140,
     width: "100%",
     justifyContent: "center",
     alignContent: "flex-start",
   },
   resultContainer: {
     width: "100%",
-    height: "60%",
+    height: "100%",
     top: 1,
     flex: 1,
     marginTop: 50,
     marginBottom: 50,
     justifyContent: "flex-start",
-    alignContent: "flex-start",
     alignItems: "center",
   },
   resultCard: {
     //has two children, transport routes, and the timing on the end
     height: 150,
-    width: "100%",
-    marginTop: 30,
-    justifyContent: "space-evenly",
+    width: "93%",
+    marginTop: 18,
+    paddingHorizontal: 10,
+    justifyContent: "space-between",
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "#828282",
+    borderColor: "#E0E0E0",
+    shadowColor: "#000000",
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 3 },
   },
-  icons: {
+  iconsContainer: {
+    marginLeft: 5,
+    marginTop: 15,
+    maxWidth: "70%",
+    flexWrap: "wrap",
     flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    backgroundColor: "grey",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    backgroundColor: "white",
+  },
+  iconWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12, // Adjust this value to set the margin between wrapped lines
+    marginRight: -4, // Optional: Add some space between icons in the same line
+  },
+  travelDurationContainer: {
+    marginRight: 10,
+    marginTop: 27,
   },
   travelDuration: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontFamily: "Inter-Bold",
+  },
+  startAndEndTimeContainer: {
+    marginLeft: 5,
+    marginBottom: 15,
   },
 });
 export default RefactoredResultsScreen;

@@ -12,6 +12,7 @@ import "react-native-reanimated";
 import Toast from "react-native-toast-message";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StatusBar } from "react-native";
 import {
   QueryClient,
   QueryClientProvider,
@@ -38,6 +39,11 @@ export default function RootLayout() {
     return null;
   }
 
+  // Forces dark status bar text (ignores device light/dark mode).
+  useEffect(() => {
+    StatusBar.setBarStyle("dark-content");
+  }, []);
+
   // Uncomment to clear existing database for testing
   // AsyncStorage.clear();'
 
@@ -59,9 +65,9 @@ export default function RootLayout() {
           console.log(busStops);
           let i = 0;
           // Add `isFavorited` field to each bus stop
-          const busStopsWithFavourite = busStops.map((busStop) => ({
+          const busStopsWithFavourite = busStops.map((busStop: any) => ({
             ...busStop,
-            isFavourited: i++ < 5,
+            isFavourited: false,
           }));
 
           await AsyncStorage.setItem(
@@ -86,12 +92,10 @@ export default function RootLayout() {
   // <Stack.Screen name="DetailedRoutingScreen" component={RouteCard}/>
   return (
     <>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-      </ThemeProvider>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="+not-found" />
+      </Stack>
       <Toast />
     </>
   );
