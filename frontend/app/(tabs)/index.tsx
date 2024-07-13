@@ -302,7 +302,7 @@ const queryClient = new QueryClient();
 async function fetchBusArrivalTimes(busStops: any) {
   console.log("fetched bus stops: ", busStops);
   const response = await axios.post(
-    "https://test-nusmaps.onrender.com/busArrivalTimes",
+    "https://nusmaps.onrender.com/busArrivalTimes",
     busStops,
     {
       headers: {
