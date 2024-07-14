@@ -7,10 +7,12 @@ const fs = require('fs');
 const axios = require('axios');
 
 var router = express.Router();
-const NUSNEXTBUSCREDENTIALS = btoa(`${process.env.NUSNEXTBUS_USER}:${process.env.NUSNEXTBUS_PASSWORD}`);
-const ONEMAPAPIKEY = process.env.ONEMAPAPIKEY;
-const ONEMAPAPITOKEN = process.env.ONEMAPAPITOKEN;
-
+// const NUSNEXTBUSCREDENTIALS = btoa(`${process.env.NUSNEXTBUS_USER}:${process.env.NUSNEXTBUS_PASSWORD}`);
+// const ONEMAPAPIKEY = process.env.ONEMAPAPIKEY;
+// const ONEMAPAPITOKEN = process.env.ONEMAPAPITOKEN;
+const NUSNEXTBUSCREDENTIALS = btoa(`NUSnextbus:13dL?zY,3feWR^"T`);
+const ONEMAPAPIKEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI1NDQxYjQ3MDFhY2E3MDdlODYzZjE2MzdmNjNmNDk0YiIsImlzcyI6Imh0dHA6Ly9pbnRlcm5hbC1hbGItb20tcHJkZXppdC1pdC0xMjIzNjk4OTkyLmFwLXNvdXRoZWFzdC0xLmVsYi5hbWF6b25hd3MuY29tL2FwaS92Mi91c2VyL3Nlc3Npb24iLCJpYXQiOjE3MjA4NjAwOTQsImV4cCI6MTcyMTExOTI5NCwibmJmIjoxNzIwODYwMDk0LCJqdGkiOiI1MUlEUGpUNUJZUXkwbWtZIiwidXNlcl9pZCI6MzcyOSwiZm9yZXZlciI6ZmFsc2V9.6rdejcmmMOA7hmTtqVLCczkwr7qb2OHf0z644Wmapzs"
+const ONEMAPAPITOKEN = "f812a60f552bb0e67cff12553059fd08b922804b5e36ef16d2bd964895de2344";
 const PUBLICNUSBUSSTOPS = ["CG", "JP-SCH-16151", "RAFFLES", "MUSEUM", "YIH-OPP", "YIH", "SDE3-OPP", "UHC", "UHC-OPP", "IT", "CLB", "UHALL-OPP", "UHALL", "S17", "LT27", "KRB", "KR-MRT", "KR-MRT-OPP"];
 const TEMP_NUS_BUS_STOPS_COORDS = new Map();
 
@@ -251,7 +253,7 @@ const formatPublicTransportLeg = (leg, stopsCoordsArray) => {
 //   return polyline.encode(combinedPointsArr);
 // };
 const _combineNUSInternalAlgo_OneMapResult = (slicedFormattedFinalResult, oneMapResult, oneMapResultFirst) => {
-  //combining both's first result only, can iterate and add the second option for more variety later
+  // Combining both's first result only
   const oneMapItinerary = oneMapResult.itineraries[0];
   const singularSlicedFormattedFinalResult = slicedFormattedFinalResult[0];
   const duration = oneMapItinerary.duration + singularSlicedFormattedFinalResult.duration;
@@ -261,41 +263,50 @@ const _combineNUSInternalAlgo_OneMapResult = (slicedFormattedFinalResult, oneMap
   let legsArray;
   let saveResult;
   // let finalPolyLineString;
+
   if (oneMapResultFirst) {
     startTime = oneMapItinerary.startTime;
-    // console.log("start time: ", startTime);
     endTime = oneMapItinerary.endTime + singularSlicedFormattedFinalResult.duration * 1000;
-    // console.log("one map legs: ", oneMapItinerary.legs);
-    // console.log('nus bus routes legs:', singularSlicedFormattedFinalResult.legs);
     legsArray = oneMapItinerary.legs.concat(singularSlicedFormattedFinalResult.legs);
-    // console.log("final legs array: ", legsArray);
-    saveResult = JSON.stringify({
-      oneMap: oneMapItinerary.legs,
-      NUS_RESULT: singularSlicedFormattedFinalResult.legs,
-      FINAL: legsArray
-    });
-    // finalPolyLineString = _combineEncodedPolyLine(oneMapItinerary.legGeometry.points, singularSlicedFormattedFinalResult.legGeometry.points);
   } else {
     startTime = singularSlicedFormattedFinalResult.startTime;
     endTime = oneMapItinerary.endTime;
     legsArray = singularSlicedFormattedFinalResult.legs.concat(oneMapItinerary.legs);
-    saveResult = JSON.stringify({
-      oneMap: oneMapItinerary.legs,
-      NUS_RESULT: singularSlicedFormattedFinalResult.legs,
-      FINAL: legsArray
+  }
+
+  // Check for walking loop issue
+  let hasLoop = false;
+  for (let i = 0; i < legsArray.length - 1; i++) {
+    if (legsArray[i].endLocation === legsArray[i + 1].startLocation) {
+      hasLoop = true;
+      break;
+    }
+  }
+
+  if (hasLoop) {
+    console.log("Detected walking loop in combined legs array:", legsArray);
+    // Handle the loop case, maybe by filtering out redundant legs
+    legsArray = legsArray.filter((leg, index, array) => {
+      if (index === 0) return true;
+      return leg.startLocation !== array[index - 1].endLocation;
     });
-    // finalPolyLineString = _combineEncodedPolyLine(singularSlicedFormattedFinalResult.legGeometry.points, oneMapItinerary.legGeometry.points);
-  };
-  // console.log("singular result: ", singularSlicedFormattedFinalResult);
-  // console.log("endTime from oneMap: ", oneMapItinerary.endTime);
-  // console.log("endTime: ", endTime);
+  }
+
+  saveResult = JSON.stringify({
+    oneMap: oneMapItinerary.legs,
+    NUS_RESULT: singularSlicedFormattedFinalResult.legs,
+    FINAL: legsArray
+  });
+
+  // finalPolyLineString = _combineEncodedPolyLine(oneMapItinerary.legGeometry.points, singularSlicedFormattedFinalResult.legGeometry.points);
+
   return {
     duration: duration,
     startTime: startTime,
     endTime: endTime,
     walkTime: walkTime,
     legs: legsArray,
-    debuggingResults:saveResult
+    debuggingResults: saveResult
   };
 };
 
@@ -304,7 +315,7 @@ function _compareBasedOnWeight(firstItinerary, secondItinerary) {
   return _getWeight(firstItinerary) - _getWeight(secondItinerary);
 };
 function _getWeight(itinerary) {
-  return itinerary.duration + itinerary.walkTime * 10; 
+  return itinerary.duration + itinerary.walkTime * 0; 
 }
 
 const handleRouting = async (origin, destination) => {
@@ -326,7 +337,7 @@ const handleRouting = async (origin, destination) => {
   if (isPointInNUSPolygons(originTurfPoint) && isPointInNUSPolygons(destinationTurfPoint)) {
     //can use directly as result
     // console.log("code 1");
-    const resultPromise =  await axios.post("https://nusmaps.onrender.com/NUSBusRoutes", 
+    const resultPromise =  await axios.post("http://0.0.0.0:3000/NUSBusRoutes", 
       {
         "origin": origin,
         "destination" : destination
@@ -354,7 +365,7 @@ const handleRouting = async (origin, destination) => {
       // console.log("nus stop: ", nusStop);
       // console.log("nus stop coords: ", nusStopCoords);
       // console.log('destination:', destination);
-      const promiseFromStopToDest = axios.post("https://nusmaps.onrender.com/NUSBusRoutes", 
+      const promiseFromStopToDest = axios.post("http://0.0.0.0:3000/NUSBusRoutes", 
         {
           origin: nusStopCoords,
           destination: destination
@@ -409,7 +420,7 @@ const handleRouting = async (origin, destination) => {
     const promisesArray = [];
     for (nusStop of PUBLICNUSBUSSTOPS) {
       const nusStopCoords = TEMP_NUS_BUS_STOPS_COORDS.get(nusStop);
-      const promiseFromOriginToStop = axios.post("https://nusmaps.onrender.com/NUSBusRoutes", 
+      const promiseFromOriginToStop = axios.post("http://0.0.0.0:3000/NUSBusRoutes", 
         {
           origin: origin,
           destination: nusStopCoords,
