@@ -7,12 +7,10 @@ const fs = require('fs');
 const axios = require('axios');
 
 var router = express.Router();
-// const NUSNEXTBUSCREDENTIALS = btoa(`${process.env.NUSNEXTBUS_USER}:${process.env.NUSNEXTBUS_PASSWORD}`);
-// const ONEMAPAPIKEY = process.env.ONEMAPAPIKEY;
-// const ONEMAPAPITOKEN = process.env.ONEMAPAPITOKEN;
-const NUSNEXTBUSCREDENTIALS = btoa(`NUSnextbus:13dL?zY,3feWR^"T`);
-const ONEMAPAPIKEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI1NDQxYjQ3MDFhY2E3MDdlODYzZjE2MzdmNjNmNDk0YiIsImlzcyI6Imh0dHA6Ly9pbnRlcm5hbC1hbGItb20tcHJkZXppdC1pdC0xMjIzNjk4OTkyLmFwLXNvdXRoZWFzdC0xLmVsYi5hbWF6b25hd3MuY29tL2FwaS92Mi91c2VyL3Nlc3Npb24iLCJpYXQiOjE3MjA4NjAwOTQsImV4cCI6MTcyMTExOTI5NCwibmJmIjoxNzIwODYwMDk0LCJqdGkiOiI1MUlEUGpUNUJZUXkwbWtZIiwidXNlcl9pZCI6MzcyOSwiZm9yZXZlciI6ZmFsc2V9.6rdejcmmMOA7hmTtqVLCczkwr7qb2OHf0z644Wmapzs"
-const ONEMAPAPITOKEN = "f812a60f552bb0e67cff12553059fd08b922804b5e36ef16d2bd964895de2344";
+const NUSNEXTBUSCREDENTIALS = btoa(`${process.env.NUSNEXTBUS_USER}:${process.env.NUSNEXTBUS_PASSWORD}`);
+const ONEMAPAPIKEY = process.env.ONEMAPAPIKEY;
+const ONEMAPAPITOKEN = process.env.ONEMAPAPITOKEN;
+
 const PUBLICNUSBUSSTOPS = ["CG", "JP-SCH-16151", "RAFFLES", "MUSEUM", "YIH-OPP", "YIH", "SDE3-OPP", "UHC", "UHC-OPP", "IT", "CLB", "UHALL-OPP", "UHALL", "S17", "LT27", "KRB", "KR-MRT", "KR-MRT-OPP"];
 const TEMP_NUS_BUS_STOPS_COORDS = new Map();
 
@@ -337,7 +335,7 @@ const handleRouting = async (origin, destination) => {
   if (isPointInNUSPolygons(originTurfPoint) && isPointInNUSPolygons(destinationTurfPoint)) {
     //can use directly as result
     // console.log("code 1");
-    const resultPromise =  await axios.post("http://0.0.0.0:3000/NUSBusRoutes", 
+    const resultPromise =  await axios.post("https://nusmaps-onrender.com/NUSBusRoutes", 
       {
         "origin": origin,
         "destination" : destination
@@ -365,7 +363,7 @@ const handleRouting = async (origin, destination) => {
       // console.log("nus stop: ", nusStop);
       // console.log("nus stop coords: ", nusStopCoords);
       // console.log('destination:', destination);
-      const promiseFromStopToDest = axios.post("http://0.0.0.0:3000/NUSBusRoutes", 
+      const promiseFromStopToDest = axios.post("https://nusmaps-onrender.com/NUSBusRoutes", 
         {
           origin: nusStopCoords,
           destination: destination
@@ -420,7 +418,7 @@ const handleRouting = async (origin, destination) => {
     const promisesArray = [];
     for (nusStop of PUBLICNUSBUSSTOPS) {
       const nusStopCoords = TEMP_NUS_BUS_STOPS_COORDS.get(nusStop);
-      const promiseFromOriginToStop = axios.post("http://0.0.0.0:3000/NUSBusRoutes", 
+      const promiseFromOriginToStop = axios.post("https://nusmaps-onrender.com/NUSBusRoutes", 
         {
           origin: origin,
           destination: nusStopCoords,
