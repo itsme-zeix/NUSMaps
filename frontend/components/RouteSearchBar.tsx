@@ -70,6 +70,7 @@ export const RouteSearchBar: React.FC<
         }}
         query={queryParams}
         enablePoweredByContainer={false}
+        debounce={300}
         styles={{
           container: styles.googleSearchBar,
         }}
