@@ -60,8 +60,10 @@ type DestinationResult = {
 } & LatLng;
 
 //constants and variables
-const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
-const oneMapsAPIToken = process.env.EXPO_PUBLIC_ONEMAPAPITOKEN;
+const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY == undefined ? Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY : process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY ;
+console.log("maps api key:", mapsApiKey);
+const oneMapsAPIToken = process.env.EXPO_PUBLIC_ONEMAPAPITOKEN == undefined ?  Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN : process.env.EXPO_PUBLIC_ONEMAPAPITOKEN;
+console.log("api token: ", oneMapsAPIToken);
 //USE THIS FOR PRODUCTION BUILDS
 // const mapsApiKey = Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
 // const oneMapsAPIToken = Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN;
@@ -228,7 +230,6 @@ export default function App() {
   async function getLatLngFromId(placeId: string) {
     //reverses geocoding
     try {
-      console.log('error here');
       const response = await axios.get(
         `https://places.googleapis.com/v1/places/${placeId}?fields=location&key=${mapsApiKey}`
       );
