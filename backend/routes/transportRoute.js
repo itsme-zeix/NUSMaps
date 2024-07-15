@@ -1,93 +1,129 @@
-const { format } = require('date-fns');
+const { format } = require("date-fns");
 const dotenv = require("dotenv").config();
 var express = require("express");
 var polyline = require("@mapbox/polyline");
-const turf = require('@turf/turf');
-const fs = require('fs');
-const axios = require('axios');
+const turf = require("@turf/turf");
+const fs = require("fs");
+const axios = require("axios");
 
 var router = express.Router();
-const NUSNEXTBUSCREDENTIALS = btoa(`${process.env.NUSNEXTBUS_USER}:${process.env.NUSNEXTBUS_PASSWORD}`);
+const NUSNEXTBUSCREDENTIALS = btoa(
+  `${process.env.NUSNEXTBUS_USER}:${process.env.NUSNEXTBUS_PASSWORD}`
+);
 const ONEMAPAPIKEY = process.env.ONEMAPAPIKEY;
 const ONEMAPAPITOKEN = process.env.ONEMAPAPITOKEN;
-const PUBLICNUSBUSSTOPS = ["CG", "JP-SCH-16151", "RAFFLES", "MUSEUM", "YIH-OPP", "YIH", "SDE3-OPP", "UHC", "UHC-OPP", "IT", "CLB", "UHALL-OPP", "UHALL", "S17", "LT27", "KRB", "KR-MRT", "KR-MRT-OPP"];
+
+const PUBLICNUSBUSSTOPS = [
+  "CG",
+  "JP-SCH-16151",
+  "RAFFLES",
+  "MUSEUM",
+  "YIH-OPP",
+  "YIH",
+  "SDE3-OPP",
+  "UHC",
+  "UHC-OPP",
+  "IT",
+  "CLB",
+  "UHALL-OPP",
+  "UHALL",
+  "S17",
+  "LT27",
+  "KRB",
+  "KR-MRT",
+  "KR-MRT-OPP",
+];
 const TEMP_NUS_BUS_STOPS_COORDS = new Map();
 
 const populateNusStops = async () => {
   let result = await axios.get("https://nnextbus.nus.edu.sg/BusStops", {
-      headers: {
-          "Content-Type": "application/json",
-          "Authorization" : `Basic ${NUSNEXTBUSCREDENTIALS}`
-        //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
-      },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Basic ${NUSNEXTBUSCREDENTIALS}`,
+      //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
+    },
   });
   result = result.data;
   busStops = result.BusStopsResult.busstops;
   for (busStop of busStops) {
-      TEMP_NUS_BUS_STOPS_COORDS.set(busStop.name, {"latitude": busStop.latitude, "longitude":busStop.longitude});
-  };
+    TEMP_NUS_BUS_STOPS_COORDS.set(busStop.name, {
+      latitude: busStop.latitude,
+      longitude: busStop.longitude,
+    });
+  }
   // console.log(NUS_STOPS);
 };
 //define NUS region
-const NUS_main_campus = turf.polygon([[
-  [1.2968329289865643, 103.7762916810378], //coords of nus given by google maps
-  [1.3028648271298058, 103.77279374967891], // coords of nus north
-  [1.2998219221911307, 103.77865023478752], //coords of north-west
-  [1.3025513785650056, 103.77122359254473], //north-east of main campus
-  [1.2937887904782797, 103.78548519721024], //north-east-east
-  [1.293460326733752, 103.7852568188001],
-  [1.293092957711561, 103.78495104698392],
-  [1.2925704299803888, 103.78444102681647],
-  [1.2916901628460273, 103.78352141272447],
-  [1.2900224844954917, 103.78182641051126],
-  [1.2899700010610378, 103.78051232327127],
-  [1.2901753809383811, 103.77798170130043],
-  [1.2907355801595615, 103.77660936614296],
-  [1.2910492008762349, 103.77500337319907],
-  [1.2912820648270722, 103.77426779760573],//southern points
-  [1.2914914567096643, 103.7736659358387],
-  [1.2921567927024897, 103.77387489779053],
-  [1.2927199359109969, 103.76837530764206],
-  [1.2949161066970192, 103.76912561825506],
-  [1.2992924248059339, 103.76957045591979], //west
-  [1.3009729212012877, 103.7697122492112],
-  [1.302843406171479, 103.77076362904104],
-  [1.2968329289865643, 103.7762916810378],
-]]);
+const NUS_main_campus = turf.polygon([
+  [
+    [1.3005628657892387, 103.77832943343063], //coords of nus given by google maps
+    [1.3023124806584663, 103.77473563267986], // coords of nus north
+    [1.3025750928275155, 103.7711089390613], //coords of north-west
+    [1.3029190771254466, 103.76849448593353], //north-east of main campus
+    [1.30216730286252, 103.76710223379818], //north-east-east
+    [1.301029631597137, 103.76739051821554],
+    [1.3010144626434559, 103.7688015945741],
+    [1.300536417289922, 103.76964283355146],
+    [1.298952, 103.769564],
+    [1.293469, 103.768632],
+    [1.2932377594265212, 103.76877142619047],
+    [1.2924306202942022, 103.77046025348741],
+    [1.292206638078851, 103.77159838628117],
+    [1.2923802329646688, 103.77242062668698],
+    [1.291690121858906, 103.77367665227003], //southern points
+    [1.2910324689351864, 103.77504439393819],
+    [1.2903455529876475, 103.7787362464226],
+    [1.2889226067082815, 103.78303725651844],
+    [1.292913859485185, 103.78532774020009],
+    [1.2938082138904348, 103.78552872515404], //west
+    [1.294416174451289, 103.7862503760527],
+    [1.298486828084511, 103.78237294783986],
+    [1.3005628657892387, 103.77832943343063],
+  ],
+]);
 
-const UTOWN = turf.polygon([[
-  [1.3038122291526468, 103.77261610335879], //south-west
-  [1.3044184078463275, 103.77168571218175],
-  [1.3047633767756952, 103.77152673208596],
-  [1.3054996128364094, 103.77131746819157],
-  [1.3093443263822075, 103.77193220431806], //north-west
-  [1.3089503110991403, 103.77278419275714], //north
-  [1.3088517890174955, 103.77359592571669],
-  [1.305861823817989, 103.77498878763893],
-  [1.3043228861440457, 103.77527031146018],
-  [1.303746474239734, 103.77615390341342],
-  [1.3025351374545597, 103.77482242792516],
-  [1.3034875179531693, 103.77311620058559], //south
-  [1.3038122291526468, 103.77261610335879]
-]]);
+const UTOWN = turf.polygon([
+  [
+    [1.3038122291526468, 103.77261610335879], //south-west
+    [1.3044184078463275, 103.77168571218175],
+    [1.3047633767756952, 103.77152673208596],
+    [1.3054996128364094, 103.77131746819157],
+    [1.3093443263822075, 103.77193220431806], //north-west
+    [1.3089503110991403, 103.77278419275714], //north
+    [1.3088517890174955, 103.77359592571669],
+    [1.305861823817989, 103.77498878763893],
+    [1.3043228861440457, 103.77527031146018],
+    [1.303746474239734, 103.77615390341342],
+    [1.3025351374545597, 103.77482242792516],
+    [1.3034875179531693, 103.77311620058559], //south
+    [1.3038122291526468, 103.77261610335879],
+  ],
+]);
 
-const BUKITTIMAHCAMPUS = turf.polygon([[
-  [1.3199857761667493, 103.81772502068209],// northern tip
-  [1.3188668036342386, 103.81628748746567], //western tip
-  [1.3183531088631435, 103.8164589866481], //southern tip
-  [1.3180340104667796, 103.81668697440577],
-  [1.3178480668629782, 103.81703167772963],
-  [1.317897387153247, 103.81727988670823],
-  [1.3182812769107988, 103.81775673592597], //eastern tip
-  [1.3190201017319494, 103.81852882870939],
-  [1.3199857761667493, 103.81772502068209]
-]]);
+const BUKITTIMAHCAMPUS = turf.polygon([
+  [
+    [1.3199857761667493, 103.81772502068209], // northern tip
+    [1.3188668036342386, 103.81628748746567], //western tip
+    [1.3183531088631435, 103.8164589866481], //southern tip
+    [1.3180340104667796, 103.81668697440577],
+    [1.3178480668629782, 103.81703167772963],
+    [1.317897387153247, 103.81727988670823],
+    [1.3182812769107988, 103.81775673592597], //eastern tip
+    [1.3190201017319494, 103.81852882870939],
+    [1.3199857761667493, 103.81772502068209],
+  ],
+]);
+
+function _sortByDuration(firstItinerary, secondItinerary) {
+  return firstItinerary.duration - secondItinerary.duration;
+}
 
 function _processItinerary(itinerary) {
   const legsArray = itinerary.legs;
   // console.log('itinerary:', itinerary);
-    // console.log("legs array: ", legsArray);
-  const [typesArr, formattedLegArray, combinedRouteGeometry, stopsCoordsArray] = formatLeg(legsArray);
+  // console.log("legs array: ", legsArray);
+  const [typesArr, formattedLegArray, combinedRouteGeometry, stopsCoordsArray] =
+    formatLeg(legsArray);
   // console.log("types array: ", typesArr);
   // console.log("formattedLegArray: ", formattedLegArray);
   const rightSideTiming = formatBeginningEndingTime(
@@ -96,14 +132,21 @@ function _processItinerary(itinerary) {
   );
   const leftSideTiming = formatJourneyTime(itinerary.duration);
   // console.log("combine geometry: ", combinedRouteGeometry);
-  return [typesArr,leftSideTiming, rightSideTiming, formattedLegArray, combinedRouteGeometry, stopsCoordsArray];
-};
+  return [
+    typesArr,
+    leftSideTiming,
+    rightSideTiming,
+    formattedLegArray,
+    combinedRouteGeometry,
+    stopsCoordsArray,
+  ];
+}
 async function _processData(response) {
   /*processes the data and returns the following useful info:
   
   */
   // console.log("response: ", response);
-  console.log("response plan: ", response.plan);
+  // console.log("response plan: ", response.plan);
   const bestPaths = response.plan.itineraries;
   const baseCardResultsDataStorage = [];
   // console.log("best paths: ", JSON.stringify(bestPaths));
@@ -112,7 +155,14 @@ async function _processData(response) {
     // console.log(currPath.legs[0].mode);
     // Only way to not use 'any' type here is to define an interface for the const routes (the json reply above)
     // console.log('current path: ', currPath);
-    const [typesArr,leftSideTiming, rightSideTiming, formattedLegArray, combinedRouteGeometry, stopsCoordsArray] = _processItinerary(currPath);
+    const [
+      typesArr,
+      leftSideTiming,
+      rightSideTiming,
+      formattedLegArray,
+      combinedRouteGeometry,
+      stopsCoordsArray,
+    ] = _processItinerary(currPath);
 
     baseCardResultsDataStorage.push({
       types: typesArr,
@@ -120,24 +170,21 @@ async function _processData(response) {
       wholeJourneyTiming: rightSideTiming,
       journeyLegs: formattedLegArray,
       polylineArray: combinedRouteGeometry,
-      stopsCoordsArray: [...stopsCoordsArray]
+      stopsCoordsArray: [...stopsCoordsArray],
     });
   }
   // console.log('finished :', baseCardResultsDataStorage);
   return baseCardResultsDataStorage;
-};
+}
 
-const formatBeginningEndingTime = (
-  startTiming,
-  endTiming
-) => {
-  console.log("end timing: ", endTiming);
+const formatBeginningEndingTime = (startTiming, endTiming) => {
+  // console.log("end timing: ", endTiming);
   const formattedStartTiming = format(new Date(startTiming), "hh:mm a");
   const formattedEndTiming = format(new Date(endTiming), "hh:mm a");
   return `${formattedStartTiming} - ${formattedEndTiming}`;
 };
 const formatJourneyTime = (time) => {
-  console.log(time);
+  // console.log(time);
   const intermediate = Math.floor(time / 60);
   const hours = Math.floor(intermediate / 60);
   const minutes = Math.floor(intermediate % 60);
@@ -150,7 +197,7 @@ const formatJourneyTime = (time) => {
 
 const formatLeg = (legArray) => {
   //general function to format legs, which consists of 3 distinct types, start intermediate, destination
-  //and 4 distinct subtypes for intermediate: 
+  //and 4 distinct subtypes for intermediate:
   //walk, bus, mrt, tram
   // console.log("received leg array ", legArray);
   //for walking there is only route geometry
@@ -160,28 +207,39 @@ const formatLeg = (legArray) => {
   const stopsCoordsArray = new Set();
   // console.log('legarray: ', legArray);
   for (leg of legArray) {
-    stopsCoordsArray.add(JSON.stringify({
-      latitude: leg.from.lat,
-      longitude: leg.from.lon,
-      name: leg.from.name
-    }));
-    leg.mode === "WALK" ?  formattedLegArray.push(formatWalkLeg(leg)) : formattedLegArray.push(formatPublicTransportLeg(leg, stopsCoordsArray));
-    stopsCoordsArray.add(JSON.stringify({
-      latitude:leg.to.lat,
-      longitude:leg.to.lon,
-      name: leg.to.name
-    }));
+    stopsCoordsArray.add(
+      JSON.stringify({
+        latitude: leg.from.lat,
+        longitude: leg.from.lon,
+        name: leg.from.name,
+      })
+    );
+    leg.mode === "WALK"
+      ? formattedLegArray.push(formatWalkLeg(leg))
+      : formattedLegArray.push(formatPublicTransportLeg(leg, stopsCoordsArray));
+    stopsCoordsArray.add(
+      JSON.stringify({
+        latitude: leg.to.lat,
+        longitude: leg.to.lon,
+        name: leg.to.name,
+      })
+    );
     typesArr.push(leg.mode);
     // console.log("leg geometry:",leg.legGeometry);
     const decodedArray = polyline.decode(leg.legGeometry.points);
-    console.log(decodedArray);
-    geometryArr = geometryArr.concat((polyline.decode(leg.legGeometry.points))); //returns an array which is then placed into an array
-  };
+    // console.log(decodedArray);
+    geometryArr = geometryArr.concat(polyline.decode(leg.legGeometry.points)); //returns an array which is then placed into an array
+  }
   // console.log("geometry array:", geometryArr);
   // console.log("typesArr before sending: ", typesArr);
   const combinedRouteGeometryString = polyline.encode(geometryArr);
   // console.log("returned total route geometry: ",combinedRouteGeometryString);
-  return [typesArr, formattedLegArray, combinedRouteGeometryString, stopsCoordsArray];
+  return [
+    typesArr,
+    formattedLegArray,
+    combinedRouteGeometryString,
+    stopsCoordsArray,
+  ];
 };
 
 const formatWalkLeg = (leg) => {
@@ -190,17 +248,19 @@ const formatWalkLeg = (leg) => {
   const walkInfo = []; // json of dist and direction
   for (const turn of stepsArr) {
     walkInfo.push({
-      "distance":turn.distance,
-      "direction":turn.absoluteDirection
+      distance: turn.distance,
+      direction: turn.absoluteDirection,
     });
-  };
+  }
   return {
     type: "WALK",
     startTime: leg.startTime,
     endTime: leg.endTime,
     duration: leg.duration,
     walkInfo: walkInfo,
-    distance:leg.distance
+    distance: leg.distance,
+    startCoords: leg.from,
+    destCoords: leg.to,
   };
 };
 
@@ -209,7 +269,7 @@ const formatPublicTransportLeg = (leg, stopsCoordsArray) => {
   const destinationStopName = leg.to.name;
   const startingStopETA = leg.from.ETA; //will be undefined for public transport but defined for nus buses
   let intermediateStopCount = 1;
-  const duration = leg.duration;//in minutes
+  const duration = leg.duration; //in minutes
   const intermediateStopNames = [];
   const intermediateStopGPSCoords = []; // json array
   for (stop of leg.intermediateStops) {
@@ -218,17 +278,19 @@ const formatPublicTransportLeg = (leg, stopsCoordsArray) => {
       latitude: stop.lat,
       longitude: stop.lon,
     });
-    stopsCoordsArray.add(JSON.stringify({
-      latitude: stop.lat,
-      longitude: stop.lon,
-      name: stop.name
-    }));
+    stopsCoordsArray.add(
+      JSON.stringify({
+        latitude: stop.lat,
+        longitude: stop.lon,
+        name: stop.name,
+      })
+    );
     intermediateStopCount += 1;
-  };
+  }
   // console.log('pt leg completed');
   // console.log('intermediate stop count: ', intermediateStopCount);
   item = {
-    type:leg.mode,
+    type: leg.mode,
     startingStopETA: startingStopETA,
     startTime: leg.startTime,
     endTime: leg.endTime,
@@ -247,101 +309,147 @@ const formatPublicTransportLeg = (leg, stopsCoordsArray) => {
 //   const combinedPointsArr = polyline.decode(firstString).concat(polyline.decode(secondString));
 //   return polyline.encode(combinedPointsArr);
 // };
-const _combineNUSInternalAlgo_OneMapResult = (slicedFormattedFinalResult, oneMapResult, oneMapResultFirst) => {
-  //combining both's first result only, can iterate and add the second option for more variety later
+const _combineNUSInternalAlgo_OneMapResult = (
+  slicedFormattedFinalResult,
+  oneMapResult,
+  oneMapResultFirst
+) => {
+  // Combining both's first result only
   const oneMapItinerary = oneMapResult.itineraries[0];
   const singularSlicedFormattedFinalResult = slicedFormattedFinalResult[0];
-  const duration = oneMapItinerary.duration + singularSlicedFormattedFinalResult.duration;
-  const walkTime = singularSlicedFormattedFinalResult.walkTime + oneMapItinerary.walkTime;
+  const duration =
+    oneMapItinerary.duration + singularSlicedFormattedFinalResult.duration;
+  const walkTime =
+    singularSlicedFormattedFinalResult.walkTime + oneMapItinerary.walkTime;
   let startTime;
   let endTime;
   let legsArray;
+  let saveResult;
   // let finalPolyLineString;
+
   if (oneMapResultFirst) {
     startTime = oneMapItinerary.startTime;
-    // console.log("start time: ", startTime);
-    endTime = oneMapItinerary.startTime + singularSlicedFormattedFinalResult.duration * 1000;
-    legsArray = oneMapItinerary.legs.concat(singularSlicedFormattedFinalResult.legs);
-    // finalPolyLineString = _combineEncodedPolyLine(oneMapItinerary.legGeometry.points, singularSlicedFormattedFinalResult.legGeometry.points);
+    endTime =
+      oneMapItinerary.endTime +
+      singularSlicedFormattedFinalResult.duration * 1000;
+    legsArray = oneMapItinerary.legs.concat(
+      singularSlicedFormattedFinalResult.legs
+    );
   } else {
     startTime = singularSlicedFormattedFinalResult.startTime;
     endTime = oneMapItinerary.endTime;
-    legsArray = singularSlicedFormattedFinalResult.legs.concat(oneMapItinerary.legs);
-    // finalPolyLineString = _combineEncodedPolyLine(singularSlicedFormattedFinalResult.legGeometry.points, oneMapItinerary.legGeometry.points);
-  };
-  // console.log("singular result: ", singularSlicedFormattedFinalResult);
-  // console.log("endTime from oneMap: ", oneMapItinerary.endTime);
-  // console.log("endTime: ", endTime);
+    legsArray = singularSlicedFormattedFinalResult.legs.concat(
+      oneMapItinerary.legs
+    );
+  }
+
+  // Check for walking loop issue
+
+  saveResult = JSON.stringify({
+    oneMap: oneMapItinerary.legs,
+    NUS_RESULT: singularSlicedFormattedFinalResult.legs,
+    FINAL: legsArray,
+  });
+
+  // finalPolyLineString = _combineEncodedPolyLine(oneMapItinerary.legGeometry.points, singularSlicedFormattedFinalResult.legGeometry.points);
+
   return {
     duration: duration,
     startTime: startTime,
     endTime: endTime,
     walkTime: walkTime,
     legs: legsArray,
+    debuggingResults: saveResult,
   };
 };
 
-const _sortBasedOnTotalDuration = (firstPlan, secondPlan) => {
-  return firstPlan.duration - secondPlan.duration;
-};
+function _getWeight(travelTime, waitTime, originWalkTime, destWalkTime) {
+  return (
+    travelTime + waitTime * 0.5 + originWalkTime * 1.5 + destWalkTime * 1.2
+  );
+}
 
 const handleRouting = async (origin, destination) => {
   //error lies here, undefined
   //ALWAYS add this to results returned by onemap and compare
   const dateObject = new Date();
-  console.log('origin received: ', origin);
-  console.log('destination received: ', destination);
+  // console.log('origin received: ', origin);
+  // console.log('destination received: ', destination);
   await populateNusStops();
-  console.log('origin received: ', origin);
-  console.log('destination received: ', destination);
+  console.log("origin received: ", origin);
+  // console.log('destination received: ', destination);
   const originTurfPoint = turf.point([origin.latitude, origin.longitude]);
-  const destinationTurfPoint = turf.point([destination.latitude, destination.longitude]);
+  const destinationTurfPoint = turf.point([
+    destination.latitude,
+    destination.longitude,
+  ]);
   const headers = {
-    Authorization: ONEMAPAPIKEY
+    Authorization: ONEMAPAPIKEY,
   };
   // console.log("origin: ", origin);
   // console.log("destination: ", destination);
-  if (isPointInNUSPolygons(originTurfPoint) && isPointInNUSPolygons(destinationTurfPoint)) {
+  console.log(
+    "inside utown? dest:",
+    isPointInNUSPolygons(destinationTurfPoint)
+  );
+  console.log(
+    "inside NUS? origin:",
+    turf.booleanPointInPolygon(originTurfPoint, NUS_main_campus)
+  );
+  if (
+    isPointInNUSPolygons(originTurfPoint) &&
+    isPointInNUSPolygons(destinationTurfPoint)
+  ) {
     //can use directly as result
     console.log("code 1");
-    const resultPromise =  await axios.post("https://nusmaps.onrender.com/NUSBusRoutes", 
+    const resultPromise = await axios.post(
+      "https://nusmaps-onrender.com/NUSBusRoutes",
       {
-        "origin": origin,
-        "destination" : destination
-      }, 
-      {
-      headers: {
-        "Content-Type": "application/json"
+        origin: origin,
+        destination: destination,
       },
-
-    }); //shows top 3 results 
-    console.log("result:", resultPromise);
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    ); //shows top 3 results
     const result = resultPromise.data;
+    // console.log("result from walking alone:", result.slicedFormattedFinalResult.slice(0,2));
+    fs.appendFileSync(
+      "debuggingResults.json",
+      JSON.stringify(result.slicedFormattedFinalResult)
+    );
     return {
       status: 200,
       message: "both points lie inside NUS",
-      body: result.slicedFormattedFinalResult.slice(0,2)
+      body: result.slicedFormattedFinalResult[0],
     };
-  } else if (!(isPointInNUSPolygons(originTurfPoint)) && isPointInNUSPolygons(destinationTurfPoint)) {
+  } else if (
+    !isPointInNUSPolygons(originTurfPoint) &&
+    isPointInNUSPolygons(destinationTurfPoint)
+  ) {
     //now we use onemaps to link to all possible public bus stops and then from all possible bus stops to the destination
     //we also compute the path from the public nus bus stop to the destination by walking
     console.log("code 2");
-    const promisesArray = []; //a 2d array of promises like [[Promise<Origin, nus_stop>, Promise<nus_stop, destination>]...]
+    const promisesArray = []; //a 2d array of promises like [[Promise<Origin, nus_stop>, Promise<nus_stop, destination>]...]♣
     for (nusStop of PUBLICNUSBUSSTOPS) {
       const nusStopCoords = TEMP_NUS_BUS_STOPS_COORDS.get(nusStop);
       // console.log("nus stop: ", nusStop);
       // console.log("nus stop coords: ", nusStopCoords);
       // console.log('destination:', destination);
-      const promiseFromStopToDest = axios.post("https://nusmaps.onrender.com/NUSBusRoutes", 
+      const promiseFromStopToDest = axios.post(
+        "https://nusmaps-onrender.com/NUSBusRoutes",
         {
           origin: nusStopCoords,
-          destination: destination
-        }
-        , {
-        headers: {
-          "Content-Type": "application/json"
+          destination: destination,
         },
-      });
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       let date = format(dateObject, "MM-dd-yyyy");
       let time = format(dateObject, "HH:MM:SS");
       const routesUrl = encodeURI(
@@ -351,169 +459,217 @@ const handleRouting = async (origin, destination) => {
         headers: headers,
       });
       promisesArray.push([promiseFromOriginToStop, promiseFromStopToDest]);
-    };
-    const responsesArray = await Promise.all(promisesArray.map(array => Promise.all(array)));
-    const jsonPromisesArray = responsesArray.map(responses =>
-      Promise.all(responses.map(response => {
-        // console.log("Response status:", response.status);
-        // console.log("Response status text:", response.statusText);
-        if (response.status !== 200) {
-          throw new Error(`Network response was not ok: ${response.statusText}`);
-        } else {
-          return response.data;
-        }})));
+    }
+    const responsesArray = await Promise.all(
+      promisesArray.map((array) => Promise.all(array))
+    );
+    const jsonPromisesArray = responsesArray.map((responses) =>
+      Promise.all(
+        responses.map((response) => {
+          // console.log("Response status:", response.status);
+          // console.log("Response status text:", response.statusText);
+          if (response.status !== 200) {
+            throw new Error(
+              `Network response was not ok: ${response.statusText}`
+            );
+          } else {
+            return response.data;
+          }
+        })
+      )
+    );
     const responseBodiesArray = await Promise.all(jsonPromisesArray);
     // console.log("all: ", responseBodiesArray);
-    const newFinalArray = [];
+    let newFinalArray = [];
     for (body of responseBodiesArray) {
       // console.log("formatted result: ", JSON.stringify(body[1].slicedFormattedFinalResult));
       // console.log("itinerary: ", JSON.stringify(body[0].plan.itineraries[0].duration));
       if (body[1].slicedFormattedFinalResult.length !== 0) {
         // console.log("result: ", JSON.stringify(_combineNUSInternalAlgo_OneMapResult(body[1].slicedFormattedFinalResult, body[0].plan, true)));
-        newFinalArray.push(_combineNUSInternalAlgo_OneMapResult(body[1].slicedFormattedFinalResult, body[0].plan, true));
+        newFinalArray.push(
+          _combineNUSInternalAlgo_OneMapResult(
+            body[1].slicedFormattedFinalResult,
+            body[0].plan,
+            true
+          )
+        );
       }
-    };
+    }
     // console.log("new final array pre sorting: ", JSON.stringify(newFinalArray));
-    newFinalArray.sort(_sortBasedOnTotalDuration);
+    newFinalArray = newFinalArray.sort(_sortByDuration);
     // console.log("sorted by timing",  JSON.stringify(newFinalArray));
     return {
       status: 201,
-      message: "The origin lies outside of NUS, while the destination lies inside NUS",
-      body: newFinalArray.slice(0, 2) //only show the top 3 results
-      };
-  } else if ( isPointInNUSPolygons(originTurfPoint) && !(isPointInNUSPolygons(destinationTurfPoint))) {
+      message:
+        "The origin lies outside of NUS, while the destination lies inside NUS",
+      body: newFinalArray.slice(0, 2), //only show the top 2 results
+    };
+  } else if (
+    isPointInNUSPolygons(originTurfPoint) &&
+    !isPointInNUSPolygons(destinationTurfPoint)
+  ) {
     //origin is in nus, destination lies outside
     console.log("code 3");
     const promisesArray = [];
     for (nusStop of PUBLICNUSBUSSTOPS) {
       const nusStopCoords = TEMP_NUS_BUS_STOPS_COORDS.get(nusStop);
-      const promiseFromOriginToStop = axios.post("https://nusmaps.onrender.com/NUSBusRoutes", 
+      const promiseFromOriginToStop = axios.post(
+        "https://nusmaps-onrender.com/NUSBusRoutes",
         {
           origin: origin,
           destination: nusStopCoords,
         },
         {
-        headers: {
-          "Content-Type": "application/json"
-        },
-      });
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       let date = format(dateObject, "MM-dd-yyyy");
       let time = format(dateObject, "HH:MM:SS");
       const routesUrl = encodeURI(
         `https://www.onemap.gov.sg/api/public/routingsvc/route?start=${nusStopCoords.latitude},${nusStopCoords.longitude}&end=${destination.latitude},${destination.longitude}&routeType=pt&date=${date}&time=${time}&mode=TRANSIT&maxWalkDistance=1000&numItineraries=1`
       );
       const headers = {
-        Authorization: ONEMAPAPIKEY
+        Authorization: ONEMAPAPIKEY,
       };
       const promiseFromStopToDest = axios.get(routesUrl, {
         headers: headers,
       });
       promisesArray.push([promiseFromOriginToStop, promiseFromStopToDest]);
     }
-    const responsesArray = await Promise.all(promisesArray.map(array => Promise.all(array)));
-    const jsonPromisesArray = responsesArray.map(responses =>
-      Promise.all(responses.map(response => {
-        console.log("Response status:", response.status);
-        console.log("Response status text:", response.statusText);
+    const responsesArray = await Promise.all(
+      promisesArray.map((array) => Promise.all(array))
+    );
+    const jsonPromisesArray = responsesArray.map((responses) =>
+      Promise.all(
+        responses.map((response) => {
+          // console.log("Response status:", response.status);
+          // console.log("Response status text:", response.statusText);
 
-        if (response.status !== 200) {
-          throw new Error(`Network response was not ok: ${response.statusText}`);
-        } else {
-          return response.data;
-        }})));
+          if (response.status !== 200) {
+            throw new Error(
+              `Network response was not ok: ${response.statusText}`
+            );
+          } else {
+            return response.data;
+          }
+        })
+      )
+    );
     const responseBodiesArray = await Promise.all(jsonPromisesArray);
     // console.log("all: ", responseBodiesArray);
-    const newFinalArray = [];
+    let newFinalArray = [];
     for (body of responseBodiesArray) {
       // console.log("formatted result: ", body[1].plan);
       // console.log("itinerary: ", body[0].slicedFormattedFinalResult);
       if (body[0].slicedFormattedFinalResult.length !== 0) {
         // console.log("result: ", JSON.stringify(_combineNUSInternalAlgo_OneMapResult(body[0].slicedFormattedFinalResult, body[1].plan, false)));
-        newFinalArray.push(_combineNUSInternalAlgo_OneMapResult(body[0].slicedFormattedFinalResult, body[1].plan, false));
-      };
-    };
-    newFinalArray.sort(_sortBasedOnTotalDuration);
+        newFinalArray.push(
+          _combineNUSInternalAlgo_OneMapResult(
+            body[0].slicedFormattedFinalResult,
+            body[1].plan,
+            false
+          )
+        );
+      }
+    }
+    newFinalArray = newFinalArray.sort(_sortByDuration);
     // console.log("new final array", JSON.stringify(newFinalArray));
     // newFinalArray.sort();
     // console.log("sorted by timing", JSON.stringify(newFinalArray));
-    return { 
+    return {
       status: 202,
       message: "The origin lies in NUS, while the destination lies outside",
-      body: newFinalArray.slice(0, 2)
+      body: newFinalArray.slice(0, 2),
     };
   } else {
     //both not inside, will return undefined
     console.log("code 4");
     return {
-      status:203,
+      status: 203,
       message: "Both points do not lie inside NUS",
-      body: undefined
+      body: undefined,
     };
   }
 };
 const isPointInNUSPolygons = (point) => {
-  return turf.booleanPointInPolygon(point, NUS_main_campus) || turf.booleanPointInPolygon(point, UTOWN) || turf.booleanPointInPolygon(point, BUKITTIMAHCAMPUS);
+  return (
+    turf.booleanPointInPolygon(point, NUS_main_campus) ||
+    turf.booleanPointInPolygon(point, UTOWN) ||
+    turf.booleanPointInPolygon(point, BUKITTIMAHCAMPUS)
+  );
 };
 
 const _addAlternativeRoutesToOneMap = (oneMapRoute, nusResult) => {
   // console.log("map route: ", oneMapRoute);
   // console.log("nus results body: ", nusResult.body);
-  oneMapRoute.plan.itineraries = oneMapRoute.plan.itineraries.concat(nusResult.body);
-  oneMapRoute.plan.itineraries = oneMapRoute.plan.itineraries.sort((a, b) => {
-    return a.duration < b.duration;
-  });
+  oneMapRoute.plan.itineraries = oneMapRoute.plan.itineraries.concat(
+    nusResult.body
+  );
+  // fs.appendFileSync('debuggingResults.json', JSON.stringify(nusResult.body), 'utf-8')
+  oneMapRoute.plan.itineraries =
+    oneMapRoute.plan.itineraries.sort(_sortByDuration);
   // console.log("one map route sorted: ", JSON.stringify(oneMapRoute));
   return oneMapRoute;
 };
 
 router.post("/", async (req, res) => {
-    const dateObject = new Date();
-    auth_token = req.headers['authorization'];
-    console.log('reciived');
-    let origin;
-    let destination;
-    if (auth_token === ONEMAPAPITOKEN) {
-      origin = req.body.origin;
-      console.log('origin: ', origin);
-      destination = req.body.destination;
-      let date = format(dateObject, "MM-dd-yyyy");
-      let time = format(dateObject, "HH:MM:SS");
-      const routesUrl = encodeURI(
-        `https://www.onemap.gov.sg/api/public/routingsvc/route?start=${origin.latitude},${origin.longitude}&end=${destination.latitude},${destination.longitude}&routeType=pt&date=${date}&time=${time}&mode=TRANSIT&maxWalkDistance=1000&numItineraries=3`
-      );
-      // console.log("routes url:", routesUrl);
-      const headers = {
-        Authorization: ONEMAPAPIKEY
-      };
-      try {
-        const response = fetch(routesUrl, {
-          method: "GET",
-          headers: headers,
-        });
-        const routeResponse = await response;
-        const route = await routeResponse.json();
-        // console.log("response route: ", route);
-        const nusResultPromise = handleRouting(origin, destination); //this will decide the course of action
-        // console.log('nus result promise: ', nusResultPromise);
-        const nusResult = await nusResultPromise;
-        const result = await _processData(route);
-        // console.log('error here?')
-        // console.log("nus result body: ", JSON.stringify(nusResult));
-        if (nusResult.status === 200 || nusResult.status === 201 || nusResult.status === 202) {
-          const addedLeg = _addAlternativeRoutesToOneMap(route, nusResult);
-          const finalCombinedResult = await _processData(addedLeg);
-          
-          return res.json(finalCombinedResult);
-        } else {
-          return res.json(result);
-        }
-      } catch (err) {
-        console.error(err); //log the error from "route not found"
-        return res.status(401).send("Error retrieving route.");
+  const dateObject = new Date();
+  auth_token = req.headers["authorization"];
+  // console.log('reciived');
+  let origin;
+  let destination;
+  if (auth_token === ONEMAPAPITOKEN) {
+    origin = req.body.origin;
+    // console.log('origin: ', origin);
+    destination = req.body.destination;
+    let date = format(dateObject, "MM-dd-yyyy");
+    let time = format(dateObject, "HH:MM:SS");
+    const routesUrl = encodeURI(
+      `https://www.onemap.gov.sg/api/public/routingsvc/route?start=${origin.latitude},${origin.longitude}&end=${destination.latitude},${destination.longitude}&routeType=pt&date=${date}&time=${time}&mode=TRANSIT&maxWalkDistance=1000&numItineraries=3`
+    );
+    // console.log("routes url:", routesUrl);
+    const headers = {
+      Authorization: ONEMAPAPIKEY,
+    };
+    try {
+      const response = fetch(routesUrl, {
+        method: "GET",
+        headers: headers,
+      });
+      const routeResponse = await response;
+      const route = await routeResponse.json();
+      // console.log("response route: ", route);
+      const nusResultPromise = handleRouting(origin, destination); //this will decide the course of action
+      // console.log('nus result promise: ', nusResultPromise);
+      const nusResult = await nusResultPromise;
+      const result = await _processData(route);
+      // console.log('error here?')
+      // console.log("nus result body: ", JSON.stringify(nusResult));
+      if (
+        nusResult.status === 200 ||
+        nusResult.status === 201 ||
+        nusResult.status === 202
+      ) {
+        const addedLeg = _addAlternativeRoutesToOneMap(route, nusResult);
+        const finalCombinedResult = await _processData(addedLeg);
+
+        return res.json(finalCombinedResult);
+      } else {
+        return res.json(result);
       }
-    } else {
-      return res.status(403).send(`Incorrect or missing authorization token. Your token: ${auth_token}`);
+    } catch (err) {
+      // console.error(err); //log the error from "route not found"
+      return res.status(401).send("Error retrieving route.");
     }
+  } else {
+    return res
+      .status(403)
+      .send(
+        `Incorrect or missing authorization token. Your token: ${auth_token}`
+      );
+  }
 });
 
 module.exports = router;
