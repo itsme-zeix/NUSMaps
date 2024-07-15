@@ -11,8 +11,12 @@ import {
 } from "react-native";
 import { SearchBar, Icon } from "@rneui/base";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import {
+  useNavigation,
+  useRoute,
+  useFocusEffect,
+} from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 
 const ITEMS_PER_PAGE = 20; // Number of items to load per page
 
@@ -53,7 +57,7 @@ const BusStopSearchScreen = () => {
     }, [searchBarRef])
   );
 
-  const updateSearch = (search) => {
+  const updateSearch = (search: string) => {
     setSearch(search);
     const newData = data.filter((item) =>
       item.busStopName.toLowerCase().includes(search.toLowerCase())
@@ -113,15 +117,19 @@ const BusStopSearchScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ marginHorizontal: 10 }}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.closeButton}
+        >
           <Text>Close</Text>
         </TouchableOpacity>
         <SearchBar
           placeholder="Search"
-          onChangeText={updateSearch}
+          onChangeText={(text) => updateSearch(text)}
           value={search}
           platform="ios"
           searchIcon={<Ionicons name="search" size={20} color="gray" />}
+          clearIcon={<Ionicons name="close-circle" size={23} color="gray" />}
           autoFocus={true}
           ref={(ref) => setSearchBarRef(ref)}
         />

@@ -378,15 +378,6 @@ function FavouriteBusStops({ refresh }: { refresh: () => void }) {
     refresh(); // Trigger the refresh function passed as prop
   };
 
-  if (favouriteBusStops && favouriteBusStops.length === 0) {
-    return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <Text style={{ fontFamily: "Inter-SemiBold", fontSize: 18, color: "#848484" }}> No bus stops have been favourited yet! </Text>
-        <MaterialCommunityIcons name="ghost" size={80} color={"#848484"} style={{ marginTop: 10 }}/>
-      </View>
-    );
-  }
-
   if (isPending)
     return <ActivityIndicator size="large" style={{ margin: 20 }} />;
   if (error)
@@ -403,23 +394,33 @@ function FavouriteBusStops({ refresh }: { refresh: () => void }) {
       </ScrollView>
     );
 
-  return (
-    <ScrollView
-      refreshControl={
-        <RefreshControl refreshing={isPending} onRefresh={handleRefresh} />
-      }
-    >
-      <View>
-        {busStops && Array.isArray(busStops) ? (
-          busStops.map((busStop: BusStop, index: number) => (
-            <ListItem key={index} item={busStop} />
-          ))
+    return (
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={isPending} onRefresh={handleRefresh} />
+        }
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
+        {favouriteBusStops && favouriteBusStops.length === 0 ? (
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center", alignContent: "center" }}>
+            <Text style={{ fontFamily: "Inter-SemiBold", fontSize: 18, color: "#848484" }}>
+              No bus stops have been favourited yet!
+            </Text>
+            <MaterialCommunityIcons name="ghost" size={80} color={"#848484"} style={{ marginTop: 10 }} />
+          </View>
         ) : (
-          <Text>{JSON.stringify(busStops)}</Text>
+          <View>
+            {busStops && Array.isArray(busStops) ? (
+              busStops.map((busStop: BusStop, index: number) => (
+                <ListItem key={index} item={busStop} />
+              ))
+            ) : (
+              <Text>{JSON.stringify(busStops)}</Text>
+            )}
+          </View>
         )}
-      </View>
-    </ScrollView>
-  );
+      </ScrollView>
+    );
 }
 
 // Get nearest bus stops by location and render it. Backend API will return a busStops object with updated bus timings.
