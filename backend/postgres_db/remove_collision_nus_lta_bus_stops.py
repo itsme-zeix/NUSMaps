@@ -35,7 +35,7 @@ PUBLICNUSBUSSTOPS = {
   "KRB": 16009,
   "KR-MRT": 18331,
   "KR-MRT-OPP": 18339,
-};
+}
 
 def updateTable():
   # Extracting bus stop IDs from the dictionary
