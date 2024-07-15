@@ -1,9 +1,5 @@
 import psycopg2
-import requests
-import json
-import base64
 import os
-from psycopg2.extras import execute_values
 import dotenv
 dotenv.load_dotenv()
 
