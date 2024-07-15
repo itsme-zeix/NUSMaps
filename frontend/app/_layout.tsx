@@ -18,7 +18,7 @@ import {
   QueryClientProvider,
   useQuery,
 } from "@tanstack/react-query";
-import axios from 'axios';
+import axios from "axios";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -45,7 +45,7 @@ export default function RootLayout() {
   }, []);
 
   // Uncomment to clear existing database for testing
-  // AsyncStorage.clear();'
+  AsyncStorage.clear();
 
   // One time setup for async storage
   useEffect(() => {
@@ -56,14 +56,15 @@ export default function RootLayout() {
         if (!isInitialized) {
           // Perform API call to retrieve database
           const response = await axios.get(
-            `https://nusmaps.onrender.com:3000/busStopDatabase?lastUpdated=${lastUpdated}`
+            `https://nusmaps.onrender.com/busStopDatabase?lastUpdated=${lastUpdated}`
           );
           if (response.status !== 200) {
-            throw new Error("Network response was not ok");
+            throw new Error(
+              "Network response was not ok. Please try again later."
+            );
           }
           const busStops = await response.data;
-          console.log(busStops);
-          let i = 0;
+
           // Add `isFavorited` field to each bus stop
           const busStopsWithFavourite = busStops.map((busStop: any) => ({
             ...busStop,
