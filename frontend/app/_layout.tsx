@@ -45,7 +45,7 @@ export default function RootLayout() {
   }, []);
 
   // Uncomment to clear existing database for testing
-  AsyncStorage.clear();
+  // AsyncStorage.clear();
 
   // One time setup for async storage
   useEffect(() => {
