@@ -403,7 +403,7 @@ const handleRouting = async (origin, destination) => {
     //can use directly as result
     console.log("code 1");
     const resultPromise = await axios.post(
-      "https://nusmaps-onrender.com/NUSBusRoutes",
+      "https://nusmaps.onrender.com/NUSBusRoutes",
       {
         origin: origin,
         destination: destination,
@@ -439,7 +439,7 @@ const handleRouting = async (origin, destination) => {
       // console.log("nus stop coords: ", nusStopCoords);
       // console.log('destination:', destination);
       const promiseFromStopToDest = axios.post(
-        "https://nusmaps-onrender.com/NUSBusRoutes",
+        "https://nusmaps.onrender.com/NUSBusRoutes",
         {
           origin: nusStopCoords,
           destination: destination,
@@ -514,7 +514,7 @@ const handleRouting = async (origin, destination) => {
     for (nusStop of PUBLICNUSBUSSTOPS) {
       const nusStopCoords = TEMP_NUS_BUS_STOPS_COORDS.get(nusStop);
       const promiseFromOriginToStop = axios.post(
-        "https://nusmaps-onrender.com/NUSBusRoutes",
+        "https://nusmaps.onrender.com/NUSBusRoutes",
         {
           origin: origin,
           destination: nusStopCoords,
