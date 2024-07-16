@@ -9,7 +9,6 @@ import {
   RefreshControl,
   Image,
   ActivityIndicator,
-  StatusBar,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
@@ -23,19 +22,20 @@ import {
   useQuery,
   useMutation,
 } from "@tanstack/react-query";
+import axios from "axios";
 import * as Location from "expo-location";
 import { LocationObject } from "expo-location";
 import Toast from "react-native-toast-message";
-import BusStopSearchBar from "@/components/BusStopSearchBar";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
-import { getFavouritedBusStops } from "@/utils/storage";
-import axios from "axios";
-import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import BusStopSearchScreen from "@/components/BusStopSearchScreen";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-// STACK NAVIGATOR TO HANDLE BUS STOP SEARCHING
+// Self-built components
+import { getFavouritedBusStops } from "@/utils/storage";
+import BusStopSearchBar from "@/components/busStopsTab/BusStopSearchBar";
+import BusStopSearchScreen from "@/components/busStopsTab/BusStopSearchScreen";
+
+// Stack navigator to redirect from bus stop screen to bus stop search screen (vice-versa)
 const Stack = createStackNavigator();
 export default function App() {
   return (
@@ -307,7 +307,6 @@ const useUserLocation = (refreshLocation: number) => {
 const queryClient = new QueryClient();
 
 async function fetchBusArrivalTimes(busStops: any) {
-  console.log("fetched bus stops: ", busStops);
   const response = await axios.post(
     "https://nusmaps.onrender.com/busArrivalTimes",
     busStops,
@@ -394,33 +393,51 @@ function FavouriteBusStops({ refresh }: { refresh: () => void }) {
       </ScrollView>
     );
 
-    return (
-      <ScrollView
-        refreshControl={
-          <RefreshControl refreshing={isPending} onRefresh={handleRefresh} />
-        }
-        contentContainerStyle={{ flexGrow: 1 }}
-      >
-        {favouriteBusStops && favouriteBusStops.length === 0 ? (
-          <View style={{ flex: 1, alignItems: "center", justifyContent: "center", alignContent: "center" }}>
-            <Text style={{ fontFamily: "Inter-SemiBold", fontSize: 18, color: "#848484" }}>
-              No bus stops have been favourited yet!
-            </Text>
-            <MaterialCommunityIcons name="ghost" size={80} color={"#848484"} style={{ marginTop: 10 }} />
-          </View>
-        ) : (
-          <View>
-            {busStops && Array.isArray(busStops) ? (
-              busStops.map((busStop: BusStop, index: number) => (
-                <ListItem key={index} item={busStop} />
-              ))
-            ) : (
-              <Text>{JSON.stringify(busStops)}</Text>
-            )}
-          </View>
-        )}
-      </ScrollView>
-    );
+  return (
+    <ScrollView
+      refreshControl={
+        <RefreshControl refreshing={isPending} onRefresh={handleRefresh} />
+      }
+      contentContainerStyle={{ flexGrow: 1 }}
+    >
+      {favouriteBusStops && favouriteBusStops.length === 0 ? (
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            alignContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              fontFamily: "Inter-SemiBold",
+              fontSize: 18,
+              color: "#848484",
+            }}
+          >
+            No bus stops have been favourited yet!
+          </Text>
+          <MaterialCommunityIcons
+            name="ghost"
+            size={80}
+            color={"#848484"}
+            style={{ marginTop: 10 }}
+          />
+        </View>
+      ) : (
+        <View>
+          {busStops && Array.isArray(busStops) ? (
+            busStops.map((busStop: BusStop, index: number) => (
+              <ListItem key={index} item={busStop} />
+            ))
+          ) : (
+            <Text>{JSON.stringify(busStops)}</Text>
+          )}
+        </View>
+      )}
+    </ScrollView>
+  );
 }
 
 // Get nearest bus stops by location and render it. Backend API will return a busStops object with updated bus timings.
@@ -433,6 +450,16 @@ function NearbyBusStops({
 }) {
   const location = useUserLocation(refreshLocation);
 
+  // Type guard to assert that location is not null
+  // if (!location) {
+  //   return (
+  //     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+  //       <ActivityIndicator size="large" style={{ margin: 20 }} />
+  //       <Text>Loading location...</Text>
+  //     </View>
+  //   );
+  // }
+
   const {
     isPending,
     error,
@@ -441,9 +468,12 @@ function NearbyBusStops({
     queryKey: ["busStopsByLocation"],
     staleTime: 30000, // 30 seconds
     queryFn: () =>
-      fetch(
-        `https://nusmaps.onrender.com/busStopsByLocation?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}`
-      ).then((res) => res.json()),
+      axios
+        .get(
+          `https://nusmaps.onrender.com/busStopsByLocation?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}`
+        )
+        .then((res) => res.data),
+    enabled: !!location,
   });
 
   if (isPending)
@@ -504,9 +534,9 @@ function NUSBusStops({ refresh }: { refresh: () => void }) {
     queryKey: ["nusBusStops"],
     staleTime: 30000, // 30 seconds
     queryFn: () =>
-      fetch(`https://nusmaps.onrender.com/nusBusStops`).then((res) =>
-        res.json()
-      ),
+      axios
+        .get("https://nusmaps.onrender.com/nusBusStops")
+        .then((res) => res.data),
   });
 
   if (isPending)
