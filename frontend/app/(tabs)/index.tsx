@@ -450,16 +450,6 @@ function NearbyBusStops({
 }) {
   const location = useUserLocation(refreshLocation);
 
-  // Type guard to assert that location is not null
-  // if (!location) {
-  //   return (
-  //     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-  //       <ActivityIndicator size="large" style={{ margin: 20 }} />
-  //       <Text>Loading location...</Text>
-  //     </View>
-  //   );
-  // }
-
   const {
     isPending,
     error,
@@ -470,7 +460,7 @@ function NearbyBusStops({
     queryFn: () =>
       axios
         .get(
-          `https://nusmaps.onrender.com/busStopsByLocation?latitude=${location.coords.latitude}&longitude=${location.coords.longitude}`
+          `https://nusmaps.onrender.com/busStopsByLocation?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`
         )
         .then((res) => res.data),
     enabled: !!location,
