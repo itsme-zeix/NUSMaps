@@ -17,7 +17,7 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
   return d;
 }
 
-async function getArrivalTime(busStopsArray, userLat, userLon) {
+async function getArrivalTimeAndDistance(busStopsArray, userLat, userLon) {
   await Promise.all(
     busStopsArray.map(async (busStop) => {
       busStop.distanceAway = haversineDistance(busStop.latitude, busStop.longitude, userLat, userLon);
@@ -194,7 +194,7 @@ router.post("/", async (req, res) => {
     const userLat = busStopsArrayWithLocation.latitude;
     const userLon = busStopsArrayWithLocation.longitude;
 
-    await getArrivalTime(busStopsArray, userLat, userLon);
+    await getArrivalTimeAndDistance(busStopsArray, userLat, userLon);
     res.json(busStopsArray);
   } catch (err) {
     console.error(err);
