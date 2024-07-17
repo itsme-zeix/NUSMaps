@@ -261,7 +261,7 @@ const queryClient = new QueryClient();
 
 // busstops also contain location information
 async function fetchBusArrivalTimes(busStopsWithLocation: any) {
-  const response = await axios.post("https://nusmaps.onrender.com/busArrivalTimes", busStopsWithLocation, {
+  const response = await axios.post("http://localhost:3000/busArrivalTimes", busStopsWithLocation, {
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
@@ -278,7 +278,11 @@ function FavouriteBusStops({ refreshLocation, refresh }: { refreshLocation: numb
   const [busStops, setBusStops] = useState<BusStop[]>([]);
   const [dataMutated, setDataMutated] = useState(false);
 
-  const { error, data: favouriteBusStops } = useQuery({
+  const {
+    error,
+    data: favouriteBusStops,
+    refetch,
+  } = useQuery({
     queryKey: ["favouriteBusStops"],
     queryFn: getFavouritedBusStops,
     refetchOnWindowFocus: "always",
@@ -304,7 +308,7 @@ function FavouriteBusStops({ refreshLocation, refresh }: { refreshLocation: numb
       };
       mutate(dataWithLocation);
     }
-  }, [favouriteBusStops, dataMutated, mutate]);
+  }, [favouriteBusStops, dataMutated, mutate, location]);
 
   // Ensure re-render by setting state properly & calculate minutes from ISOTime
   useEffect(() => {
@@ -324,6 +328,7 @@ function FavouriteBusStops({ refreshLocation, refresh }: { refreshLocation: numb
   const handleRefresh = () => {
     setDataMutated(false); // Reset dataMutated to allow re-fetching
     refresh(); // Trigger the refresh function passed as prop
+    refetch(); // Refetch the favourite bus stops data
   };
 
   if (isPending) return <ActivityIndicator size="large" style={{ margin: 20 }} />;
@@ -385,7 +390,7 @@ function NearbyBusStops({ refreshLocation, refreshUserLocation }: { refreshLocat
     staleTime: 30000, // 30 seconds
     queryFn: () =>
       axios
-        .get(`https://nusmaps.onrender.com/busStopsByLocation?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`)
+        .get(`http://localhost:3000/busStopsByLocation?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`)
         .then((res) => res.data),
     enabled: !!location,
   });
@@ -434,7 +439,7 @@ function NUSBusStops({ refreshLocation, refresh }: { refreshLocation: number; re
     staleTime: 30000, // 30 seconds
     queryFn: () =>
       axios
-        .get(`https://nusmaps.onrender.com/nusBusStops?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`)
+        .get(`http://localhost:3000/nusBusStops?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`)
         .then((res) => res.data),
   });
 
