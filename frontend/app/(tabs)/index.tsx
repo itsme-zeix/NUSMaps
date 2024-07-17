@@ -259,8 +259,9 @@ const useUserLocation = (refreshLocation: number) => {
 // PERFORM API QUERY
 const queryClient = new QueryClient();
 
-async function fetchBusArrivalTimes(busStops: any) {
-  const response = await axios.post("https://nusmaps.onrender.com/busArrivalTimes", busStops, {
+// busstops also contain location information
+async function fetchBusArrivalTimes(busStopsWithLocation: any) {
+  const response = await axios.post("https://nusmaps.onrender.com/busArrivalTimes", busStopsWithLocation, {
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
@@ -272,14 +273,15 @@ async function fetchBusArrivalTimes(busStops: any) {
   return response.data;
 }
 
-function FavouriteBusStops({ refresh }: { refresh: () => void }) {
+function FavouriteBusStops({ refreshLocation, refresh }: { refreshLocation: number; refresh: () => void }) {
+  const location = useUserLocation(refreshLocation);
   const [busStops, setBusStops] = useState<BusStop[]>([]);
   const [dataMutated, setDataMutated] = useState(false);
 
   const { error, data: favouriteBusStops } = useQuery({
     queryKey: ["favouriteBusStops"],
     queryFn: getFavouritedBusStops,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: "always",
   });
 
   const { mutate, isPending } = useMutation({
@@ -294,8 +296,13 @@ function FavouriteBusStops({ refresh }: { refresh: () => void }) {
   });
 
   useEffect(() => {
-    if (favouriteBusStops && Array.isArray(favouriteBusStops) && favouriteBusStops.length > 0 && !dataMutated) {
-      mutate(favouriteBusStops);
+    if (favouriteBusStops && Array.isArray(favouriteBusStops) && favouriteBusStops.length > 0 && !dataMutated && location) {
+      const dataWithLocation = {
+        latitude: location!.coords.latitude,
+        longitude: location!.coords.longitude,
+        favouriteBusStops,
+      };
+      mutate(dataWithLocation);
     }
   }, [favouriteBusStops, dataMutated, mutate]);
 
@@ -504,7 +511,7 @@ function BusStopsScreen() {
           </View>
           <View style={{ flex: 1 }}>
             {selectedIndex === 0 ? (
-              <FavouriteBusStops refresh={refetchFavouriteBusStops} />
+              <FavouriteBusStops refreshLocation={refreshLocation} refresh={refetchFavouriteBusStops} />
             ) : selectedIndex === 1 ? (
               <NearbyBusStops refreshLocation={refreshLocation} refreshUserLocation={refetchUserLocation} />
             ) : (
