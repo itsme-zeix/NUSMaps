@@ -112,7 +112,7 @@ async function fetchNUSNextBusData(busStop) {
       }
       // Update NUS Bus Stop name to be the full name rather than the code name (i.e. NUSSTOP_YIH-OPP -> NUSSTOP_Opp Yusof Ishak House).
       busStop.busStopName = "NUSSTOP_" + NUSReply.ShuttleServiceResult.caption;
-      cache.set(cacheKey, busStop.savedBuses, 30); // cache for 30 seconds
+      cache.set(cacheKey, busStop.savedBuses, 15); // cache for 15 seconds
     } catch (error) {
       console.error("Error fetching data from NUSNextBus API:", error);
     }
@@ -157,7 +157,7 @@ async function fetchLTAData(busStop) {
             const firstArrivalTime = datamallReply.Services[0].NextBus.EstimatedArrival;
             const secondArrivalTime = datamallReply.Services[0].NextBus2.EstimatedArrival;
             bus.timings = [firstArrivalTime, secondArrivalTime];
-            cache.set(cacheKey, bus.timings, 30); // Cache for 30 seconds
+            cache.set(cacheKey, bus.timings, 15); // Cache for 15 seconds
           }
         } catch (error) {
           console.error("Error fetching data from datamall:", error);

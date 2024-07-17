@@ -115,7 +115,7 @@ async function getArrivalTime(busStopsArray) {
         }
       }
       busStop.busStopName = "NUSSTOP_" + NUSReply.ShuttleServiceResult.caption;
-      cache.set(cacheKey, busStop.savedBuses, 30); // Cache for 30 seconds
+      cache.set(cacheKey, busStop.savedBuses, 15); // Cache for 15 seconds
     } catch (error) {
       console.error("Error fetching data from NUSNextBus API:", error);
     }
