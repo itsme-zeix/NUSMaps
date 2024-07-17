@@ -2,9 +2,25 @@ const dotenv = require("dotenv").config();
 const express = require("express");
 const router = express.Router();
 const axios = require("axios");
-async function getArrivalTime(busStopsArray) {
+
+// Haversine formula to calculate distance between two points
+function haversineDistance(lat1, lon1, lat2, lon2) {
+  const toRad = (x) => (x * Math.PI) / 180;
+
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const d = R * c; // Distance in kilometers
+
+  return d;
+}
+
+async function getArrivalTime(busStopsArray, userLat, userLon) {
   await Promise.all(
     busStopsArray.map(async (busStop) => {
+      busStop.distanceAway = haversineDistance(busStop.latitude, busStop.longitude, userLat, userLon);
       if (busStop.busStopName.startsWith("NUSSTOP")) {
         await (async (busStop) => {
           const stopName = busStop.busStopName.substring(8); // substring(8) skips the first 8 characters 'NUSSTOP_'
@@ -14,20 +30,15 @@ async function getArrivalTime(busStopsArray) {
             // Encode the credentials
             const credentials = `${username}:${password}`;
             const encodedCredentials = btoa(credentials);
-            const response = await axios.get(
-              `https://nnextbus.nus.edu.sg/ShuttleService?busstopname=${stopName}`,
-              {
-                headers: {
-                  Authorization: `Basic ${encodedCredentials}`,
-                },
-              }
-            );
+            const response = await axios.get(`https://nnextbus.nus.edu.sg/ShuttleService?busstopname=${stopName}`, {
+              headers: {
+                Authorization: `Basic ${encodedCredentials}`,
+              },
+            });
 
             // Check if the response is ok and has a body
             if (response.status !== 200) {
-              throw new Error(
-                `HTTP error from NUSNextBus API! status: ${response.status}`
-              );
+              throw new Error(`HTTP error from NUSNextBus API! status: ${response.status}`);
             }
 
             if (!response.data) {
@@ -60,19 +71,13 @@ async function getArrivalTime(busStopsArray) {
                     busObject.timings = ["N.A.", "N.A."];
                   } else if (etaLength == 1) {
                     const arrivalTime = shuttle._etas[0].eta_s;
-                    const firstArrivalTime = new Date(
-                      currentTime.getTime() + arrivalTime * 1000
-                    ).toISOString();
+                    const firstArrivalTime = new Date(currentTime.getTime() + arrivalTime * 1000).toISOString();
                     busObject.timings = [firstArrivalTime, "N.A."];
                   } else {
                     const arrivalTime = shuttle._etas[0].eta_s;
                     const nextArrivalTime = shuttle._etas[1].eta_s;
-                    const firstArrivalTime = new Date(
-                      currentTime.getTime() + arrivalTime * 1000
-                    ).toISOString();
-                    const secondArrivalTime = new Date(
-                      currentTime.getTime() + nextArrivalTime * 1000
-                    ).toISOString();
+                    const firstArrivalTime = new Date(currentTime.getTime() + arrivalTime * 1000).toISOString();
+                    const secondArrivalTime = new Date(currentTime.getTime() + nextArrivalTime * 1000).toISOString();
                     busObject.timings = [firstArrivalTime, secondArrivalTime];
                     busStop.busStopName = shuttle.caption; // Update NUS Bus Stop name to be the full name rather than the code name (i.e. YIH-OPP -> Opp Yusof Ishak House).
                   }
@@ -85,24 +90,17 @@ async function getArrivalTime(busStopsArray) {
 
                   // Check if arrivalTime and nextArrivalTime are numbers (they can be Arr), if not, set them to 0
                   arrivalTime = isNaN(arrivalTime) ? 0 : arrivalTime;
-                  nextArrivalTime = isNaN(nextArrivalTime)
-                    ? 0
-                    : nextArrivalTime;
+                  nextArrivalTime = isNaN(nextArrivalTime) ? 0 : nextArrivalTime;
 
-                  const firstArrivalTime = new Date(
-                    currentTime.getTime() + arrivalTime * 60000
-                  ).toISOString();
-                  const secondArrivalTime = new Date(
-                    currentTime.getTime() + nextArrivalTime * 60000
-                  ).toISOString();
+                  const firstArrivalTime = new Date(currentTime.getTime() + arrivalTime * 60000).toISOString();
+                  const secondArrivalTime = new Date(currentTime.getTime() + nextArrivalTime * 60000).toISOString();
 
                   busObject.timings = [firstArrivalTime, secondArrivalTime];
                 }
               }
             }
             // Update NUS Bus Stop name to be the full name rather than the code name (i.e. NUSSTOP_YIH-OPP -> NUSSTOP_Opp Yusof Ishak House).
-            busStop.busStopName =
-              "NUSSTOP_" + NUSReply.ShuttleServiceResult.caption;
+            busStop.busStopName = "NUSSTOP_" + NUSReply.ShuttleServiceResult.caption;
           } catch (error) {
             console.error("Error fetching data from NUSNextBus API:", error);
           }
@@ -126,9 +124,7 @@ async function getArrivalTime(busStopsArray) {
 
                 // Check if the response is ok and has a body
                 if (response.status !== 200) {
-                  throw new Error(
-                    `HTTP error from datamall! status: ${response.status}`
-                  );
+                  throw new Error(`HTTP error from datamall! status: ${response.status}`);
                 }
 
                 if (!response.data) {
@@ -142,10 +138,8 @@ async function getArrivalTime(busStopsArray) {
                 if (datamallReply.Services.length == 0) {
                   bus.timings = ["N.A.", "N.A."];
                 } else {
-                  const firstArrivalTime =
-                    datamallReply.Services[0].NextBus.EstimatedArrival;
-                  const secondArrivalTime =
-                    datamallReply.Services[0].NextBus2.EstimatedArrival;
+                  const firstArrivalTime = datamallReply.Services[0].NextBus.EstimatedArrival;
+                  const secondArrivalTime = datamallReply.Services[0].NextBus2.EstimatedArrival;
                   bus.timings = [firstArrivalTime, secondArrivalTime];
                 }
               } catch (error) {
@@ -175,9 +169,9 @@ router.post("/", async (req, res) => {
   const acceptHeader = req.get("Accept");
   const authorizationHeader = req.get("Authorization");
   const contentTypeHeader = req.get("Content-Type");
-  const busStopsArray = req.body;
+  const busStopsArrayWithLocation = req.body;
 
-  console.log("Received POST /busArrivalTimes, body:", req.body);
+  console.log("Received POST /busArrivalTimes");
 
   if (contentTypeHeader !== "application/json") {
     return res.status(415).send("Unsupported Media Type");
@@ -193,12 +187,14 @@ router.post("/", async (req, res) => {
   // }
 
   try {
-    if (!Array.isArray(busStopsArray)) {
+    if (!Array.isArray(busStopsArrayWithLocation)) {
       throw new Error("Request body must be an array");
     }
-    await getArrivalTime(busStopsArray);
-    console.log(busStopsArray);
-    console.log(busStopsArray[0].savedBuses[0]);
+    const busStopsArray = busStopsArrayWithLocation.favouriteBusStops;
+    const userLat = busStopsArrayWithLocation.latitude;
+    const userLon = busStopsArrayWithLocation.longitude;
+
+    await getArrivalTime(busStopsArray, userLat, userLon);
     res.json(busStopsArray);
   } catch (err) {
     console.error(err);
