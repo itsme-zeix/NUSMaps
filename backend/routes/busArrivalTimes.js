@@ -14,19 +14,19 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
   const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // Distance in kilometers
+}
 
-  async function getArrivalTimeAndDistance(busStopsArray, userLat, userLon) {
-    await Promise.all(
-      busStopsArray.map(async (busStop) => {
-        busStop.distanceAway = haversineDistance(busStop.latitude, busStop.longitude, userLat, userLon);
-        if (busStop.busStopName.startsWith("NUSSTOP")) {
-          await fetchNUSNextBusData(busStop);
-        } else {
-          await fetchLTAData(busStop);
-        }
-      })
-    );
-  }
+async function getArrivalTimeAndDistance(busStopsArray, userLat, userLon) {
+  await Promise.all(
+    busStopsArray.map(async (busStop) => {
+      busStop.distanceAway = haversineDistance(busStop.latitude, busStop.longitude, userLat, userLon);
+      if (busStop.busStopName.startsWith("NUSSTOP")) {
+        await fetchNUSNextBusData(busStop);
+      } else {
+        await fetchLTAData(busStop);
+      }
+    })
+  );
 }
 
 async function fetchNUSNextBusData(busStop) {
