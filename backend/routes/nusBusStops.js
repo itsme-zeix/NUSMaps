@@ -1,19 +1,8 @@
-const dotenv = require("dotenv").config();
 const express = require("express");
 const router = express.Router();
-const { Pool } = require("pg");
 const axios = require("axios");
-const cache = require("./cache/cache"); // Import the shared cache
-
-// Initialize database pool to reduce latency on connect/disconnect
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-  ssl: true, // Note that this is required to connect to the Render server.
-});
+const cache = require("./sharedmodules/cache");
+const pool = require('./sharedmodules/dbPool'); 
 
 // Function to generate bus stops object
 async function generateBusStopsObject(stop) {
