@@ -3,11 +3,6 @@ const express = require("express");
 const router = express.Router();
 const { Client } = require("pg");
 const axios = require("axios");
-function logTime(label, startTime) {
-  const endTime = process.hrtime(startTime);
-  const timeTaken = (endTime[0] * 1e9 + endTime[1]) / 1e6; // convert to milliseconds
-  console.log(`${label}: ${timeTaken.toFixed(3)}ms`);
-}
 
 // Create bus stop objects (based on interface defined in front end, see comment inside the method) using bus stop info retrieved from database in getNearestBusStops method.
 async function generateBusStopsObject(stop) {
@@ -221,9 +216,6 @@ async function getArrivalTime(busStopsArray) {
             // though that will require some gymnastics with inserting the timings (need to match serviceNo etc).
             // Also, if we simply call the API by bus stop id, certain bus services will be missing because the api only responses for certain bus stops.
             await (async (stopId, serviceNo) => {
-              console.log("bus service no: ", serviceNo);
-              console.log("stop no: ", serviceNo);
-
               try {
                 const response = await axios.get(
                   `http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=${stopId}&ServiceNo=${serviceNo}`,
