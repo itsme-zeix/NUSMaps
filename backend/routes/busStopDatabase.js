@@ -4,13 +4,13 @@ const router = express.Router();
 const { Client } = require("pg");
 
 async function generateBusStopsObject(stop) {
-  const savedBuses = await Promise.all(
-    stop.services.map((service) => generateBusServiceObject(service))
-  );
+  const savedBuses = await Promise.all(stop.services.map((service) => generateBusServiceObject(service)));
 
   const busStopObject = {
     busStopName: stop.name,
     busStopId: stop.id,
+    latitude: stop.latitude,
+    longitude: stop.longitude,
     savedBuses: savedBuses,
   };
   return busStopObject;
@@ -37,20 +37,14 @@ async function getBusStops() {
   // Query for bus stops and filter by distance from user location.
   try {
     await client.connect();
-    const res = await client.query(
-      "SELECT id, name, latitude, longitude, services FROM busstops"
-    );
+    const res = await client.query("SELECT id, name, latitude, longitude, services FROM busstops");
     const busStops = res.rows;
 
     // Format the bus stops properly so that timings can be inserted easily once retrieved.
-    const arrBusStops = await Promise.all(
-      busStops.map((stop) => generateBusStopsObject(stop))
-    );
+    const arrBusStops = await Promise.all(busStops.map((stop) => generateBusStopsObject(stop)));
     return arrBusStops;
   } catch (err) {
-    console.error(
-      "busStopsByLocation encountered an error with PostgreSQL call:" + err
-    );
+    console.error("busStopsByLocation encountered an error with PostgreSQL call:" + err);
   } finally {
     await client.end();
   }

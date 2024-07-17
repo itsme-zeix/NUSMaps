@@ -3,11 +3,8 @@ const express = require("express");
 const router = express.Router();
 const { Client } = require("pg");
 const axios = require("axios");
-function logTime(label, startTime) {
-  const endTime = process.hrtime(startTime);
-  const timeTaken = (endTime[0] * 1e9 + endTime[1]) / 1e6; // convert to milliseconds
-  console.log(`${label}: ${timeTaken.toFixed(3)}ms`);
-}
+const cache = require("./sharedmodules/cache");
+const pool = require("./sharedmodules/dbPool");
 
 // Create bus stop objects (based on interface defined in front end, see comment inside the method) using bus stop info retrieved from database in getNearestBusStops method.
 async function generateBusStopsObject(stop) {
@@ -41,70 +38,72 @@ async function generateBusStopsObject(stop) {
   }
   return busStopObject;
 }
+
+// Haversine Distance Calculation
+function haversineDistance(lat1, lon1, lat2, lon2) {
+  const toRadians = (degrees) => (degrees * Math.PI) / 180;
+  const R = 6371; // radius of the Earth in km
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon1 - lon2);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // distance in km
+}
+
+// Helper function to quantize coordinate (~1.11139 metres)
+function quantizeCoordinate(value, precision = 5) {
+  const factor = Math.pow(10, precision);
+  return Math.round(value * factor) / factor;
+}
+
 // This function obtains x of the nearest bus stops formatted as busStopObjects.
+// Get nearest bus stops
 async function getNearestBusStops(userLat, userLon) {
-  // NOTE:
-  // Since there are only ~5000 bus stops, we are able to skip optimizations such as adding buckets by 1km radius.
-  // Instead, we can just calculate the euclidean distance synchronously (calculating asynchrononously doesn't speed up much here).
-  // Connect to PostgreSQL server
-
-  const client = new Client({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
-    ssl: true, // Note that this is required to connect to the Render server.
-  });
-
-  // Calculate distance function abstracted out to use in the calculation below
-  function haversineDistance(lat1, lon1, lat2, lon2) {
-    const toRadians = (degrees) => (degrees * Math.PI) / 180;
-    const R = 6371; // Radius of the Earth in km
-    const dLat = toRadians(lat2 - lat1);
-    const dLon = toRadians(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRadians(lat1)) *
-        Math.cos(toRadians(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // Distance in km
+  const quantizedLat = quantizeCoordinate(userLat);
+  const quantizedLon = quantizeCoordinate(userLon);
+  const cacheKey = `nearestBusStops_${quantizedLat}_${quantizedLon}`;
+  const cachedBusStops = cache.get(cacheKey);
+  if (cachedBusStops) {
+    return cachedBusStops;
   }
 
-  // Query for bus stops and filter by distance from user location.
-  try {
-    await client.connect();
-    const res = await client.query(
-      "SELECT id, name, latitude, longitude, services FROM busstops"
-    );
-    const busStops = res.rows;
-    const nearbyStops = busStops
-      .map((stop) => {
-        const stopLat = stop.latitude;
-        const stopLon = stop.longitude;
-        const name = stop.name;
-        const services = stop.services;
-        const distance = haversineDistance(userLat, userLon, stopLat, stopLon);
-        return { id: stop.id, name, distance, services };
-      })
-      .sort((a, b) => a.distance - b.distance) // Sort by distance
-      .slice(0, 10); // Get the 10 nearest stops
+  // Calculate bounding box (approx. 3km radius)
+  const latDiff = 0.03; // Roughly equal to 3km
+  const lonDiff = 0.03; // Roughly equal to 3km
 
-    // Format the bus stops properly so that timings can be inserted easily once retrieved.
-    const arrBusStops = await Promise.all(
-      nearbyStops.map((stop) => generateBusStopsObject(stop))
-    );
+  const minLat = Number(userLat - latDiff);
+  const maxLat = Number(userLat + latDiff);
+  const minLon = Number(userLon - lonDiff);
+  const maxLon = Number(userLon + lonDiff);
+
+  const query = `
+    SELECT id, name, latitude, longitude, services
+    FROM busstops
+    WHERE latitude BETWEEN $1 AND $2
+    AND longitude BETWEEN $3 AND $4
+  `;
+
+  try {
+    const res = await pool.query(query, [minLat, maxLat, minLon, maxLon]);
+    const busStops = res.rows;
+
+    // Calculate distances and sort
+    const nearbyStops = busStops
+      .map((stop) => ({
+        ...stop,
+        distance: haversineDistance(userLat, userLon, stop.latitude, stop.longitude),
+      }))
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 10);
+
+    const arrBusStops = await Promise.all(nearbyStops.map((stop) => generateBusStopsObject(stop)));
+
+    cache.set(cacheKey, arrBusStops, 300); // Cache for 5 minutes
     return arrBusStops;
   } catch (err) {
-    console.error(
-      "busStopsByLocation encountered an error with PostgreSQL call:" + err
-    );
-  } finally {
-    await client.end();
+    console.error("Error fetching nearest bus stops:", err);
+    throw err;
   }
-  return;
 }
 
 // Insert the arrival times (retrieved from API) into the bus stops array.
@@ -114,28 +113,25 @@ async function getArrivalTime(busStopsArray) {
   await Promise.all(
     busStopsArray.map(async (busStop) => {
       if (busStop.busStopName.startsWith("NUSSTOP")) {
-        await (async (busStop) => {
-          const stopName = busStop.busStopName.substring(8); // substring(8) skips the first 8 characters 'NUSSTOP_'
+        const stopName = busStop.busStopName.substring(8); // substring(8) skips the first 8 characters 'NUSSTOP_'
+        const cacheKey = `arrivalTimes_${stopName}`;
+        const cachedData = cache.get(cacheKey);
+
+        if (cachedData) {
+          busStop.savedBuses = cachedData;
+        } else {
           try {
             const username = process.env.NUSNEXTBUS_USER;
             const password = process.env.NUSNEXTBUS_PASSWORD;
-            // Encode the credentials
-            const credentials = `${username}:${password}`;
-            const encodedCredentials = btoa(credentials);
-            const response = await axios.get(
-              `https://nnextbus.nus.edu.sg/ShuttleService?busstopname=${stopName}`,
-              {
-                headers: {
-                  Authorization: `Basic ${encodedCredentials}`,
-                },
-              }
-            );
+            const credentials = Buffer.from(`${username}:${password}`).toString("base64");
+
+            const response = await axios.get(`https://nnextbus.nus.edu.sg/ShuttleService?busstopname=${stopName}`, {
+              headers: { Authorization: `Basic ${credentials}` },
+            });
 
             // Check if the response is ok and has a body
             if (response.status !== 200) {
-              throw new Error(
-                `HTTP error from NUSNextBus API! status: ${response.status}`
-              );
+              throw new Error(`HTTP error from NUSNextBus API! status: ${response.status}`);
             }
 
             if (!response.data) {
@@ -146,12 +142,11 @@ async function getArrivalTime(busStopsArray) {
             // We will process the NUSReply in a 2 step process:
             // 1) reformat reply such that we can search the buses by name in a dict.
             // 2) iterate through buses in our bus stop objects and retrieve the timings based on the name.
+            const shuttles = NUSReply.ShuttleServiceResult.shuttles.reduce((acc, shuttle) => {
+              acc[shuttle.name] = shuttle;
+              return acc;
+            }, {});
 
-            // REFORMAT
-            let shuttles = {};
-            for (let shuttle of NUSReply.ShuttleServiceResult.shuttles) {
-              shuttles[shuttle.name] = shuttle;
-            }
             // ITERATE AND UPDATE BUS ARRIVAL TIMING
             for (let busObject of busStop.savedBuses) {
               const serviceName = busObject.busNumber;
@@ -167,19 +162,13 @@ async function getArrivalTime(busStopsArray) {
                     busObject.timings = ["N.A.", "N.A."];
                   } else if (etaLength == 1) {
                     const arrivalTime = shuttle._etas[0].eta_s;
-                    const firstArrivalTime = new Date(
-                      currentTime.getTime() + arrivalTime * 1000
-                    ).toISOString();
+                    const firstArrivalTime = new Date(currentTime.getTime() + arrivalTime * 1000).toISOString();
                     busObject.timings = [firstArrivalTime, "N.A."];
                   } else {
                     const arrivalTime = shuttle._etas[0].eta_s;
                     const nextArrivalTime = shuttle._etas[1].eta_s;
-                    const firstArrivalTime = new Date(
-                      currentTime.getTime() + arrivalTime * 1000
-                    ).toISOString();
-                    const secondArrivalTime = new Date(
-                      currentTime.getTime() + nextArrivalTime * 1000
-                    ).toISOString();
+                    const firstArrivalTime = new Date(currentTime.getTime() + arrivalTime * 1000).toISOString();
+                    const secondArrivalTime = new Date(currentTime.getTime() + nextArrivalTime * 1000).toISOString();
                     busObject.timings = [firstArrivalTime, secondArrivalTime];
                     busStop.busNumber = shuttle.caption; // Update NUS Bus Stop name to be the full name rather than the code name (i.e. YIH-OPP -> Opp Yusof Ishak House).
                   }
@@ -192,41 +181,37 @@ async function getArrivalTime(busStopsArray) {
 
                   // Check if arrivalTime and nextArrivalTime are numbers (they can be Arr), if not, set them to 0
                   arrivalTime = isNaN(arrivalTime) ? 0 : arrivalTime;
-                  nextArrivalTime = isNaN(nextArrivalTime)
-                    ? 0
-                    : nextArrivalTime;
+                  nextArrivalTime = isNaN(nextArrivalTime) ? 0 : nextArrivalTime;
 
-                  const firstArrivalTime = new Date(
-                    currentTime.getTime() + arrivalTime * 60000
-                  ).toISOString();
-                  const secondArrivalTime = new Date(
-                    currentTime.getTime() + nextArrivalTime * 60000
-                  ).toISOString();
+                  const firstArrivalTime = new Date(currentTime.getTime() + arrivalTime * 60000).toISOString();
+                  const secondArrivalTime = new Date(currentTime.getTime() + nextArrivalTime * 60000).toISOString();
 
                   busObject.timings = [firstArrivalTime, secondArrivalTime];
                 }
               }
             }
             // Update NUS Bus Stop name to be the full name rather than the code name (i.e. NUSSTOP_YIH-OPP -> NUSSTOP_Opp Yusof Ishak House).
-            busStop.busStopName =
-              "NUSSTOP_" + NUSReply.ShuttleServiceResult.caption;
+            busStop.busStopName = "NUSSTOP_" + NUSReply.ShuttleServiceResult.caption;
+            cache.set(cacheKey, busStop.savedBuses, 15); // cache for 15 seconds
           } catch (error) {
             console.error("Error fetching data from NUSNextBus API:", error);
           }
-        })(busStop);
+        }
       } else {
         await Promise.all(
           busStop.savedBuses.map(async (bus) => {
-            // logic is somewhat convoluted here, can be simplified by removing serviceNo to reduce the number of API calls.
-            // though that will require some gymnastics with inserting the timings (need to match serviceNo etc).
-            // Also, if we simply call the API by bus stop id, certain bus services will be missing because the api only responses for certain bus stops.
-            await (async (stopId, serviceNo) => {
-              console.log("bus service no: ", serviceNo);
-              console.log("stop no: ", serviceNo);
+            const cacheKey = `LTA_${busStop.busStopId}_${bus.busNumber}`;
+            const cachedData = cache.get(cacheKey);
 
+            if (cachedData) {
+              bus.timings = cachedData;
+            } else {
+              // logic is somewhat convoluted here, can be simplified by removing serviceNo to reduce the number of API calls.
+              // though that will require some gymnastics with inserting the timings (need to match serviceNo etc).
+              // Also, if we simply call the API by bus stop id, certain bus services will be missing because the api only responses for certain bus stops.
               try {
                 const response = await axios.get(
-                  `http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=${stopId}&ServiceNo=${serviceNo}`,
+                  `http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=${busStop.busStopId}&ServiceNo=${bus.busNumber}`,
                   {
                     headers: {
                       AccountKey: process.env.LTA_DATAMALL_KEY,
@@ -234,11 +219,8 @@ async function getArrivalTime(busStopsArray) {
                   }
                 );
 
-                // Check if the response is ok and has a body
                 if (response.status !== 200) {
-                  throw new Error(
-                    `HTTP error from datamall! status: ${response.status}`
-                  );
+                  throw new Error(`HTTP error from datamall! status: ${response.status}`);
                 }
 
                 if (!response.data) {
@@ -249,19 +231,18 @@ async function getArrivalTime(busStopsArray) {
                 if (!datamallReply.Services) {
                   throw new Error("Unexpected response format from datamall");
                 }
-                if (datamallReply.Services.length == 0) {
+                if (datamallReply.Services.length === 0) {
                   bus.timings = ["N.A.", "N.A."];
                 } else {
-                  const firstArrivalTime =
-                    datamallReply.Services[0].NextBus.EstimatedArrival;
-                  const secondArrivalTime =
-                    datamallReply.Services[0].NextBus2.EstimatedArrival;
+                  const firstArrivalTime = datamallReply.Services[0].NextBus.EstimatedArrival;
+                  const secondArrivalTime = datamallReply.Services[0].NextBus2.EstimatedArrival;
                   bus.timings = [firstArrivalTime, secondArrivalTime];
+                  cache.set(cacheKey, bus.timings, 15); // Cache for 15 seconds
                 }
               } catch (error) {
                 console.error("Error fetching data from datamall:", error);
               }
-            })(busStop.busStopId, bus.busNumber);
+            }
           })
         );
       }
@@ -283,11 +264,9 @@ router.get("/", async (req, res) => {
   // }
 
   try {
-    (async () => {
-      const busStopsArray = await getNearestBusStops(latitude, longitude);
-      await getArrivalTime(busStopsArray); // insert arrival times
-      res.json(busStopsArray);
-    })();
+    const busStopsArray = await getNearestBusStops(latitude, longitude);
+    await getArrivalTime(busStopsArray); // insert arrival times
+    res.json(busStopsArray);
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal server error");
