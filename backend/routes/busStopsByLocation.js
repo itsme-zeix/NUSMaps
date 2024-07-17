@@ -71,10 +71,10 @@ async function getNearestBusStops(userLat, userLon) {
   const latDiff = 0.03; // Roughly equal to 3km
   const lonDiff = 0.03; // Roughly equal to 3km
 
-  const minLat = userLat - latDiff;
-  const maxLat = userLat + latDiff;
-  const minLon = userLon - lonDiff;
-  const maxLon = userLon + lonDiff;
+  const minLat = Number(userLat - latDiff);
+  const maxLat = Number(userLat + latDiff);
+  const minLon = Number(userLon - lonDiff);
+  const maxLon = Number(userLon + lonDiff);
 
   const query = `
     SELECT id, name, latitude, longitude, services
