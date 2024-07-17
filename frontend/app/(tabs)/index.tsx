@@ -11,17 +11,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery,
-  useMutation,
-} from "@tanstack/react-query";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import { QueryClient, QueryClientProvider, useQuery, useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import * as Location from "expo-location";
 import { LocationObject } from "expo-location";
@@ -41,16 +32,8 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Stack.Navigator initialRouteName="MainScreen">
-        <Stack.Screen
-          name="BusStopsScreen"
-          component={BusStopsScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="BusStopSearchScreen"
-          component={BusStopSearchScreen}
-          options={{ headerShown: false }}
-        />
+        <Stack.Screen name="BusStopsScreen" component={BusStopsScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="BusStopSearchScreen" component={BusStopSearchScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </QueryClientProvider>
   );
@@ -69,13 +52,7 @@ interface BusStop {
 }
 
 // UI COMPONENTS
-const ColouredCircle = ({
-  color,
-  size = 50,
-}: {
-  color: string;
-  size?: number;
-}) => {
+const ColouredCircle = ({ color, size = 50 }: { color: string; size?: number }) => {
   return (
     <View
       style={{
@@ -107,13 +84,7 @@ const calculateMinutesDifference = (isoTime: string): string => {
   return differenceInMinutes >= 0 ? `${differenceInMinutes} min` : "N/A"; // Correctly format the minute output
 };
 
-const CollapsibleContainer = ({
-  children,
-  expanded,
-}: {
-  children: React.ReactNode;
-  expanded: boolean;
-}) => {
+const CollapsibleContainer = ({ children, expanded }: { children: React.ReactNode; expanded: boolean }) => {
   const [height, setHeight] = useState(0);
   const animatedHeight = useSharedValue(0);
 
@@ -188,11 +159,7 @@ const ListItem = ({ item }: { item: BusStop }) => {
       <TouchableWithoutFeedback onPress={onItemPress}>
         <View style={styles.cardContainer}>
           <View style={styles.textContainer}>
-            <Text style={styles.busStopName}>
-              {item.busStopName.startsWith("NUSSTOP")
-                ? item.busStopName.slice(8)
-                : item.busStopName}
-            </Text>
+            <Text style={styles.busStopName}>{item.busStopName.startsWith("NUSSTOP") ? item.busStopName.slice(8) : item.busStopName}</Text>
             <Text style={styles.distanceAwayText}>
               {Number(item.distanceAway) < 1
                 ? `~${(Number(item.distanceAway) * 1000).toFixed(0)}m away`
@@ -206,11 +173,7 @@ const ListItem = ({ item }: { item: BusStop }) => {
               </View>
             )}
             <Image
-              source={
-                expanded
-                  ? require("@/assets/images/chevron_up_blue_icon.png")
-                  : require("@/assets/images/chevron_down_blue_icon.png")
-              }
+              source={expanded ? require("@/assets/images/chevron_up_blue_icon.png") : require("@/assets/images/chevron_down_blue_icon.png")}
               style={styles.chevron}
             />
           </View>
@@ -223,23 +186,13 @@ const ListItem = ({ item }: { item: BusStop }) => {
             <View key={index} style={styles.detailRow}>
               <View style={styles.leftContainer}>
                 <ColouredCircle color={getColor(bus.busNumber)} size={15} />
-                <Text style={[styles.details, styles.busNumber]}>
-                  {bus.busNumber.startsWith("PUB:")
-                    ? bus.busNumber.slice(4)
-                    : bus.busNumber}
-                </Text>
+                <Text style={[styles.details, styles.busNumber]}>{bus.busNumber.startsWith("PUB:") ? bus.busNumber.slice(4) : bus.busNumber}</Text>
               </View>
               <View style={styles.rightContainer}>
-                <Text
-                  style={[styles.details, styles.timingText]}
-                  numberOfLines={1}
-                >
+                <Text style={[styles.details, styles.timingText]} numberOfLines={1}>
                   {bus.timings[0]}
                 </Text>
-                <Text
-                  style={[styles.details, styles.timingText]}
-                  numberOfLines={1}
-                >
+                <Text style={[styles.details, styles.timingText]} numberOfLines={1}>
                   {bus.timings[1]}
                 </Text>
               </View>
@@ -307,16 +260,12 @@ const useUserLocation = (refreshLocation: number) => {
 const queryClient = new QueryClient();
 
 async function fetchBusArrivalTimes(busStops: any) {
-  const response = await axios.post(
-    "https://nusmaps.onrender.com/busArrivalTimes",
-    busStops,
-    {
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  const response = await axios.post("https://nusmaps.onrender.com/busArrivalTimes", busStops, {
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+  });
   if (response.status !== 200) {
     throw new Error("Network response was not ok");
   }
@@ -345,12 +294,7 @@ function FavouriteBusStops({ refresh }: { refresh: () => void }) {
   });
 
   useEffect(() => {
-    if (
-      favouriteBusStops &&
-      Array.isArray(favouriteBusStops) &&
-      favouriteBusStops.length > 0 &&
-      !dataMutated
-    ) {
+    if (favouriteBusStops && Array.isArray(favouriteBusStops) && favouriteBusStops.length > 0 && !dataMutated) {
       mutate(favouriteBusStops);
     }
   }, [favouriteBusStops, dataMutated, mutate]);
@@ -362,9 +306,7 @@ function FavouriteBusStops({ refresh }: { refresh: () => void }) {
         return prevBusStops.map((busStop) => {
           const updatedBuses = busStop.savedBuses.map((bus) => ({
             ...bus,
-            timings: bus.timings.map((timing) =>
-              calculateMinutesDifference(timing)
-            ),
+            timings: bus.timings.map((timing) => calculateMinutesDifference(timing)),
           }));
           return { ...busStop, savedBuses: updatedBuses };
         });
@@ -377,15 +319,10 @@ function FavouriteBusStops({ refresh }: { refresh: () => void }) {
     refresh(); // Trigger the refresh function passed as prop
   };
 
-  if (isPending)
-    return <ActivityIndicator size="large" style={{ margin: 20 }} />;
+  if (isPending) return <ActivityIndicator size="large" style={{ margin: 20 }} />;
   if (error)
     return (
-      <ScrollView
-        refreshControl={
-          <RefreshControl refreshing={isPending} onRefresh={refresh} />
-        }
-      >
+      <ScrollView refreshControl={<RefreshControl refreshing={isPending} onRefresh={refresh} />}>
         <View style={{ flex: 1, alignItems: "center", margin: 20 }}>
           <Text>An error has occurred: {error.message}. </Text>
           <Text>Pull down to try again.</Text>
@@ -394,12 +331,7 @@ function FavouriteBusStops({ refresh }: { refresh: () => void }) {
     );
 
   return (
-    <ScrollView
-      refreshControl={
-        <RefreshControl refreshing={isPending} onRefresh={handleRefresh} />
-      }
-      contentContainerStyle={{ flexGrow: 1 }}
-    >
+    <ScrollView refreshControl={<RefreshControl refreshing={isPending} onRefresh={handleRefresh} />} contentContainerStyle={{ flexGrow: 1 }}>
       {favouriteBusStops && favouriteBusStops.length === 0 ? (
         <View
           style={{
@@ -418,19 +350,12 @@ function FavouriteBusStops({ refresh }: { refresh: () => void }) {
           >
             No bus stops have been favourited yet!
           </Text>
-          <MaterialCommunityIcons
-            name="ghost"
-            size={80}
-            color={"#848484"}
-            style={{ marginTop: 10 }}
-          />
+          <MaterialCommunityIcons name="ghost" size={80} color={"#848484"} style={{ marginTop: 10 }} />
         </View>
       ) : (
         <View>
           {busStops && Array.isArray(busStops) ? (
-            busStops.map((busStop: BusStop, index: number) => (
-              <ListItem key={index} item={busStop} />
-            ))
+            busStops.map((busStop: BusStop, index: number) => <ListItem key={index} item={busStop} />)
           ) : (
             <Text>{JSON.stringify(busStops)}</Text>
           )}
@@ -441,13 +366,7 @@ function FavouriteBusStops({ refresh }: { refresh: () => void }) {
 }
 
 // Get nearest bus stops by location and render it. Backend API will return a busStops object with updated bus timings.
-function NearbyBusStops({
-  refreshLocation,
-  refreshUserLocation,
-}: {
-  refreshLocation: number;
-  refreshUserLocation: () => void;
-}) {
+function NearbyBusStops({ refreshLocation, refreshUserLocation }: { refreshLocation: number; refreshUserLocation: () => void }) {
   const location = useUserLocation(refreshLocation);
 
   const {
@@ -459,25 +378,15 @@ function NearbyBusStops({
     staleTime: 30000, // 30 seconds
     queryFn: () =>
       axios
-        .get(
-          `https://nusmaps.onrender.com/busStopsByLocation?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`
-        )
+        .get(`https://nusmaps.onrender.com/busStopsByLocation?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`)
         .then((res) => res.data),
     enabled: !!location,
   });
 
-  if (isPending)
-    return <ActivityIndicator size="large" style={{ margin: 20 }} />;
+  if (isPending) return <ActivityIndicator size="large" style={{ margin: 20 }} />;
   if (error)
     return (
-      <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={isPending}
-            onRefresh={refreshUserLocation}
-          />
-        }
-      >
+      <ScrollView refreshControl={<RefreshControl refreshing={isPending} onRefresh={refreshUserLocation} />}>
         <View style={{ flex: 1, alignItems: "center", margin: 20 }}>
           <Text>An error has occurred: {error.message}. </Text>
           <Text>Pull down to try again.</Text>
@@ -493,19 +402,10 @@ function NearbyBusStops({
   );
 
   return (
-    <ScrollView
-      refreshControl={
-        <RefreshControl
-          refreshing={isPending}
-          onRefresh={refreshUserLocation}
-        />
-      }
-    >
+    <ScrollView refreshControl={<RefreshControl refreshing={isPending} onRefresh={refreshUserLocation} />}>
       <View>
         {busStops && Array.isArray(busStops) ? (
-          busStops.map((busStop: BusStop, index: number) => (
-            <ListItem key={index} item={busStop} />
-          ))
+          busStops.map((busStop: BusStop, index: number) => <ListItem key={index} item={busStop} />)
         ) : (
           <Text>{JSON.stringify(busStops)}</Text>
         )}
@@ -515,7 +415,9 @@ function NearbyBusStops({
 }
 
 // Get all NUS Bus Stops and its associated timings and render it.
-function NUSBusStops({ refresh }: { refresh: () => void }) {
+function NUSBusStops({ refreshLocation, refresh }: { refreshLocation: number; refresh: () => void }) {
+  const location = useUserLocation(refreshLocation);
+
   const {
     isPending,
     error,
@@ -525,19 +427,14 @@ function NUSBusStops({ refresh }: { refresh: () => void }) {
     staleTime: 30000, // 30 seconds
     queryFn: () =>
       axios
-        .get("https://nusmaps.onrender.com/nusBusStops")
+        .get(`https://nusmaps.onrender.com/nusBusStops?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`)
         .then((res) => res.data),
   });
 
-  if (isPending)
-    return <ActivityIndicator size="large" style={{ margin: 20 }} />;
+  if (isPending) return <ActivityIndicator size="large" style={{ margin: 20 }} />;
   if (error)
     return (
-      <ScrollView
-        refreshControl={
-          <RefreshControl refreshing={isPending} onRefresh={refresh} />
-        }
-      >
+      <ScrollView refreshControl={<RefreshControl refreshing={isPending} onRefresh={refresh} />}>
         <View style={{ flex: 1, alignItems: "center", margin: 20 }}>
           <Text>An error has occurred: {error.message}. </Text>
           <Text>Pull down to try again.</Text>
@@ -555,16 +452,10 @@ function NUSBusStops({ refresh }: { refresh: () => void }) {
   }
 
   return (
-    <ScrollView
-      refreshControl={
-        <RefreshControl refreshing={isPending} onRefresh={refresh} />
-      }
-    >
+    <ScrollView refreshControl={<RefreshControl refreshing={isPending} onRefresh={refresh} />}>
       <View>
         {busStops && Array.isArray(busStops) ? (
-          busStops.map((busStop: BusStop, index: number) => (
-            <ListItem key={index} item={busStop} />
-          ))
+          busStops.map((busStop: BusStop, index: number) => <ListItem key={index} item={busStop} />)
         ) : (
           <Text>{JSON.stringify(busStops)}</Text>
         )}
@@ -578,10 +469,12 @@ function BusStopsScreen() {
   const [selectedIndex, setSelectedIndex] = useState(0); // State to handle the logic of rendering nearby(0) or NUS(1) bus stops.
 
   const refetchFavouriteBusStops = useCallback(() => {
+    setRefreshLocation((prevKey) => prevKey + 1);
     queryClient.invalidateQueries({ queryKey: ["favouriteBusStops"] });
   }, [queryClient]);
 
   const refetchNUSBusStops = useCallback(() => {
+    setRefreshLocation((prevKey) => prevKey + 1);
     queryClient.invalidateQueries({ queryKey: ["nusBusStops"] });
   }, [queryClient]);
 
@@ -613,12 +506,9 @@ function BusStopsScreen() {
             {selectedIndex === 0 ? (
               <FavouriteBusStops refresh={refetchFavouriteBusStops} />
             ) : selectedIndex === 1 ? (
-              <NearbyBusStops
-                refreshLocation={refreshLocation}
-                refreshUserLocation={refetchUserLocation}
-              />
+              <NearbyBusStops refreshLocation={refreshLocation} refreshUserLocation={refetchUserLocation} />
             ) : (
-              <NUSBusStops refresh={refetchNUSBusStops} />
+              <NUSBusStops refreshLocation={refreshLocation} refresh={refetchNUSBusStops} />
             )}
           </View>
         </SafeAreaView>
