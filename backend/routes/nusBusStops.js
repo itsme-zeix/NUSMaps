@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 const cache = require("./sharedmodules/cache");
-const pool = require('./sharedmodules/dbPool'); 
+const pool = require("./sharedmodules/dbPool");
 
 // Function to generate bus stops object
 async function generateBusStopsObject(stop) {
@@ -114,10 +114,8 @@ async function getArrivalTime(busStopsArray) {
           }
         }
       }
-
-      cache.set(cacheKey, busStop.savedBuses, 30); // Cache for 30 seconds
-
       busStop.busStopName = "NUSSTOP_" + NUSReply.ShuttleServiceResult.caption;
+      cache.set(cacheKey, busStop.savedBuses, 30); // Cache for 30 seconds
     } catch (error) {
       console.error("Error fetching data from NUSNextBus API:", error);
     }
