@@ -261,7 +261,8 @@ const queryClient = new QueryClient();
 
 // busstops also contain location information
 async function fetchBusArrivalTimes(busStopsWithLocation: any) {
-  const response = await axios.post("http://localhost:3000/busArrivalTimes", busStopsWithLocation, {
+  console.log(busStopsWithLocation)
+  const response = await axios.post("https://nusmaps.onrender.com/busArrivalTimes", busStopsWithLocation, {
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
@@ -390,7 +391,7 @@ function NearbyBusStops({ refreshLocation, refreshUserLocation }: { refreshLocat
     staleTime: 30000, // 30 seconds
     queryFn: () =>
       axios
-        .get(`http://localhost:3000/busStopsByLocation?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`)
+        .get(`https://nusmaps.onrender.com/busStopsByLocation?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`)
         .then((res) => res.data),
     enabled: !!location,
   });
@@ -439,7 +440,7 @@ function NUSBusStops({ refreshLocation, refresh }: { refreshLocation: number; re
     staleTime: 30000, // 30 seconds
     queryFn: () =>
       axios
-        .get(`http://localhost:3000/nusBusStops?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`)
+        .get(`https://nusmaps.onrender.com/nusBusStops?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`)
         .then((res) => res.data),
   });
 
