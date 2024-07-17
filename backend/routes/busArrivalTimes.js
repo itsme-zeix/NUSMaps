@@ -58,7 +58,6 @@ async function getArrivalTimeAndDistance(busStopsArray, userLat, userLon) {
             // ITERATE AND UPDATE BUS ARRIVAL TIMING
             for (let busObject of busStop.savedBuses) {
               const serviceName = busObject.busNumber;
-              console.log(serviceName);
               if (shuttles[serviceName]) {
                 const shuttle = shuttles[serviceName];
                 if (shuttle._etas) {
@@ -187,9 +186,6 @@ router.post("/", async (req, res) => {
   // }
 
   try {
-    if (!Array.isArray(busStopsArrayWithLocation)) {
-      throw new Error("Request body must be an array");
-    }
     const busStopsArray = busStopsArrayWithLocation.favouriteBusStops;
     const userLat = busStopsArrayWithLocation.latitude;
     const userLon = busStopsArrayWithLocation.longitude;
