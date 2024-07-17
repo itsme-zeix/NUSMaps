@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { Pool } = require("pg");
 const axios = require("axios");
-const NodeCache = require("node-cache");
+const cache = require("./cache/cache"); // Import the shared cache
 
 // Initialize database pool to reduce latency on connect/disconnect
 const pool = new Pool({
@@ -15,31 +15,26 @@ const pool = new Pool({
   ssl: true, // Note that this is required to connect to the Render server.
 });
 
-// Initialize cache with TTL of 7200 seconds (2 hours).
-// This will cache the NUS bus stop data retrieved from our PostgreSQL server
-const cache = new NodeCache({ stdTTL: 7200 });
-
+// Function to generate bus stops object
 async function generateBusStopsObject(stop) {
-  // Initialize bus stop object
   const busStopObject = {
     busStopName: stop.name,
     busStopId: String(stop.id),
     distanceAway: String(stop.distance),
-    savedBuses: [], // This is an array length = services.length that contains BusStop objects
+    savedBuses: [],
   };
 
-  // Initialize each of the bus services at a bus stop
   for (const service of stop.services) {
     const busService = {
       busNumber: service,
-      timings: [], // Contains 2 strings which is the time in ISO format
+      timings: [],
     };
-    busStopObject.savedBuses.push(busService); // Insert bus services into bus stop
+    busStopObject.savedBuses.push(busService);
   }
   return busStopObject;
 }
 
-// This function obtains all of the NUS Bus Stops formatted as busStopObjects.
+// Function to get NUS Bus Stops
 async function getNUSBusStops() {
   const cachedBusStops = cache.get("nusBusStops");
   if (cachedBusStops) {
@@ -62,7 +57,7 @@ async function getNUSBusStops() {
     );
     const busStopsArray = await Promise.all(busStopsPromises);
 
-    cache.set("nusBusStops", busStopsArray); // Cache the bus stops
+    cache.set("nusBusStops", busStopsArray, 7200); // Cache for 2 hours
 
     return busStopsArray;
   } catch (err) {
@@ -71,10 +66,18 @@ async function getNUSBusStops() {
   }
 }
 
-// Insert the arrival times (retrieved from API) into the bus stops array.
+// Function to get arrival times
 async function getArrivalTime(busStopsArray) {
   const promises = busStopsArray.map(async (busStop) => {
-    const stopName = busStop.busStopName.substring(8); // substring(8) skips the first 8 characters 'NUSSTOP_'
+    const stopName = busStop.busStopName.substring(8);
+    const cacheKey = `arrivalTimes_${stopName}`;
+    const cachedArrivalTimes = cache.get(cacheKey);
+
+    if (cachedArrivalTimes) {
+      busStop.savedBuses = cachedArrivalTimes;
+      return;
+    }
+
     try {
       const username = process.env.NUSNEXTBUS_USER;
       const password = process.env.NUSNEXTBUS_PASSWORD;
@@ -96,9 +99,6 @@ async function getArrivalTime(busStopsArray) {
       }
 
       const NUSReply = response.data;
-      // We will process the NUSReply in a 2 step process:
-      // 1) reformat reply such that we can search the buses by name in a dict.
-      // 2) iterate through buses in our bus stop objects and retrieve the timings based on the name.
       const shuttles = NUSReply.ShuttleServiceResult.shuttles.reduce(
         (acc, shuttle) => {
           acc[shuttle.name] = shuttle;
@@ -113,9 +113,6 @@ async function getArrivalTime(busStopsArray) {
           const shuttle = shuttles[serviceName];
           const currentTime = new Date();
           if (shuttle._etas) {
-            // These are NUS buses. Public buses do not have ._etas field in NUSNextBus API response.
-            // Handle the cases of differing sizes of etas returned due to 0/1/2 next buses.
-            // ETA is not given in ISO time, so we have to calculate the ISO time based on mins till arrival.
             const etaLength = shuttle._etas.length;
             if (etaLength === 0) {
               busObject.timings = ["N.A.", "N.A."];
@@ -134,8 +131,6 @@ async function getArrivalTime(busStopsArray) {
               busObject.timings = [firstArrivalTime, secondArrivalTime];
             }
           } else {
-            // Public bus timings obtained by NUSNextBus API is given in mins to arrival rather than ISO time.
-            // The code below converts arrival time in minutes to ISO time to maintain a standard response format.
             const arrivalTime = isNaN(shuttle.arrivalTime)
               ? 0
               : shuttle.arrivalTime;
@@ -152,7 +147,9 @@ async function getArrivalTime(busStopsArray) {
           }
         }
       }
-      // Update NUS Bus Stop name to be the full name rather than the code name (i.e. NUSSTOP_YIH-OPP -> NUSSTOP_Opp Yusof Ishak House).
+
+      cache.set(cacheKey, busStop.savedBuses, 30); // Cache for 30 seconds
+
       busStop.busStopName = "NUSSTOP_" + NUSReply.ShuttleServiceResult.caption;
     } catch (error) {
       console.error("Error fetching data from NUSNextBus API:", error);
@@ -162,17 +159,9 @@ async function getArrivalTime(busStopsArray) {
   await Promise.all(promises);
 }
 
-// GET request that takes location coordinates and returns a busStops object with updated arrival timings of buses.
-// The bus stops should be within x distance of the location.
+// GET request to return bus stops with updated arrival timings
 router.get("/", async (req, res) => {
-  const authorizationHeader = req.get("Authorization");
-
   console.log("Received GET /nusBusStops");
-
-  // Add authorization check
-  // if (!authorizationHeader || authorizationHeader !== 'expectedValue') {
-  //   return res.status(403).send("Forbidden");
-  // }
 
   try {
     const busStopsArray = await getNUSBusStops();
