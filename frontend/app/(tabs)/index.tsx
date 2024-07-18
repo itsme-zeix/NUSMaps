@@ -69,8 +69,6 @@ const ColouredCircle = ({ color, size = 50 }: { color: string; size?: number }) 
 
 // Logic to modify the timings in the BusService object from ISO time to minutes away from now.
 const calculateMinutesDifference = (isoTime: string): string => {
-  if (!isoTime) return "Loading"; // Handle uninitialized data
-
   // Calculate the difference in minutes between the current time and the given ISO time
   const now = new Date();
   const busTime = new Date(isoTime);
@@ -190,10 +188,10 @@ const ListItem = ({ item }: { item: BusStop }) => {
               </View>
               <View style={styles.rightContainer}>
                 <Text style={[styles.details, styles.timingText]} numberOfLines={1}>
-                  {bus.timings[0]}
+                  {calculateMinutesDifference(bus.timings[0])}
                 </Text>
                 <Text style={[styles.details, styles.timingText]} numberOfLines={1}>
-                  {bus.timings[1]}
+                  {calculateMinutesDifference(bus.timings[1])}
                 </Text>
               </View>
             </View>
@@ -261,7 +259,6 @@ const queryClient = new QueryClient();
 
 // busstops also contain location information
 async function fetchBusArrivalTimes(busStopsWithLocation: any) {
-  console.log(busStopsWithLocation)
   const response = await axios.post("https://nusmaps.onrender.com/busArrivalTimes", busStopsWithLocation, {
     headers: {
       Accept: "application/json",
@@ -310,21 +307,6 @@ function FavouriteBusStops({ refreshLocation, refresh }: { refreshLocation: numb
       mutate(dataWithLocation);
     }
   }, [favouriteBusStops, dataMutated, mutate, location]);
-
-  // Ensure re-render by setting state properly & calculate minutes from ISOTime
-  useEffect(() => {
-    if (dataMutated) {
-      setBusStops((prevBusStops) => {
-        return prevBusStops.map((busStop) => {
-          const updatedBuses = busStop.savedBuses.map((bus) => ({
-            ...bus,
-            timings: bus.timings.map((timing) => calculateMinutesDifference(timing)),
-          }));
-          return { ...busStop, savedBuses: updatedBuses };
-        });
-      });
-    }
-  }, [dataMutated]);
 
   const handleRefresh = () => {
     setDataMutated(false); // Reset dataMutated to allow re-fetching
@@ -392,8 +374,9 @@ function NearbyBusStops({ refreshLocation, refreshUserLocation }: { refreshLocat
     queryFn: () =>
       axios
         .get(`https://nusmaps.onrender.com/busStopsByLocation?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`)
-        .then((res) => res.data),
-    enabled: !!location,
+        .then((res) => {
+          return res.data;
+        }),
   });
 
   if (isPending) return <ActivityIndicator size="large" style={{ margin: 20 }} />;
@@ -406,13 +389,6 @@ function NearbyBusStops({ refreshLocation, refreshUserLocation }: { refreshLocat
         </View>
       </ScrollView>
     );
-
-  busStops.map((busStop: BusStop) =>
-    busStop.savedBuses.map((bus: BusService) => {
-      bus.timings[0] = calculateMinutesDifference(bus.timings[0]);
-      bus.timings[1] = calculateMinutesDifference(bus.timings[1]);
-    })
-  );
 
   return (
     <ScrollView refreshControl={<RefreshControl refreshing={isPending} onRefresh={refreshUserLocation} />}>
@@ -454,15 +430,6 @@ function NUSBusStops({ refreshLocation, refresh }: { refreshLocation: number; re
         </View>
       </ScrollView>
     );
-
-  if (busStops && Array.isArray(busStops)) {
-    busStops.forEach((busStop: BusStop) =>
-      busStop.savedBuses.forEach((bus: BusService) => {
-        bus.timings[0] = calculateMinutesDifference(bus.timings[0]);
-        bus.timings[1] = calculateMinutesDifference(bus.timings[1]);
-      })
-    );
-  }
 
   return (
     <ScrollView refreshControl={<RefreshControl refreshing={isPending} onRefresh={refresh} />}>
