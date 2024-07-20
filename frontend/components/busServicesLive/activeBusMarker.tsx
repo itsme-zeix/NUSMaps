@@ -5,13 +5,13 @@ import { FontAwesome5 } from '@expo/vector-icons';
 
 const determineBG = (crowdLevel: string) => {
     if (crowdLevel == "low") {
-        return "green"
+        return "green";
     } else if (crowdLevel == "medium") {
-        return "yellow"
+        return "yellow";
     } else if (crowdLevel == "high") {
-        return "red"
+        return "red";
     } else {
-        return "grey"
+        return "grey";
     }
 };
 
