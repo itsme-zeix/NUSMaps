@@ -1,14 +1,5 @@
 import React from "react";
-import {
-  StyleSheet,
-  ScrollView,
-  Text,
-  View,
-  Image,
-  StatusBar,
-  Platform,
-  Pressable,
-} from "react-native";
+import { StyleSheet, ScrollView, Text, View, Image, StatusBar, Platform, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import MapView, { Marker, LatLng, PROVIDER_GOOGLE } from "react-native-maps";
@@ -90,22 +81,16 @@ const iconList: IconCatalog = {
 //constant variables
 // const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY;
 //USE THIS FOR PRODUCTION BUILDS
-const apiKey = Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
+const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY || Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
 
 //result card(singular card)
-const ResultCard: React.FC<SingleResultCardData> = ({
-  origin,
-  destination,
-  resultData,
-}) => {
+const ResultCard: React.FC<SingleResultCardData> = ({ origin, destination, resultData }) => {
   //Put in a pressable that when expanded, will
-  console.log("destination received in resultcard", destination);
+  // console.log("destination received in resultcard", destination);
   const types = resultData.types.flatMap((icon) => [icon, "RCHEVRON"]);
   types.splice(types.length - 1, 1); // remove the last chevron
-  console.log(types);
   const router = useRouter();
-  const segments = useSegments();
-  console.log("curr path: ", segments.join("/"));
+  // const segments = useSegments();
   const nextScreenFunc = () => {
     router.push({
       pathname: "../routefindingScreens/DetailedRouteScreen",
@@ -117,50 +102,37 @@ const ResultCard: React.FC<SingleResultCardData> = ({
     });
   };
   return (
-    <Pressable
-      style={[{ backgroundColor: "white" }, styles.resultCard]}
-      onPress={nextScreenFunc}
-    >
+    <Pressable style={[{ backgroundColor: "white" }, styles.resultCard]} onPress={nextScreenFunc}>
       <View style={{ flexDirection: "column" }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <View style={styles.iconsContainer}>
             {types.map((icon, index) => {
               if (icon === "BUS" || icon === "NUS_BUS") {
-                const ptLeg = resultData.journeyLegs[
-                  index / 2
-                ] as PublicTransportLeg;
-                console.log("pt leg:", ptLeg);
+                const ptLeg = resultData.journeyLegs[Math.floor(index / 2)] as PublicTransportLeg;
                 return (
-                  <View key={index} style={styles.iconWrapper}>
-                    <BusNumberCard
-                      busNumber={ptLeg.serviceType}
-                      busType={ptLeg.type}
-                    />
+                  <View key={`bus-${index}`} style={styles.iconWrapper}>
+                    <BusNumberCard busNumber={ptLeg.serviceType} busType={ptLeg.type} />
                   </View>
                 );
               } else if (icon === "SUBWAY") {
-                const ptLeg = resultData.journeyLegs[
-                  index / 2
-                ] as PublicTransportLeg;
+                const ptLeg = resultData.journeyLegs[Math.floor(index / 2)] as PublicTransportLeg;
                 return (
-                  <View key={index} style={styles.iconWrapper}>
+                  <View key={`subway-${index}`} style={styles.iconWrapper}>
                     <SubwayTypeCard serviceType={ptLeg.serviceType} />
                   </View>
                 );
               } else if (icon === "TRAM") {
-                const ptLeg = resultData.journeyLegs[
-                  index / 2
-                ] as PublicTransportLeg;
+                const ptLeg = resultData.journeyLegs[Math.floor(index / 2)] as PublicTransportLeg;
                 return (
-                  <View key={index} style={styles.iconWrapper}>
+                  <View key={`tram-${index}`} style={styles.iconWrapper}>
                     <TramTypeCard serviceType={ptLeg.serviceType} />
                   </View>
                 );
               } else {
                 return (
-                  <View style={styles.iconWrapper}>
+                  <View key={`icon-${index}`} style={styles.iconWrapper}>
                     <MaterialIcons
-                      key={index}
+                      key={`icon-${index}`}
                       size={22}
                       name={iconList[icon as keyof IconCatalog]}
                       color="#434343"
@@ -172,9 +144,7 @@ const ResultCard: React.FC<SingleResultCardData> = ({
             })}
           </View>
           <View style={styles.travelDurationContainer}>
-            <Text style={styles.travelDuration}>
-              {resultData.journeyTiming}
-            </Text>
+            <Text style={styles.travelDuration}>{resultData.journeyTiming}</Text>
           </View>
         </View>
       </View>
@@ -202,14 +172,13 @@ const RefactoredResultsScreen: React.FC = () => {
     radius: 5000,
     components: "country:sg",
   };
-  console.log("base result cards data:", baseResultsData);
+  // console.log("base result cards data:", baseResultsData);
   const parsedOrigin: LatLng = _parseParams(origin);
   const parsedDestination: destinationType = _parseParams(destination);
   const parsedBaseResultsData = _parseParams(baseResultsData);
-  console.log("dest", parsedDestination);
+  // console.log("dest", parsedDestination);
   if (parsedOrigin && parsedDestination && parsedBaseResultsData) {
-    const typeCastedBaseResultsCard: baseResultsCardType[] =
-      parsedBaseResultsData;
+    const typeCastedBaseResultsCard: baseResultsCardType[] = parsedBaseResultsData;
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
         <View style={{ flex: 1 }}>
@@ -221,10 +190,9 @@ const RefactoredResultsScreen: React.FC = () => {
                 latitude: (parsedOrigin.latitude + parsedDestination.latitude) / 2,
                 longitude: (parsedOrigin.longitude + parsedDestination.longitude) / 2,
                 latitudeDelta: Math.abs(parsedOrigin.latitude - parsedDestination.latitude) * 2,
-                longitudeDelta:
-                  Math.abs(parsedOrigin.longitude - parsedDestination.longitude) * 2,
+                longitudeDelta: Math.abs(parsedOrigin.longitude - parsedDestination.longitude) * 2,
               }}
-              >
+            >
               <Marker
                 title="Origin"
                 coordinate={{
@@ -274,12 +242,7 @@ const RefactoredResultsScreen: React.FC = () => {
           <ScrollView>
             <View style={styles.resultContainer}>
               {typeCastedBaseResultsCard.map((data, index) => (
-                <ResultCard
-                  key={index}
-                  origin={parsedOrigin}
-                  resultData={data}
-                  destination={parsedDestination}
-                />
+                <ResultCard key={`result-${index}`} origin={parsedOrigin} resultData={data} destination={parsedDestination} />
               ))}
             </View>
           </ScrollView>
