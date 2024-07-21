@@ -21,6 +21,7 @@ const busStopsByLocationRouter = require("./routes/busStopsByLocation");
 const NUSBusRoutesRouter = require("./routes/NUSBusRoutes");
 const nusBusStopsRouter = require("./routes/nusBusStops");
 const busStopDatabaseRouter = require("./routes/busStopDatabase");
+const busServicesLiveRouter = require("./routes/busServicesLive");
 
 // Use routes
 app.use("/busArrivalTimes", busArrivalTimesRouter);
@@ -30,6 +31,7 @@ app.use("/busStopsByLocation", busStopsByLocationRouter);
 app.use("/NUSBusRoutes", NUSBusRoutesRouter);
 app.use("/nusBusStops", nusBusStopsRouter);
 app.use("/busStopDatabase", busStopDatabaseRouter);
+app.use("/busServicesLive", busServicesLiveRouter);
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
