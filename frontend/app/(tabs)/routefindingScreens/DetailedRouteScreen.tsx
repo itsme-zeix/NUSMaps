@@ -217,8 +217,8 @@ const PublicTransportLegPart: React.FC<PublicTransportLegProps> = ({
   setExpanded,
 }) => {
   //TO-DO: put in Tram type
-  console.log("type:", ptLeg.type);
-  console.log("duration:", ptLeg.duration);
+  // console.log("type:", ptLeg.type);
+  // console.log("duration:", ptLeg.duration);
 
   return (
     <View style={stylesheet.legDetails}>
@@ -304,11 +304,11 @@ const DetailedRouteScreen: React.FC<
 > = () => {
   //add a base current location and end flag
   const params = useLocalSearchParams();
-  console.log("destination type:", params.destination);
+  // console.log("destination type:", params.destination);
   let destination: destinationType = JSON.parse(params.destination as string);
-  console.log("dest:", destination);
+  // console.log("dest:", destination);
   let origin: LatLng = JSON.parse(params.origin as string);
-  console.log("origin:", origin);
+  // console.log("origin:", origin);
   if (params.baseResultsCardData == undefined) {
     console.error("no base results received");
     return;
@@ -322,10 +322,10 @@ const DetailedRouteScreen: React.FC<
     origin.latitude != destination.latitude &&
     origin.longitude != destination.longitude
   ) {
-    console.log(
-      "base results card data: ",
-      JSON.stringify(baseResultsCardData)
-    );
+    // console.log(
+    //   "base results card data: ",
+    //   JSON.stringify(baseResultsCardData)
+    // );
     // console.log("stop coords array as str: ", JSON.stringify(baseResultsCardData).)
     console.error(
       "no routing received despite differing origins and destination"
@@ -415,7 +415,7 @@ const DetailedRouteScreen: React.FC<
             </View>
           </View>
           {baseResultsCardData.journeyLegs.map((leg, index) => {
-            console.log("leg type", leg.type);
+            // console.log("leg type", leg.type);
             // Calculate the height based on the content of each leg
             let legHeight = leg.type === "WALK" ? 20 : 40; // Adjust these values as needed
             return (
