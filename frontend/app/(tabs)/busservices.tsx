@@ -256,7 +256,7 @@ async function fetchBusRoute(serviceName:string) {
   //5. the direction of each marker (clockwise degrees) (hardcode)
   // 4 and 5 will be added later
   try {
-    const serviceRouteData = await axios.post("http://192.168.2.139:3000/busServicesLive", {
+    const serviceRouteData = await axios.post("https://nusmaps.onrender.com/busServicesLive", {
       service: serviceName,
       requestType: "fetchAll"
     });
