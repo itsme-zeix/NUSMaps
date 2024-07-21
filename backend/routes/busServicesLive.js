@@ -19,7 +19,7 @@ function _getCheckPointDataFilePath(service) {
 function loadInCheckPoints() {
     try {
         for (service of NUS_BUS_SERVICES) {
-            const data = fs.readFileSync(_getCheckPointDataFilePath(service), "utf-8")
+            const data = fs.readFileSync(_getCheckPointDataFilePath(service), "utf-8");
             CHECKPOINT_MAPPINGS[service] = JSON.parse(data).CheckPointResult.CheckPoint;
             console.log(`Checkpoints for ${service} loaded in successfully`);
         };
@@ -53,7 +53,7 @@ function processSavedData(savedCheckPoints, liveActiveBusResults, service) {
     
     const busStopMarkersCoords = fs.readFileSync(path.join(__dirname, `datafiles/busstops/${service}BusStops.json`), "utf-8"); //reads the coords for the bus stops
     const busStopsCoordsArray = JSON.parse(busStopMarkersCoords);
-    const processedActiveBuses = _processActiveBusData(liveActiveBusResults)
+    const processedActiveBuses = _processActiveBusData(liveActiveBusResults);
     return [checkPointCoordsArray, busStopsCoordsArray, processedActiveBuses];
 }
 loadInCheckPoints();
@@ -107,7 +107,7 @@ router.post("/", async (req, res) => {
         res.json({checkPointPolylineString, busStopsCoordsArray, processedActiveBuses});
         } catch (error) {
             console.error("Error retrieving live bus locations and bus checkpoints: ", error);
-            res.status(500).json({error: "Check internal logs for live bus location failure and checkpoint reading failures"})
+            res.status(500).json({error: "Check internal logs for live bus location failure and checkpoint reading failures"});
         };
     } else if (service !== undefined && requestType == "fetchActiveBus") {
         try {
@@ -120,7 +120,7 @@ router.post("/", async (req, res) => {
             return res.json(_processActiveBusData(activeBusResponse.data));
         } catch (error) {
             console.error("Error retrieving updated live bus locations: ", error);
-            res.status(500).json({error: "Check internal logs for live bus location failure"})
+            res.status(500).json({error: "Check internal logs for live bus location failure"});
         }
     }
 });
