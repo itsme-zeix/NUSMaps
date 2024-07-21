@@ -51,7 +51,7 @@ function processSavedData(savedCheckPoints, liveActiveBusResults, service) {
         // };
     };
     
-    const busStopMarkersCoords = fs.readFileSync(path.join(__dirname, `datafiles/busStops/${service}BusStops.json`), "utf-8"); //reads the coords for the bus stops
+    const busStopMarkersCoords = fs.readFileSync(path.join(__dirname, `datafiles/busstops/${service}BusStops.json`), "utf-8"); //reads the coords for the bus stops
     const busStopsCoordsArray = JSON.parse(busStopMarkersCoords);
     const processedActiveBuses = _processActiveBusData(liveActiveBusResults)
     return [checkPointCoordsArray, busStopsCoordsArray, processedActiveBuses];
