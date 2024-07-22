@@ -120,7 +120,7 @@ const CollapsibleContainer = ({ children, expanded }: { children: React.ReactNod
   );
 };
 
-const ListItem = ({ item }: { item: BusStop }) => {
+const ListBusStop = ({ item }: { item: BusStop }) => {
   //Used to render details for 1 bus stop
   const [expanded, setExpanded] = useState(false);
 
@@ -350,7 +350,7 @@ function FavouriteBusStops({ refreshLocation, refresh }: { refreshLocation: numb
       ) : (
         <View>
           {busStops && Array.isArray(busStops) ? (
-            busStops.map((busStop: BusStop, index: number) => <ListItem key={index} item={busStop} />)
+            busStops.map((busStop: BusStop, index: number) => <ListBusStop key={index} item={busStop} />)
           ) : (
             <Text>{JSON.stringify(busStops)}</Text>
           )}
@@ -394,7 +394,7 @@ function NearbyBusStops({ refreshLocation, refreshUserLocation }: { refreshLocat
     <ScrollView refreshControl={<RefreshControl refreshing={isPending} onRefresh={refreshUserLocation} />}>
       <View>
         {busStops && Array.isArray(busStops) ? (
-          busStops.map((busStop: BusStop, index: number) => <ListItem key={index} item={busStop} />)
+          busStops.map((busStop: BusStop, index: number) => <ListBusStop key={index} item={busStop} />)
         ) : (
           <Text>{JSON.stringify(busStops)}</Text>
         )}
@@ -435,7 +435,7 @@ function NUSBusStops({ refreshLocation, refresh }: { refreshLocation: number; re
     <ScrollView refreshControl={<RefreshControl refreshing={isPending} onRefresh={refresh} />}>
       <View>
         {busStops && Array.isArray(busStops) ? (
-          busStops.map((busStop: BusStop, index: number) => <ListItem key={index} item={busStop} />)
+          busStops.map((busStop: BusStop, index: number) => <ListBusStop key={index} item={busStop} />)
         ) : (
           <Text>{JSON.stringify(busStops)}</Text>
         )}
