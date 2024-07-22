@@ -1,17 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableWithoutFeedback,
-  LayoutChangeEvent,
-  ScrollView,
-  RefreshControl,
-  Image,
-  ActivityIndicator,
-} from "react-native";
+import { StyleSheet, Text, View, TouchableWithoutFeedback, ScrollView, RefreshControl, Image, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { QueryClient, QueryClientProvider, useQuery, useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import * as Location from "expo-location";
@@ -25,6 +14,8 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { getFavouritedBusStops } from "@/utils/storage";
 import BusStopSearchBar from "@/components/busStopsTab/BusStopSearchBar";
 import BusStopSearchScreen from "@/components/busStopsTab/BusStopSearchScreen";
+import ColouredCircle from "@/components/busStopsTab/ColouredCircle";
+import CollapsibleContainer from "@/components/busStopsTab/CollapsibleContainer";
 
 // Stack navigator to redirect from bus stop screen to bus stop search screen (vice-versa)
 const Stack = createStackNavigator();
@@ -49,25 +40,11 @@ interface BusStop {
   busStopId: string;
   distanceAway: string;
   savedBuses: BusService[];
+  latitude: number;
+  longitude: number;
 }
 
-// UI COMPONENTS
-const ColouredCircle = ({ color, size = 50 }: { color: string; size?: number }) => {
-  return (
-    <View
-      style={{
-        width: size,
-        height: size,
-        borderRadius: size / 2,
-        backgroundColor: color,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    />
-  );
-};
-
-// Logic to modify the timings in the BusService object from ISO time to minutes away from now.
+// Logic to modify the timings in a BusService object from ISO time to minutes away from now.
 const calculateMinutesDifference = (isoTime: string): string => {
   // Calculate the difference in minutes between the current time and the given ISO time
   const now = new Date();
@@ -80,44 +57,6 @@ const calculateMinutesDifference = (isoTime: string): string => {
   const differenceInMilliseconds = busTime.getTime() - now.getTime();
   const differenceInMinutes = Math.round(differenceInMilliseconds / 1000 / 60);
   return differenceInMinutes >= 0 ? `${differenceInMinutes} min` : "N/A"; // Correctly format the minute output
-};
-
-const CollapsibleContainer = ({ children, expanded }: { children: React.ReactNode; expanded: boolean }) => {
-  const [height, setHeight] = useState(0);
-  const animatedHeight = useSharedValue(0);
-
-  const onLayout = (event: LayoutChangeEvent) => {
-    const onLayoutHeight = event.nativeEvent.layout.height;
-
-    if (onLayoutHeight > 0 && height !== onLayoutHeight) {
-      setHeight(onLayoutHeight);
-    }
-  };
-
-  useEffect(() => {
-    animatedHeight.value = withTiming(expanded ? height : 0);
-  }, [expanded, height]);
-
-  const collapsibleStyle = useAnimatedStyle(() => {
-    return {
-      height: animatedHeight.value,
-    };
-  });
-
-  return (
-    <Animated.View style={[collapsibleStyle, { overflow: "hidden" }]}>
-      <View style={{ position: "absolute" }} onLayout={onLayout}>
-        <View
-          style={{
-            borderBottomColor: "#626262",
-            borderBottomWidth: StyleSheet.hairlineWidth,
-            marginHorizontal: 16,
-          }}
-        />
-        {children}
-      </View>
-    </Animated.View>
-  );
 };
 
 const ListBusStop = ({ item }: { item: BusStop }) => {
@@ -158,11 +97,7 @@ const ListBusStop = ({ item }: { item: BusStop }) => {
         <View style={styles.cardContainer}>
           <View style={styles.textContainer}>
             <Text style={styles.busStopName}>{item.busStopName.startsWith("NUSSTOP") ? item.busStopName.slice(8) : item.busStopName}</Text>
-            <Text style={styles.distanceAwayText}>
-              {Number(item.distanceAway) < 1
-                ? `~${(Number(item.distanceAway) * 1000).toFixed(0)}m away`
-                : `~${Number(item.distanceAway).toFixed(2)}km away`}
-            </Text>
+            <Text style={styles.distanceAwayText}>{Number(item.distanceAway) < 1 ? `~${(Number(item.distanceAway) * 1000).toFixed(0)}m away` : `~${Number(item.distanceAway).toFixed(2)}km away`}</Text>
           </View>
           <View style={styles.nusTagAndChevronContainer}>
             {item.busStopName.startsWith("NUSSTOP") && (
@@ -170,10 +105,7 @@ const ListBusStop = ({ item }: { item: BusStop }) => {
                 <Text style={styles.nusTagText}>NUS</Text>
               </View>
             )}
-            <Image
-              source={expanded ? require("@/assets/images/chevron_up_blue_icon.png") : require("@/assets/images/chevron_down_blue_icon.png")}
-              style={styles.chevron}
-            />
+            <Image source={expanded ? require("@/assets/images/chevron_up_blue_icon.png") : require("@/assets/images/chevron_down_blue_icon.png")} style={styles.chevron} />
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -348,13 +280,7 @@ function FavouriteBusStops({ refreshLocation, refresh }: { refreshLocation: numb
           <MaterialCommunityIcons name="ghost" size={80} color={"#848484"} style={{ marginTop: 10 }} />
         </View>
       ) : (
-        <View>
-          {busStops && Array.isArray(busStops) ? (
-            busStops.map((busStop: BusStop, index: number) => <ListBusStop key={index} item={busStop} />)
-          ) : (
-            <Text>{JSON.stringify(busStops)}</Text>
-          )}
-        </View>
+        <View>{busStops && Array.isArray(busStops) ? busStops.map((busStop: BusStop, index: number) => <ListBusStop key={index} item={busStop} />) : <Text>{JSON.stringify(busStops)}</Text>}</View>
       )}
     </ScrollView>
   );
@@ -372,11 +298,9 @@ function NearbyBusStops({ refreshLocation, refreshUserLocation }: { refreshLocat
     queryKey: ["busStopsByLocation"],
     staleTime: 30000, // 30 seconds
     queryFn: () =>
-      axios
-        .get(`https://nusmaps.onrender.com/busStopsByLocation?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`)
-        .then((res) => {
-          return res.data;
-        }),
+      axios.get(`https://nusmaps.onrender.com/busStopsByLocation?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`).then((res) => {
+        return res.data;
+      }),
   });
 
   if (isPending) return <ActivityIndicator size="large" style={{ margin: 20 }} />;
@@ -392,13 +316,7 @@ function NearbyBusStops({ refreshLocation, refreshUserLocation }: { refreshLocat
 
   return (
     <ScrollView refreshControl={<RefreshControl refreshing={isPending} onRefresh={refreshUserLocation} />}>
-      <View>
-        {busStops && Array.isArray(busStops) ? (
-          busStops.map((busStop: BusStop, index: number) => <ListBusStop key={index} item={busStop} />)
-        ) : (
-          <Text>{JSON.stringify(busStops)}</Text>
-        )}
-      </View>
+      <View>{busStops && Array.isArray(busStops) ? busStops.map((busStop: BusStop, index: number) => <ListBusStop key={index} item={busStop} />) : <Text>{JSON.stringify(busStops)}</Text>}</View>
     </ScrollView>
   );
 }
@@ -414,10 +332,7 @@ function NUSBusStops({ refreshLocation, refresh }: { refreshLocation: number; re
   } = useQuery({
     queryKey: ["nusBusStops"],
     staleTime: 30000, // 30 seconds
-    queryFn: () =>
-      axios
-        .get(`https://nusmaps.onrender.com/nusBusStops?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`)
-        .then((res) => res.data),
+    queryFn: () => axios.get(`https://nusmaps.onrender.com/nusBusStops?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`).then((res) => res.data),
   });
 
   if (isPending) return <ActivityIndicator size="large" style={{ margin: 20 }} />;
@@ -433,13 +348,7 @@ function NUSBusStops({ refreshLocation, refresh }: { refreshLocation: number; re
 
   return (
     <ScrollView refreshControl={<RefreshControl refreshing={isPending} onRefresh={refresh} />}>
-      <View>
-        {busStops && Array.isArray(busStops) ? (
-          busStops.map((busStop: BusStop, index: number) => <ListBusStop key={index} item={busStop} />)
-        ) : (
-          <Text>{JSON.stringify(busStops)}</Text>
-        )}
-      </View>
+      <View>{busStops && Array.isArray(busStops) ? busStops.map((busStop: BusStop, index: number) => <ListBusStop key={index} item={busStop} />) : <Text>{JSON.stringify(busStops)}</Text>}</View>
     </ScrollView>
   );
 }
@@ -482,15 +391,7 @@ function BusStopsScreen() {
               }}
             />
           </View>
-          <View style={{ flex: 1 }}>
-            {selectedIndex === 0 ? (
-              <FavouriteBusStops refreshLocation={refreshLocation} refresh={refetchFavouriteBusStops} />
-            ) : selectedIndex === 1 ? (
-              <NearbyBusStops refreshLocation={refreshLocation} refreshUserLocation={refetchUserLocation} />
-            ) : (
-              <NUSBusStops refreshLocation={refreshLocation} refresh={refetchNUSBusStops} />
-            )}
-          </View>
+          <View style={{ flex: 1 }}>{selectedIndex === 0 ? <FavouriteBusStops refreshLocation={refreshLocation} refresh={refetchFavouriteBusStops} /> : selectedIndex === 1 ? <NearbyBusStops refreshLocation={refreshLocation} refreshUserLocation={refetchUserLocation} /> : <NUSBusStops refreshLocation={refreshLocation} refresh={refetchNUSBusStops} />}</View>
         </SafeAreaView>
       </View>
     </QueryClientProvider>
