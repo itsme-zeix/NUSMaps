@@ -55,6 +55,8 @@ const populateNusStops = async () => {
   };
 };
 
+
+
 const NUS_main_campus = turf.polygon([
     [
       [1.3005628657892387, 103.77832943343063], //coords of nus given by google maps
@@ -300,12 +302,14 @@ const _addAlternativeRoutesToOneMap = (oneMapRoute, nusResult) => {
   return oneMapRoute;
 };
 
+
 const handleRouting = async (origin, destination) => {  
   const originTurfPoint = turf.point([origin.latitude, origin.longitude]);
   const destinationTurfPoint = turf.point([destination.latitude, destination.longitude]);
   const isOriginInNUS = isPointInNUSPolygons(originTurfPoint); //true or false
   const isDestInNUS = isPointInNUSPolygons(destinationTurfPoint); //true or false
   if (isOriginInNUS && isDestInNUS) {
+    sendProgress(res, progress += 20);
     console.log("Code 1: Origin in NUS, Destination Not in NUS");
     const result = await axios.post(
       "https://nusmaps.onrender.com/NUSBusRoutes",
@@ -403,24 +407,33 @@ const isPointInNUSPolygons = point => {
     || turf.booleanPointInPolygon(point, BUKITTIMAHCAMPUS);
 };
 
-populateNusStops().then(() => console.log("Bus Stops to Coords hashtable loaded"));
+const populateNusStopsAndLog =  () => {
+  populateNusStops().then(() => {
+    console.log("Bus Stops To Coords hashtable loaded");
+  })
+  .catch((error) => {
+    console.error("Error populating NUS stops:", error);
+  });
+};
+populateNusStopsAndLog();
+//set an interval to refresh the map of the bus stops to coords
+setInterval(populateNusStopsAndLog, 24 * 60 * 60 * 1000);
 
 router.post("/", async (req, res) => {
   const auth_token = req.headers["authorization"];
   if (auth_token !== ONEMAPAPITOKEN) {
     return res.status(403).send(`Incorrect or missing authorization token. Your token: ${auth_token}`);
-  }
-
+  };
   const { origin, destination } = req.body;
   const date = format(new Date(), "MM-dd-yyyy");
   const time = format(new Date(), "HH:MM:SS");
   const routesUrl = `https://www.onemap.gov.sg/api/public/routingsvc/route?start=${origin.latitude},${origin.longitude}&end=${destination.latitude},${destination.longitude}&routeType=pt&date=${date}&time=${time}&mode=TRANSIT&maxWalkDistance=1000&numItineraries=3`;
   const headers = { Authorization: ONEMAPAPIKEY };
-
   try {
-    const routeResponse = await axios.get(routesUrl, { headers });
-    const nusResult = await handleRouting(origin, destination);
-    const result = await _processData(routeResponse.data);
+    const routeResponsePromise = axios.get(routesUrl, { headers });
+    const nusResultPromise = handleRouting(origin, destination);
+    const [routeResponse, nusResult] = await Promise.all([routeResponsePromise, nusResultPromise]);
+    const result = _processData(routeResponse.data);
     if ([200, 201, 202].includes(nusResult.status)) {
       const addedLeg = _addAlternativeRoutesToOneMap(routeResponse.data, nusResult);
       const finalCombinedResult = await _processData(addedLeg);
