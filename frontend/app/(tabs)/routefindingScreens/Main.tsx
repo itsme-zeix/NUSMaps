@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { StyleSheet, View, BackHandler } from "react-native";
+import { StyleSheet, View } from "react-native";
 import MapView, {
   PROVIDER_GOOGLE,
   Marker,
@@ -60,9 +60,13 @@ type DestinationResult = {
 } & LatLng;
 
 //constants and variables
-const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY == undefined ? Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY : process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY ;
+// const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY == undefined ? Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY : process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY ;
+// console.log("maps api key:", mapsApiKey);
+// const oneMapsAPIToken = process.env.EXPO_PUBLIC_ONEMAPAPITOKEN == undefined ?  Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN : process.env.EXPO_PUBLIC_ONEMAPAPITOKEN;
+// console.log("api token: ", oneMapsAPIToken);
+const mapsApiKey = "AIzaSyAyGTa1g5Yzd2zEgwtY3ayIYFZyX-OVjns";
 console.log("maps api key:", mapsApiKey);
-const oneMapsAPIToken = process.env.EXPO_PUBLIC_ONEMAPAPITOKEN == undefined ?  Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN : process.env.EXPO_PUBLIC_ONEMAPAPITOKEN;
+const oneMapsAPIToken = "f812a60f552bb0e67cff12553059fd08b922804b5e36ef16d2bd964895de2344";
 console.log("api token: ", oneMapsAPIToken);
 //USE THIS FOR PRODUCTION BUILDS
 // const mapsApiKey = Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
@@ -92,7 +96,7 @@ export default function App() {
   });
   const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
   const [locationErrorMsg, setLocationErrorMsg] = useState("");
-  const [isResultAttained, setisResultAttained] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); //state used to maintain whether to show the user the loading screen
   const [routeErrorMsg, setRouteErrorMsg] = useState("");
   const DEFAULTDESTINATIONLatLng = {
     latitude: NaN,
@@ -103,10 +107,6 @@ export default function App() {
   const [destination, setDestination] = useState<DestinationResult>(
     DEFAULTDESTINATIONLatLng
   );
-  const [baseResultsCardData, setbaseResultsCardData] = useState<
-    //the results needed to be displayed
-    baseResultsCardType[]
-  >([]);
   const isNotInitialExec = useRef(false);
 
   //effects arranged in execution order
@@ -115,6 +115,26 @@ export default function App() {
   //(3)Route error messages when unable to query backend
   //(4) State changes when user inputs a new destination, leading to a new visible modal
   //(5)
+
+  const showLoadingScreen = () => {
+    router.push({
+      pathname:"../routefindingScreens/loadingScreen",
+    });
+  };
+  // const showResultsScreenAfterLoading = (originCoords, destCoords, ) => {
+
+  // }
+
+  useEffect(()=> {
+    // if (!isNotInitialExec.current) {
+      //not the initial load
+      if (isLoading) {
+        showLoadingScreen();
+      } // nothing is done if set to false, as the other use effect will handle the replacement of the screen with the results screen
+    // }
+  }
+  , [isLoading]);
+
   useEffect(() => {
     //to query for location permission
     const getLocation = async () => {
@@ -183,13 +203,6 @@ export default function App() {
   }, [routeErrorMsg]);
 
   useEffect(() => {
-    //to change when the destination state changes due to search bar having user input
-    if (destination.address !== "DEFAULT") {
-      setisResultAttained(true);
-    }
-  }, [destination]);
-
-  useEffect(() => {
     //function that is executed when destination is changed (a new search result is attained)
     if (isNotInitialExec.current && destination !== DEFAULTDESTINATIONLatLng) {
       console.log("new destination: ", destination);
@@ -222,10 +235,8 @@ export default function App() {
         address: data.description,
         placeId: data.place_id,
       });
-    } else {
-      return undefined;
     }
-  }
+  };
 
   async function getLatLngFromId(placeId: string) {
     //reverses geocoding
@@ -272,7 +283,6 @@ export default function App() {
               headers: {
               "Content-Type": "application/json",
               Authorization: oneMapsAPIToken,
-              //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
             },
           }
         );
@@ -299,26 +309,16 @@ export default function App() {
     destinationCoords: LatLng
   ) {
     //fetches best route between two points, can pass a check to see if
-    // const {data, error, isLoading} = useQuery({queryKey:['routeData', originCoords, destinationCoords], queryFn:() => fetchRoutesFromServer(origin, destination)});
-    // if (isLoading) {
-    // console.log("loading...");
-    // };
-    // if (error) {
-    // console.error("Couldn't fetch best route from server");
-    // } else if (data) {
-    // setbaseResultsCardData(data);
-    // }
-    //issue: Timing issue +
     try {
+      setIsLoading(true);
       const result = await fetchRoutesFromServer(
         originCoords,
         destinationCoords
       );
       console.log("finally", result);
-      setbaseResultsCardData(result);
-      console.log("data: ", baseResultsCardData);
       console.log('Current path:', segments.join('/'));
-      router.push({
+      setIsLoading(false);
+      router.replace({
         pathname: "../routefindingScreens/ResultsScreen",
         params: {
           origin: JSON.stringify(originCoords),
