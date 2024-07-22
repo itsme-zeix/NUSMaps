@@ -105,7 +105,7 @@ const ExpandableBusStop = ({ item }: { item: BusStop }) => {
                 <Text style={styles.nusTagText}>NUS</Text>
               </View>
             )}
-            <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={25} color="#0163CF" style={styles.chevron}/>
+            <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={25} color="#0163CF" />
           </View>
         </View>
       </TouchableWithoutFeedback>
