@@ -317,7 +317,7 @@ export default function NUSBusServices() {
 
   async function fetchBusLocations() {
     try {
-      const serviceRouteData = await axios.post("http://192.168.2.139:3000/busServicesLive", {
+      const serviceRouteData = await axios.post("https://nusmaps.onrender.com/busServicesLive", {
         service: routeSelected,
         requestType: "fetchActiveBus"
       });
