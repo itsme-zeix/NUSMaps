@@ -14,6 +14,7 @@ import BusStopSearchScreen from "@/components/busStopsTab/BusStopSearchScreen";
 import ColouredCircle from "@/components/busStopsTab/ColouredCircle";
 import CollapsibleContainer from "@/components/busStopsTab/CollapsibleContainer";
 import useUserLocation from "@/hooks/useUserLocation";
+import { NUSTag } from "@/components/busStopsTab/NUSTag";
 
 // Stack navigator to redirect from bus stop screen to bus stop search screen (vice-versa)
 const Stack = createStackNavigator();
@@ -100,11 +101,7 @@ const ExpandableBusStop = ({ item }: { item: BusStop }) => {
             <Text style={styles.distanceAwayText}>{Number(item.distanceAway) < 1 ? `~${(Number(item.distanceAway) * 1000).toFixed(0)}m away` : `~${Number(item.distanceAway).toFixed(2)}km away`}</Text>
           </View>
           <View style={styles.nusTagAndChevronContainer}>
-            {item.busStopName.startsWith("NUSSTOP") && (
-              <View style={styles.nusTag}>
-                <Text style={styles.nusTagText}>NUS</Text>
-              </View>
-            )}
+            {item.busStopName.startsWith("NUSSTOP") && <NUSTag />}
             <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={25} color="#0163CF" />
           </View>
         </View>
@@ -340,12 +337,7 @@ function BusStopsScreen() {
               }}
             />
           </View>
-          <View style={{ flex: 1 }}>{selectedIndex === 0 
-          ? <FavouriteBusStops refreshLocation={refreshLocation} refresh={refetchFavouriteBusStops} /> 
-          : selectedIndex === 1 
-          ? <NearbyBusStops refreshLocation={refreshLocation} refreshUserLocation={refetchUserLocation} /> 
-          : <NUSBusStops refreshLocation={refreshLocation} refresh={refetchNUSBusStops} />}
-          </View>
+          <View style={{ flex: 1 }}>{selectedIndex === 0 ? <FavouriteBusStops refreshLocation={refreshLocation} refresh={refetchFavouriteBusStops} /> : selectedIndex === 1 ? <NearbyBusStops refreshLocation={refreshLocation} refreshUserLocation={refetchUserLocation} /> : <NUSBusStops refreshLocation={refreshLocation} refresh={refetchNUSBusStops} />}</View>
         </SafeAreaView>
       </View>
     </QueryClientProvider>
@@ -420,20 +412,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingRight: 16,
     marginVertical: 20,
-  },
-  nusTag: {
-    backgroundColor: "#27187E",
-    alignContent: "center",
-    justifyContent: "center",
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 20,
-    marginRight: 5,
-  },
-  nusTagText: {
-    fontSize: 12,
-    fontFamily: "Inter-Bold",
-    color: "#EBF3FE",
   },
   segmentedControlContainer: {
     alignItems: "center",
