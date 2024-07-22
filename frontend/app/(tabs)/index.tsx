@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { StyleSheet, Text, View, TouchableWithoutFeedback, ScrollView, RefreshControl, Image, ActivityIndicator } from "react-native";
+import { StyleSheet, Text, View, TouchableWithoutFeedback, ScrollView, RefreshControl, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { QueryClient, QueryClientProvider, useQuery, useMutation } from "@tanstack/react-query";
 import axios from "axios";
@@ -360,7 +360,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  image: { width: 50, height: 50, margin: 10, borderRadius: 5 },
   textContainer: {
     justifyContent: "space-between",
     paddingVertical: 16,
