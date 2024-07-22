@@ -3,9 +3,6 @@ import { StyleSheet, Text, View, TouchableWithoutFeedback, ScrollView, RefreshCo
 import { SafeAreaView } from "react-native-safe-area-context";
 import { QueryClient, QueryClientProvider, useQuery, useMutation } from "@tanstack/react-query";
 import axios from "axios";
-import * as Location from "expo-location";
-import { LocationObject } from "expo-location";
-import Toast from "react-native-toast-message";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { createStackNavigator } from "@react-navigation/stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -16,10 +13,11 @@ import BusStopSearchBar from "@/components/busStopsTab/BusStopSearchBar";
 import BusStopSearchScreen from "@/components/busStopsTab/BusStopSearchScreen";
 import ColouredCircle from "@/components/busStopsTab/ColouredCircle";
 import CollapsibleContainer from "@/components/busStopsTab/CollapsibleContainer";
+import useUserLocation from "@/hooks/useUserLocation";
 
 // Stack navigator to redirect from bus stop screen to bus stop search screen (vice-versa)
 const Stack = createStackNavigator();
-export default function App() {
+export default function App(): React.JSX.Element {
   return (
     <QueryClientProvider client={queryClient}>
       <Stack.Navigator initialRouteName="MainScreen">
@@ -132,58 +130,6 @@ const ListBusStop = ({ item }: { item: BusStop }) => {
       </CollapsibleContainer>
     </View>
   );
-};
-
-const useUserLocation = (refreshLocation: number) => {
-  const [location, setLocation] = useState<LocationObject | null>(null);
-  const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
-  const [locationErrorMsg, setLocationErrorMsg] = useState("");
-  const [locationReady, setLocationReady] = useState(false); // this is to only allow querying is getting user's current location is completed.
-
-  const getLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      setPermissionErrorMsg("Permission to access location was denied.");
-      return;
-    }
-    try {
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-      setLocationReady(true);
-    } catch (error) {
-      setLocationErrorMsg(`Failed to obtain location, ${error}`);
-    }
-  };
-
-  useEffect(() => {
-    getLocation();
-  }, [refreshLocation]);
-
-  useEffect(() => {
-    if (permissionErrorMsg) {
-      Toast.show({
-        type: "error",
-        text1: permissionErrorMsg,
-        text2: "Please enable location permissions for NUSMaps.",
-        position: "top",
-        autoHide: true,
-      });
-    }
-  }, [permissionErrorMsg]);
-
-  useEffect(() => {
-    if (locationErrorMsg) {
-      Toast.show({
-        type: "error",
-        text1: locationErrorMsg,
-        text2: "Please try again later",
-        position: "top",
-        autoHide: true,
-      });
-    }
-  }, [locationErrorMsg]);
-
-  return locationReady ? location : null;
 };
 
 // PERFORM API QUERY
