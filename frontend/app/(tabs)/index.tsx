@@ -68,7 +68,7 @@ const ExpandableBusStop = ({ item }: { item: BusStop }) => {
   };
 
   // Function to determine the color based on bus stop name
-  function getColor(busService: string) {
+  function mapBusServiceColour(busService: string) {
     switch (busService) {
       case "A1":
         return "#FF0000"; // Red
@@ -115,7 +115,7 @@ const ExpandableBusStop = ({ item }: { item: BusStop }) => {
           {item.savedBuses.map((bus: BusService, index: number) => (
             <View key={index} style={styles.detailRow}>
               <View style={styles.leftContainer}>
-                <ColouredCircle color={getColor(bus.busNumber)} size={15} />
+                <ColouredCircle color={mapBusServiceColour(bus.busNumber)} size={15} />
                 <Text style={[styles.details, styles.busNumber]}>{bus.busNumber.startsWith("PUB:") ? bus.busNumber.slice(4) : bus.busNumber}</Text>
               </View>
               <View style={styles.rightContainer}>
