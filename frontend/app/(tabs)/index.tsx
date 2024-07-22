@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider, useQuery, useMutation } from "@tansta
 import axios from "axios";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { createStackNavigator } from "@react-navigation/stack";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 
 // Self-built components
 import { getFavouritedBusStops } from "@/utils/storage";
@@ -17,7 +17,7 @@ import useUserLocation from "@/hooks/useUserLocation";
 
 // Stack navigator to redirect from bus stop screen to bus stop search screen (vice-versa)
 const Stack = createStackNavigator();
-export default function App(): React.JSX.Element {
+export default function BusStopSearchNavigator(): React.JSX.Element {
   return (
     <QueryClientProvider client={queryClient}>
       <Stack.Navigator initialRouteName="MainScreen">
@@ -40,6 +40,7 @@ interface BusStop {
   savedBuses: BusService[];
   latitude: number;
   longitude: number;
+  isFavourited: boolean;
 }
 
 // Logic to modify the timings in a BusService object from ISO time to minutes away from now.
@@ -57,7 +58,8 @@ const calculateMinutesDifference = (isoTime: string): string => {
   return differenceInMinutes >= 0 ? `${differenceInMinutes} min` : "N/A"; // Correctly format the minute output
 };
 
-const ListBusStop = ({ item }: { item: BusStop }) => {
+// This returns a React component of each bus stop that is expandable.
+const ExpandableBusStop = ({ item }: { item: BusStop }) => {
   //Used to render details for 1 bus stop
   const [expanded, setExpanded] = useState(false);
 
@@ -103,7 +105,7 @@ const ListBusStop = ({ item }: { item: BusStop }) => {
                 <Text style={styles.nusTagText}>NUS</Text>
               </View>
             )}
-            <Image source={expanded ? require("@/assets/images/chevron_up_blue_icon.png") : require("@/assets/images/chevron_down_blue_icon.png")} style={styles.chevron} />
+            <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={25} color="#0163CF" style={styles.chevron}/>
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -132,10 +134,10 @@ const ListBusStop = ({ item }: { item: BusStop }) => {
   );
 };
 
-// PERFORM API QUERY
+// React Query client
 const queryClient = new QueryClient();
 
-// busstops also contain location information
+// This function is used to obtain bus stop timings (POST request to REST API) for bus stops that are favourited.
 async function fetchBusArrivalTimes(busStopsWithLocation: any) {
   const response = await axios.post("https://nusmaps.onrender.com/busArrivalTimes", busStopsWithLocation, {
     headers: {
@@ -149,6 +151,7 @@ async function fetchBusArrivalTimes(busStopsWithLocation: any) {
   return response.data;
 }
 
+// Get favourite bus stops, retrieves timing from REST API (using fetchBusArrivalTimes function) and renders list of ExpandableBusStop
 function FavouriteBusStops({ refreshLocation, refresh }: { refreshLocation: number; refresh: () => void }) {
   const location = useUserLocation(refreshLocation);
   const [busStops, setBusStops] = useState<BusStop[]>([]);
@@ -226,13 +229,13 @@ function FavouriteBusStops({ refreshLocation, refresh }: { refreshLocation: numb
           <MaterialCommunityIcons name="ghost" size={80} color={"#848484"} style={{ marginTop: 10 }} />
         </View>
       ) : (
-        <View>{busStops && Array.isArray(busStops) ? busStops.map((busStop: BusStop, index: number) => <ListBusStop key={index} item={busStop} />) : <Text>{JSON.stringify(busStops)}</Text>}</View>
+        <View>{busStops && Array.isArray(busStops) ? busStops.map((busStop: BusStop, index: number) => <ExpandableBusStop key={index} item={busStop} />) : <Text>{JSON.stringify(busStops)}</Text>}</View>
       )}
     </ScrollView>
   );
 }
 
-// Get nearest bus stops by location and render it. Backend API will return a busStops object with updated bus timings.
+// Get nearest bus stops based on location, retrieves timing from REST API endpoint(GET) and renders list of ExpandableBusStop.
 function NearbyBusStops({ refreshLocation, refreshUserLocation }: { refreshLocation: number; refreshUserLocation: () => void }) {
   const location = useUserLocation(refreshLocation);
 
@@ -262,12 +265,12 @@ function NearbyBusStops({ refreshLocation, refreshUserLocation }: { refreshLocat
 
   return (
     <ScrollView refreshControl={<RefreshControl refreshing={isPending} onRefresh={refreshUserLocation} />}>
-      <View>{busStops && Array.isArray(busStops) ? busStops.map((busStop: BusStop, index: number) => <ListBusStop key={index} item={busStop} />) : <Text>{JSON.stringify(busStops)}</Text>}</View>
+      <View>{busStops && Array.isArray(busStops) ? busStops.map((busStop: BusStop, index: number) => <ExpandableBusStop key={index} item={busStop} />) : <Text>{JSON.stringify(busStops)}</Text>}</View>
     </ScrollView>
   );
 }
 
-// Get all NUS Bus Stops and its associated timings and render it.
+// Get NUS Bus Stops, retrieves timing from REST API endpoint(GET) and renders list of ExpandableBusStop.
 function NUSBusStops({ refreshLocation, refresh }: { refreshLocation: number; refresh: () => void }) {
   const location = useUserLocation(refreshLocation);
 
@@ -294,14 +297,14 @@ function NUSBusStops({ refreshLocation, refresh }: { refreshLocation: number; re
 
   return (
     <ScrollView refreshControl={<RefreshControl refreshing={isPending} onRefresh={refresh} />}>
-      <View>{busStops && Array.isArray(busStops) ? busStops.map((busStop: BusStop, index: number) => <ListBusStop key={index} item={busStop} />) : <Text>{JSON.stringify(busStops)}</Text>}</View>
+      <View>{busStops && Array.isArray(busStops) ? busStops.map((busStop: BusStop, index: number) => <ExpandableBusStop key={index} item={busStop} />) : <Text>{JSON.stringify(busStops)}</Text>}</View>
     </ScrollView>
   );
 }
 
 function BusStopsScreen() {
-  const [refreshLocation, setRefreshLocation] = useState(0);
-  const [selectedIndex, setSelectedIndex] = useState(0); // State to handle the logic of rendering nearby(0) or NUS(1) bus stops.
+  const [refreshLocation, setRefreshLocation] = useState(0); // State to handle the re-retrieval of user location.
+  const [selectedIndex, setSelectedIndex] = useState(0); // State to handle the logic of rendering Favourites, Nearby or NUS bus stops.
 
   const refetchFavouriteBusStops = useCallback(() => {
     setRefreshLocation((prevKey) => prevKey + 1);
@@ -337,7 +340,12 @@ function BusStopsScreen() {
               }}
             />
           </View>
-          <View style={{ flex: 1 }}>{selectedIndex === 0 ? <FavouriteBusStops refreshLocation={refreshLocation} refresh={refetchFavouriteBusStops} /> : selectedIndex === 1 ? <NearbyBusStops refreshLocation={refreshLocation} refreshUserLocation={refetchUserLocation} /> : <NUSBusStops refreshLocation={refreshLocation} refresh={refetchNUSBusStops} />}</View>
+          <View style={{ flex: 1 }}>{selectedIndex === 0 
+          ? <FavouriteBusStops refreshLocation={refreshLocation} refresh={refetchFavouriteBusStops} /> 
+          : selectedIndex === 1 
+          ? <NearbyBusStops refreshLocation={refreshLocation} refreshUserLocation={refetchUserLocation} /> 
+          : <NUSBusStops refreshLocation={refreshLocation} refresh={refetchNUSBusStops} />}
+          </View>
         </SafeAreaView>
       </View>
     </QueryClientProvider>
@@ -409,7 +417,7 @@ const styles = StyleSheet.create({
   },
   nusTagAndChevronContainer: {
     flexDirection: "row",
-    justifyContent: "center",
+    alignItems: "center",
     paddingRight: 16,
     marginVertical: 20,
   },
@@ -417,18 +425,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#27187E",
     alignContent: "center",
     justifyContent: "center",
-    paddingHorizontal: 13,
-    paddingVertical: 7,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
     borderRadius: 20,
+    marginRight: 5,
   },
   nusTagText: {
     fontSize: 12,
     fontFamily: "Inter-Bold",
     color: "#EBF3FE",
-  },
-  chevron: {
-    width: 30,
-    height: 30,
   },
   segmentedControlContainer: {
     alignItems: "center",
