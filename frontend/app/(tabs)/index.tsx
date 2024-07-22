@@ -1,34 +1,24 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableWithoutFeedback,
-  LayoutChangeEvent,
-  ScrollView,
-  RefreshControl,
-  Image,
-  ActivityIndicator,
-} from "react-native";
+import { StyleSheet, Text, View, TouchableWithoutFeedback, ScrollView, RefreshControl, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { QueryClient, QueryClientProvider, useQuery, useMutation } from "@tanstack/react-query";
 import axios from "axios";
-import * as Location from "expo-location";
-import { LocationObject } from "expo-location";
-import Toast from "react-native-toast-message";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import { createStackNavigator } from "@react-navigation/stack";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 
 // Self-built components
 import { getFavouritedBusStops } from "@/utils/storage";
 import BusStopSearchBar from "@/components/busStopsTab/BusStopSearchBar";
 import BusStopSearchScreen from "@/components/busStopsTab/BusStopSearchScreen";
+import ColouredCircle from "@/components/busStopsTab/ColouredCircle";
+import CollapsibleContainer from "@/components/busStopsTab/CollapsibleContainer";
+import useUserLocation from "@/hooks/useUserLocation";
+import { NUSTag } from "@/components/busStopsTab/NUSTag";
 
 // Stack navigator to redirect from bus stop screen to bus stop search screen (vice-versa)
 const Stack = createStackNavigator();
-export default function App() {
+export default function BusStopSearchNavigator(): React.JSX.Element {
   return (
     <QueryClientProvider client={queryClient}>
       <Stack.Navigator initialRouteName="MainScreen">
@@ -49,25 +39,12 @@ interface BusStop {
   busStopId: string;
   distanceAway: string;
   savedBuses: BusService[];
+  latitude: number;
+  longitude: number;
+  isFavourited: boolean;
 }
 
-// UI COMPONENTS
-const ColouredCircle = ({ color, size = 50 }: { color: string; size?: number }) => {
-  return (
-    <View
-      style={{
-        width: size,
-        height: size,
-        borderRadius: size / 2,
-        backgroundColor: color,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    />
-  );
-};
-
-// Logic to modify the timings in the BusService object from ISO time to minutes away from now.
+// Logic to modify the timings in a BusService object from ISO time to minutes away from now.
 const calculateMinutesDifference = (isoTime: string): string => {
   // Calculate the difference in minutes between the current time and the given ISO time
   const now = new Date();
@@ -82,45 +59,8 @@ const calculateMinutesDifference = (isoTime: string): string => {
   return differenceInMinutes >= 0 ? `${differenceInMinutes} min` : "N/A"; // Correctly format the minute output
 };
 
-const CollapsibleContainer = ({ children, expanded }: { children: React.ReactNode; expanded: boolean }) => {
-  const [height, setHeight] = useState(0);
-  const animatedHeight = useSharedValue(0);
-
-  const onLayout = (event: LayoutChangeEvent) => {
-    const onLayoutHeight = event.nativeEvent.layout.height;
-
-    if (onLayoutHeight > 0 && height !== onLayoutHeight) {
-      setHeight(onLayoutHeight);
-    }
-  };
-
-  useEffect(() => {
-    animatedHeight.value = withTiming(expanded ? height : 0);
-  }, [expanded, height]);
-
-  const collapsibleStyle = useAnimatedStyle(() => {
-    return {
-      height: animatedHeight.value,
-    };
-  });
-
-  return (
-    <Animated.View style={[collapsibleStyle, { overflow: "hidden" }]}>
-      <View style={{ position: "absolute" }} onLayout={onLayout}>
-        <View
-          style={{
-            borderBottomColor: "#626262",
-            borderBottomWidth: StyleSheet.hairlineWidth,
-            marginHorizontal: 16,
-          }}
-        />
-        {children}
-      </View>
-    </Animated.View>
-  );
-};
-
-const ListItem = ({ item }: { item: BusStop }) => {
+// This returns a React component of each bus stop that is expandable.
+const ExpandableBusStop = ({ item }: { item: BusStop }) => {
   //Used to render details for 1 bus stop
   const [expanded, setExpanded] = useState(false);
 
@@ -129,7 +69,7 @@ const ListItem = ({ item }: { item: BusStop }) => {
   };
 
   // Function to determine the color based on bus stop name
-  function getColor(busService: string) {
+  function mapBusServiceColour(busService: string) {
     switch (busService) {
       case "A1":
         return "#FF0000"; // Red
@@ -158,22 +98,11 @@ const ListItem = ({ item }: { item: BusStop }) => {
         <View style={styles.cardContainer}>
           <View style={styles.textContainer}>
             <Text style={styles.busStopName}>{item.busStopName.startsWith("NUSSTOP") ? item.busStopName.slice(8) : item.busStopName}</Text>
-            <Text style={styles.distanceAwayText}>
-              {Number(item.distanceAway) < 1
-                ? `~${(Number(item.distanceAway) * 1000).toFixed(0)}m away`
-                : `~${Number(item.distanceAway).toFixed(2)}km away`}
-            </Text>
+            <Text style={styles.distanceAwayText}>{Number(item.distanceAway) < 1 ? `~${(Number(item.distanceAway) * 1000).toFixed(0)}m away` : `~${Number(item.distanceAway).toFixed(2)}km away`}</Text>
           </View>
           <View style={styles.nusTagAndChevronContainer}>
-            {item.busStopName.startsWith("NUSSTOP") && (
-              <View style={styles.nusTag}>
-                <Text style={styles.nusTagText}>NUS</Text>
-              </View>
-            )}
-            <Image
-              source={expanded ? require("@/assets/images/chevron_up_blue_icon.png") : require("@/assets/images/chevron_down_blue_icon.png")}
-              style={styles.chevron}
-            />
+            {item.busStopName.startsWith("NUSSTOP") && <NUSTag />}
+            <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={25} color="#0163CF" />
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -183,7 +112,7 @@ const ListItem = ({ item }: { item: BusStop }) => {
           {item.savedBuses.map((bus: BusService, index: number) => (
             <View key={index} style={styles.detailRow}>
               <View style={styles.leftContainer}>
-                <ColouredCircle color={getColor(bus.busNumber)} size={15} />
+                <ColouredCircle color={mapBusServiceColour(bus.busNumber)} size={15} />
                 <Text style={[styles.details, styles.busNumber]}>{bus.busNumber.startsWith("PUB:") ? bus.busNumber.slice(4) : bus.busNumber}</Text>
               </View>
               <View style={styles.rightContainer}>
@@ -202,62 +131,10 @@ const ListItem = ({ item }: { item: BusStop }) => {
   );
 };
 
-const useUserLocation = (refreshLocation: number) => {
-  const [location, setLocation] = useState<LocationObject | null>(null);
-  const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
-  const [locationErrorMsg, setLocationErrorMsg] = useState("");
-  const [locationReady, setLocationReady] = useState(false); // this is to only allow querying is getting user's current location is completed.
-
-  const getLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      setPermissionErrorMsg("Permission to access location was denied.");
-      return;
-    }
-    try {
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-      setLocationReady(true);
-    } catch (error) {
-      setLocationErrorMsg(`Failed to obtain location, ${error}`);
-    }
-  };
-
-  useEffect(() => {
-    getLocation();
-  }, [refreshLocation]);
-
-  useEffect(() => {
-    if (permissionErrorMsg) {
-      Toast.show({
-        type: "error",
-        text1: permissionErrorMsg,
-        text2: "Please enable location permissions for NUSMaps.",
-        position: "top",
-        autoHide: true,
-      });
-    }
-  }, [permissionErrorMsg]);
-
-  useEffect(() => {
-    if (locationErrorMsg) {
-      Toast.show({
-        type: "error",
-        text1: locationErrorMsg,
-        text2: "Please try again later",
-        position: "top",
-        autoHide: true,
-      });
-    }
-  }, [locationErrorMsg]);
-
-  return locationReady ? location : null;
-};
-
-// PERFORM API QUERY
+// React Query client
 const queryClient = new QueryClient();
 
-// busstops also contain location information
+// This function is used to obtain bus stop timings (POST request to REST API) for bus stops that are favourited.
 async function fetchBusArrivalTimes(busStopsWithLocation: any) {
   const response = await axios.post("https://nusmaps.onrender.com/busArrivalTimes", busStopsWithLocation, {
     headers: {
@@ -271,6 +148,7 @@ async function fetchBusArrivalTimes(busStopsWithLocation: any) {
   return response.data;
 }
 
+// Get favourite bus stops, retrieves timing from REST API (using fetchBusArrivalTimes function) and renders list of ExpandableBusStop
 function FavouriteBusStops({ refreshLocation, refresh }: { refreshLocation: number; refresh: () => void }) {
   const location = useUserLocation(refreshLocation);
   const [busStops, setBusStops] = useState<BusStop[]>([]);
@@ -348,19 +226,13 @@ function FavouriteBusStops({ refreshLocation, refresh }: { refreshLocation: numb
           <MaterialCommunityIcons name="ghost" size={80} color={"#848484"} style={{ marginTop: 10 }} />
         </View>
       ) : (
-        <View>
-          {busStops && Array.isArray(busStops) ? (
-            busStops.map((busStop: BusStop, index: number) => <ListItem key={index} item={busStop} />)
-          ) : (
-            <Text>{JSON.stringify(busStops)}</Text>
-          )}
-        </View>
+        <View>{busStops && Array.isArray(busStops) ? busStops.map((busStop: BusStop, index: number) => <ExpandableBusStop key={index} item={busStop} />) : <Text>{JSON.stringify(busStops)}</Text>}</View>
       )}
     </ScrollView>
   );
 }
 
-// Get nearest bus stops by location and render it. Backend API will return a busStops object with updated bus timings.
+// Get nearest bus stops based on location, retrieves timing from REST API endpoint(GET) and renders list of ExpandableBusStop.
 function NearbyBusStops({ refreshLocation, refreshUserLocation }: { refreshLocation: number; refreshUserLocation: () => void }) {
   const location = useUserLocation(refreshLocation);
 
@@ -372,11 +244,9 @@ function NearbyBusStops({ refreshLocation, refreshUserLocation }: { refreshLocat
     queryKey: ["busStopsByLocation"],
     staleTime: 30000, // 30 seconds
     queryFn: () =>
-      axios
-        .get(`https://nusmaps.onrender.com/busStopsByLocation?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`)
-        .then((res) => {
-          return res.data;
-        }),
+      axios.get(`https://nusmaps.onrender.com/busStopsByLocation?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`).then((res) => {
+        return res.data;
+      }),
   });
 
   if (isPending) return <ActivityIndicator size="large" style={{ margin: 20 }} />;
@@ -392,18 +262,12 @@ function NearbyBusStops({ refreshLocation, refreshUserLocation }: { refreshLocat
 
   return (
     <ScrollView refreshControl={<RefreshControl refreshing={isPending} onRefresh={refreshUserLocation} />}>
-      <View>
-        {busStops && Array.isArray(busStops) ? (
-          busStops.map((busStop: BusStop, index: number) => <ListItem key={index} item={busStop} />)
-        ) : (
-          <Text>{JSON.stringify(busStops)}</Text>
-        )}
-      </View>
+      <View>{busStops && Array.isArray(busStops) ? busStops.map((busStop: BusStop, index: number) => <ExpandableBusStop key={index} item={busStop} />) : <Text>{JSON.stringify(busStops)}</Text>}</View>
     </ScrollView>
   );
 }
 
-// Get all NUS Bus Stops and its associated timings and render it.
+// Get NUS Bus Stops, retrieves timing from REST API endpoint(GET) and renders list of ExpandableBusStop.
 function NUSBusStops({ refreshLocation, refresh }: { refreshLocation: number; refresh: () => void }) {
   const location = useUserLocation(refreshLocation);
 
@@ -414,10 +278,7 @@ function NUSBusStops({ refreshLocation, refresh }: { refreshLocation: number; re
   } = useQuery({
     queryKey: ["nusBusStops"],
     staleTime: 30000, // 30 seconds
-    queryFn: () =>
-      axios
-        .get(`https://nusmaps.onrender.com/nusBusStops?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`)
-        .then((res) => res.data),
+    queryFn: () => axios.get(`https://nusmaps.onrender.com/nusBusStops?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`).then((res) => res.data),
   });
 
   if (isPending) return <ActivityIndicator size="large" style={{ margin: 20 }} />;
@@ -433,20 +294,14 @@ function NUSBusStops({ refreshLocation, refresh }: { refreshLocation: number; re
 
   return (
     <ScrollView refreshControl={<RefreshControl refreshing={isPending} onRefresh={refresh} />}>
-      <View>
-        {busStops && Array.isArray(busStops) ? (
-          busStops.map((busStop: BusStop, index: number) => <ListItem key={index} item={busStop} />)
-        ) : (
-          <Text>{JSON.stringify(busStops)}</Text>
-        )}
-      </View>
+      <View>{busStops && Array.isArray(busStops) ? busStops.map((busStop: BusStop, index: number) => <ExpandableBusStop key={index} item={busStop} />) : <Text>{JSON.stringify(busStops)}</Text>}</View>
     </ScrollView>
   );
 }
 
 function BusStopsScreen() {
-  const [refreshLocation, setRefreshLocation] = useState(0);
-  const [selectedIndex, setSelectedIndex] = useState(0); // State to handle the logic of rendering nearby(0) or NUS(1) bus stops.
+  const [refreshLocation, setRefreshLocation] = useState(0); // State to handle the re-retrieval of user location.
+  const [selectedIndex, setSelectedIndex] = useState(0); // State to handle the logic of rendering Favourites, Nearby or NUS bus stops.
 
   const refetchFavouriteBusStops = useCallback(() => {
     setRefreshLocation((prevKey) => prevKey + 1);
@@ -482,15 +337,7 @@ function BusStopsScreen() {
               }}
             />
           </View>
-          <View style={{ flex: 1 }}>
-            {selectedIndex === 0 ? (
-              <FavouriteBusStops refreshLocation={refreshLocation} refresh={refetchFavouriteBusStops} />
-            ) : selectedIndex === 1 ? (
-              <NearbyBusStops refreshLocation={refreshLocation} refreshUserLocation={refetchUserLocation} />
-            ) : (
-              <NUSBusStops refreshLocation={refreshLocation} refresh={refetchNUSBusStops} />
-            )}
-          </View>
+          <View style={{ flex: 1 }}>{selectedIndex === 0 ? <FavouriteBusStops refreshLocation={refreshLocation} refresh={refetchFavouriteBusStops} /> : selectedIndex === 1 ? <NearbyBusStops refreshLocation={refreshLocation} refreshUserLocation={refetchUserLocation} /> : <NUSBusStops refreshLocation={refreshLocation} refresh={refetchNUSBusStops} />}</View>
         </SafeAreaView>
       </View>
     </QueryClientProvider>
@@ -513,7 +360,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  image: { width: 50, height: 50, margin: 10, borderRadius: 5 },
   textContainer: {
     justifyContent: "space-between",
     paddingVertical: 16,
@@ -562,26 +408,9 @@ const styles = StyleSheet.create({
   },
   nusTagAndChevronContainer: {
     flexDirection: "row",
-    justifyContent: "center",
+    alignItems: "center",
     paddingRight: 16,
     marginVertical: 20,
-  },
-  nusTag: {
-    backgroundColor: "#27187E",
-    alignContent: "center",
-    justifyContent: "center",
-    paddingHorizontal: 13,
-    paddingVertical: 7,
-    borderRadius: 20,
-  },
-  nusTagText: {
-    fontSize: 12,
-    fontFamily: "Inter-Bold",
-    color: "#EBF3FE",
-  },
-  chevron: {
-    width: 30,
-    height: 30,
   },
   segmentedControlContainer: {
     alignItems: "center",

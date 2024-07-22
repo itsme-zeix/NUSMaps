@@ -1,11 +1,10 @@
-// src/components/BusStopSearchBar.tsx
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 export default function BusStopSearchBar() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   const handlePress = () => {
     navigation.navigate("BusStopSearchScreen", { initialQuery: "" });
@@ -34,7 +33,7 @@ const styles = StyleSheet.create({
     marginVertical: 16,
     textAlign: "center",
     backgroundColor: "#EBEBEC",
-    flexDirection: "row"
+    flexDirection: "row",
   },
   buttonText: {
     fontSize: 16,
