@@ -61,7 +61,6 @@ const BusStopSearchScreen = () => {
       try {
         const storedData = await AsyncStorage.getItem("busStops");
         let parsedData = storedData ? JSON.parse(storedData) : [];
-        parsedData = mapBusStopNames(parsedData);
         setData(parsedData);
         setFilteredData(parsedData.slice(0, ITEMS_PER_PAGE)); // Load the first page
       } catch (error) {
@@ -119,34 +118,31 @@ const BusStopSearchScreen = () => {
     await AsyncStorage.setItem("busStops", JSON.stringify(updatedData));
   };
 
-  const mapBusStopNames = (busStops) => {
-    return busStops.map((stop) => {
-      let isNUSStop = false;
-      if (stop.busStopName.startsWith("NUSSTOP_")) {
-        isNUSStop = true;
-        const code = stop.busStopName.replace("NUSSTOP_", "");
-        const fullNameEntry = mapNUSCodeNameToFullName.find((entry) => entry.value === code);
-        return {
-          ...stop,
-          busStopName: fullNameEntry ? fullNameEntry.label : stop.busStopName,
-          isNUSStop,
-        };
-      }
-      return { ...stop, isNUSStop };
-    });
+  const mapBusStopNames = (busStopName) => {
+    if (busStopName.startsWith("NUSSTOP_")) {
+      const code = busStopName.replace("NUSSTOP_", "");
+      const fullNameEntry = mapNUSCodeNameToFullName.find((entry) => entry.value === code);
+      return fullNameEntry ? fullNameEntry.label : busStopName;
+    }
+    return busStopName;
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.item}>
-      <Text style={styles.busStopText}>{item.busStopName}</Text>
-      <View style={styles.iconContainer}>
-        {item.isNUSStop && <NUSTag/>}
-        <TouchableOpacity onPress={() => toggleFavourite(item.busStopId)}>
-          <Icon name={item.isFavourited ? "star" : "star-outline"} type="ionicon" color={item.isFavourited ? "#FFD700" : "#000"} style={{ marginLeft: 5 }}  />
-        </TouchableOpacity>
+  const renderItem = ({ item }) => {
+    const isNUSStop = item.busStopName.startsWith("NUSSTOP_");
+    const busStopName = mapBusStopNames(item.busStopName);
+
+    return (
+      <View style={styles.item}>
+        <Text style={styles.busStopText}>{busStopName}</Text>
+        <View style={styles.iconContainer}>
+          {isNUSStop && <NUSTag />}
+          <TouchableOpacity onPress={() => toggleFavourite(item.busStopId)}>
+            <Icon name={item.isFavourited ? "star" : "star-outline"} type="ionicon" color={item.isFavourited ? "#FFD700" : "#000"} style={{ marginLeft: 5 }} />
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
