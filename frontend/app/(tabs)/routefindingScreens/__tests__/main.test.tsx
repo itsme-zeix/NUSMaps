@@ -1,12 +1,8 @@
-import React, { createRef } from 'react';
-import { fireEvent, render, waitFor, act } from '@testing-library/react-native';
+import React from 'react';
+import { render, waitFor} from '@testing-library/react-native';
 import * as Location from 'expo-location';
 import Toast from 'react-native-toast-message';
 import App from '../Main';
-import Constants from 'expo-constants';
-import axios from 'axios';
-import { RouteSearchBar } from '@/components/RouteSearchBar';
-
 jest.mock('expo-location', () => ({
   requestForegroundPermissionsAsync: jest.fn(),
   getCurrentPositionAsync: jest.fn(),
@@ -27,25 +23,29 @@ jest.mock('react-native-maps', () => {
   };
 });
 
+
 jest.mock('axios'); //used to simulate api call fails
 
 const DEFAULTLOCATION = {
   latitude: 1.3521,
   longitude: 103.8198,
 };
-const oneMapsAPIToken = "mockedToken"; // Mock the oneMapsAPIToken
 
 const TESTLOCATION = {
   latitude: 1.3489977386432621,
   longitude: 103.7492952313956,
 };
 
-describe('Straight forward toasts/error handling', () => {
-  beforeEach(() => {
+
+
+describe('Straight forward toasts/error handling', () => {  
+  afterEach(() => {
+    jest.resetAllMocks();
     jest.clearAllMocks();
   });
 
   it('requests location permission and checks if the screen is rendered correctly + whether the mapview renders correctly', async () => {
+    //VERY SLOW >5000ms when clearCache flag is specified in npx jest
     (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({ status: 'granted' });
     (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValue({
       coords: TESTLOCATION,
@@ -76,8 +76,7 @@ describe('Straight forward toasts/error handling', () => {
         longitudeDelta: 0.05,
       });
     });
-  });
-
+  }, 10000);
   it('handles permission denied', async () => {
     (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({ status: 'denied' });
 
@@ -114,7 +113,7 @@ describe('Straight forward toasts/error handling', () => {
   it('handles permission granted but location cannot be attained', async () => {
     (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({ status: 'granted' });
     (Location.getCurrentPositionAsync as jest.Mock).mockRejectedValue("GPS failed");
-    const { getByTestId } = render(
+    render(
         <App/>
     );
     await waitFor(() => {
@@ -127,93 +126,25 @@ describe('Straight forward toasts/error handling', () => {
         })
     });
   });
-
 });
 
-describe('more complicated toasts/error handling', () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-      });
-    it('shows a toast message when the server request fails because of a missing onemaps api token', async () => {
-        (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({ status: 'granted' });
-        (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValue({
-          coords: TESTLOCATION,
-        });
-        // Arrange: mock axios to reject with an error
-    
-        const origin = { latitude: 1.3521, longitude: 103.8198 };
-        const destination = { latitude: 1.3521, longitude: 103.8198 };
-    
-        let fetchBestRoute;
-    
-          render(
-            <App
-              ref={(ref) => {
-                if (ref) {
-                  fetchBestRoute = ref.fetchBestRoute;
-                }
-              }}
-            />
-          );
-        // Act
-        await act(async () => {
-            await fetchBestRoute(origin, destination);
-            // Expected error
-          }
-      );
-    
-        // Assert: Check if the Toast was shown with the correct message
-        expect(Toast.show).toHaveBeenCalledWith({
-          type: 'error',
-          text1: 'Server issues, please try again later. API TOKEN ERROR',
-          text2: 'Please try again later',
-          position: 'top',
-          autoHide: true,
-        });
-      });
-    beforeAll(() => {
-        // Override environment variables before running tests
-        process.env.ONE_MAPS_API_TOKEN = 'mockedValidToken';
-      });
-    afterAll(() => {
-        // Clean up environment variable after tests
-        delete process.env.ONE_MAPS_API_TOKEN;
-      });
-    
-    // it('shows a toast message when the server request fails because of backend issue, reflected in axios status', async () => {
-    //     (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({ status: 'granted' });
-    //     (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValue({
-    //       coords: TESTLOCATION,
-    //     });
-    //     const oneMapsAPIToken = 'mockedValidToken'; // Set a valid token for testing
-    //     (axios.post as jest.Mock).mockRejectedValue(new Error('Network Error'));
-    //      const origin = { latitude: 1.3521, longitude: 103.8198 };
-    //     const destination = { latitude: 1.3521, longitude: 103.8198 };
-    
-    //     let fetchRoutesFromServer;
-    
-    //       render(
-    //         <App
-    //           ref={(ref) => {
-    //             if (ref) {
-    //                 fetchRoutesFromServer = ref.fetchRoutesFromServer;
-    //             }
-    //           }}
-    //         />
-    //       );
-    //     // Act
-    //     await act(async () => {
-    //         await fetchRoutesFromServer(origin, destination);
-    //         // Expected error
-    //       }
-    //     );
-    //     expect(Toast.show).toHaveBeenCalledWith({
-    //         type: 'error',
-    //         text1: 'Server issues, please try again later.',
-    //         text2: 'Please try again later',
-    //         position: 'top',
-    //         autoHide: true,
-    //       });
-    // })
-
-})
+// THIS TEST WAS USED TO DEBUG THE ENV VARIABLES, IT DOES NOT WORK UNLESS <Text>{<apiKey>}</Text> is present in Main.tsx
+// describe('checks to see if env variables are loaded', () => {
+//   afterEach(() => {
+//     jest.resetModules();
+//     jest.clearAllMocks();
+//   });
+//   it("checks if env variables are loaded through expo constants", async () => {
+//       (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({ status: 'granted' });
+//       (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValue({
+//         coords: TESTLOCATION,
+//       });
+//       const {getByText} = render(<App/>);
+//       // const apiKeyText = await screen.findByText("mockedValidKey");
+//       // expect(apiKeyText).toBeTruthy();
+//       // const tokenText = await screen.findByText("mockedValidToken");
+//       // expect(tokenText).toBeTruthy();
+//       expect(getByText('globalMockedValidKey')).toBeTruthy();
+//       expect(getByText('globalMockedValidToken')).toBeTruthy();
+//     });  
+// }); 

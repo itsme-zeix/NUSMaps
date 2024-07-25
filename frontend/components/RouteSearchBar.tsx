@@ -18,15 +18,16 @@ interface RouteSearchBarInput {
 }
 
 //constants
-const apiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY == undefined ? Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY : process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
+const apiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY != undefined ? EXPO_PUBLIC_GOOGLEMAPS_API_KEY : Constants.expoConfig.extra.EXPO_PUBLIC_GOOGLEMAPS_API_KEY ;
 //USE THIS FOR PRODUCTION BUILDS Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
 // const apiKey = Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
 //The search bar itself
 export const RouteSearchBar: React.FC<
   RouteSearchBarInput & {
     getDestinationResult: (data: GooglePlaceData) => void;
+    testID: string
   }
-> = ({ location, getDestinationResult }) => {
+> = ({ location, getDestinationResult, testID }) => {
   //hooks
   const [currLocation, setCurrLocation] = useState<Coords>({
     latitude: 1.3521,
@@ -58,7 +59,7 @@ export const RouteSearchBar: React.FC<
   };
 
   return (
-    <View>
+    <View testID={testID}>
       <GooglePlacesAutocomplete
         placeholder="Where to?"
         textInputProps={{
