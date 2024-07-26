@@ -2,10 +2,13 @@ import React, { createRef } from "react";
 import {
   render,
   act,
+  waitFor
 } from "@testing-library/react-native";
 import * as Location from "expo-location";
 import Toast from "react-native-toast-message";
 import App from "../Main";
+import { LatLng } from "react-native-maps";
+import { baseResultsCardType } from "@/types";
 //NOTE THIS TEST FILE WAS SEPARATED FROM main.test.tsx because of 
 //(1) Issues with reconfiguring expo-constants, after 7 hours of ordeal, 
 //one cannot use .doMock or even just adjust the Constants.expoConfig prop, 
@@ -31,7 +34,7 @@ jest.mock('react-native-maps', () => {
   });
 jest.mock('axios'); //used to simulate api call fails
   
-jest.spyOn(console, 'error').mockImplementation(() => {});
+const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
 jest.mock("expo-constants", () => ({
   expoConfig: {
@@ -41,6 +44,9 @@ jest.mock("expo-constants", () => ({
     },
   },
 }));
+interface AppInstance {
+    fetchRoutesFromServer: (origin:LatLng, destination:LatLng) => Promise<baseResultsCardType[]>
+};
 
 const TESTLOCATION = {
   latitude: 1.3489977386432621,
@@ -58,30 +64,22 @@ describe("error handling for valid onemap token but invalid server response", ()
     (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValue({
         coords: TESTLOCATION,
     });
-    const { getByText } = render(
-      <App
-        ref={(ref) => {
-          if (ref) {
-            fetchRoutesFromServer = ref.fetchRoutesFromServer;
-          }
-        }}
-      />
-    );
-
-    // Arrange: mock axios to reject with an error
-    
+    const ref = React.createRef<AppInstance>();
+    render(<App ref={ref} />);
+    expect(ref.current).toBeDefined();
+    const fetchRoutesFromServerSpy = jest.spyOn(ref.current!, 'fetchRoutesFromServer');
     const origin = { latitude: 1.3521, longitude: 103.8198 };
     const destination = { latitude: 1.3521, longitude: 103.8198 };
-    
-    let fetchRoutesFromServer;
-
     await act(async () => {
-        await expect(fetchRoutesFromServer(origin, destination)).rejects.toThrow(
-            "API token could not be found. Please try again"
-        );
+        await expect(ref.current!.fetchRoutesFromServer(origin, destination)).rejects.toThrow("API token could not be found. Please try again");
+        // await expect(fetchRoutesFromServer(origin, destination)).rejects.toThrow(
+        //     "API token could not be found. Please try again"
+        // );
     });
-
-
+    await waitFor(()=> {
+        expect(consoleErrorSpy).toHaveBeenCalledWith("api token for OneMap not declared. Check server settings");
+    });
+    consoleErrorSpy.mockRestore();
     // Assert: Check if the Toast was shown with the correct message
     expect(Toast.show).toHaveBeenCalledWith({
       type: "error",

@@ -33,7 +33,7 @@ const iconList: IconCatalog = {
 const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY || Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
 
 //result card(singular card)
-const ResultCard: React.FC<SingleResultCardData> = ({ origin, destination, resultData }) => {
+const ResultCard: React.FC<SingleResultCardData & {testId:string}> = ({ origin, destination, resultData, testId }) => {
   //Put in a pressable that when expanded, will
   // console.log("destination received in resultcard", destination);
   const types = resultData.types.flatMap((icon) => [icon, "RCHEVRON"]);
@@ -51,7 +51,7 @@ const ResultCard: React.FC<SingleResultCardData> = ({ origin, destination, resul
     });
   };
   return (
-    <Pressable style={[{ backgroundColor: "white" }, styles.resultCard]} onPress={nextScreenFunc}>
+    <Pressable style={[{ backgroundColor: "white" }, styles.resultCard]} onPress={nextScreenFunc} testID={testId}>
       <View style={{ flexDirection: "column" }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <View style={styles.iconsContainer}>
@@ -191,7 +191,7 @@ const RefactoredResultsScreen: React.FC = () => {
           <ScrollView>
             <View style={styles.resultContainer}>
               {typeCastedBaseResultsCard.map((data, index) => (
-                <ResultCard key={`result-${index}`} origin={parsedOrigin} resultData={data} destination={parsedDestination} />
+                <ResultCard key={`result-${index}`} origin={parsedOrigin} resultData={data} destination={parsedDestination} testId={`result-card-${index}`}/>
               ))}
             </View>
           </ScrollView>

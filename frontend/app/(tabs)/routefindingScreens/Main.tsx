@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
-import { StyleSheet, View } from "react-native";
+import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef  } from "react";
+import { StyleSheet, View, Text } from "react-native";
 import MapView, {
   PROVIDER_GOOGLE,
   Marker,
@@ -14,67 +14,12 @@ import { GooglePlaceData } from "react-native-google-places-autocomplete";
 import { useRouter, useSegments } from "expo-router";
 import Constants from "expo-constants";
 import axios from 'axios';
+import { baseResultsCardType, destinationType } from "@/types";
 
-//interface and types
-
-
-interface LegBase {
-  //base template for the info that is displayed in the leg
-  type: string;
-}
-
-interface WalkLeg extends LegBase {
-  walkInfo: {
-    distance: number;
-    direction: string;
-  }[];
-  distance: number;
-}
-
-interface PublicTransportLeg extends LegBase {
-  //used to display the routes info
-  startingStopETA: number;
-  serviceType: string;
-  startingStopName: string;
-  destinationStopName: string;
-  intermediateStopCount: number;
-  duration: number;
-  intermediateStopNames: string[];
-  intermediateStopGPSLatLng: LatLng[];
-}
-
-type Leg = PublicTransportLeg | WalkLeg;
-
-interface baseResultsCardType {
-  types: string[];
-  journeyTiming: string;
-  wholeJourneyTiming: string;
-  journeyLegs: Leg[]; //an array of all the legs in 1 route
-  polylineArray: string[]; //each leg's polyline is a string
-  stopsCoordsArray: string[];
-}
-
-type DestinationResult = {
-  address: string;
-  placeId: string;
-} & LatLng;
-
-//constants and variables
-// const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY == undefined ? Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY : process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY ;
-// console.log("maps api key:", mapsApiKey);
-// const oneMapsAPIToken = process.env.EXPO_PUBLIC_ONEMAPAPITOKEN == undefined ?  Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN : process.env.EXPO_PUBLIC_ONEMAPAPITOKEN;
-// console.log("api token: ", oneMapsAPIToken);
-const mapsApiKey = "AIzaSyAyGTa1g5Yzd2zEgwtY3ayIYFZyX-OVjns";
-console.log("maps api key:", mapsApiKey);
-const oneMapsAPIToken = "f812a60f552bb0e67cff12553059fd08b922804b5e36ef16d2bd964895de2344";
-console.log("api token: ", oneMapsAPIToken);
-//USE THIS FOR PRODUCTION BUILDS
-// const mapsApiKey = Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
-// const oneMapsAPIToken = Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN;
-//exporter
-
-
-export default function App() {
+//constants and variablesEXPO_PUBLIC_MAPS_API_KEY
+const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY == undefined ? Constants.expoConfig.extra.EXPO_PUBLIC_GOOGLEMAPS_API_KEY : process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY ;
+const oneMapsAPIToken = process.env.EXPO_PUBLIC_ONEMAPAPITOKEN == undefined ?  Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN : process.env.EXPO_PUBLIC_ONEMAPAPITOKEN;
+const App = forwardRef((props, ref) => {
   //hooks
   const router = useRouter();
   const segments = useSegments();
@@ -104,7 +49,7 @@ export default function App() {
     address: "DEFAULT",
     placeId: "DEFAULT",
   };
-  const [destination, setDestination] = useState<DestinationResult>(
+  const [destination, setDestination] = useState<destinationType>(
     DEFAULTDESTINATIONLatLng
   );
   const isNotInitialExec = useRef(false);
@@ -152,8 +97,8 @@ export default function App() {
         setRegion({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
-          latitudeDelta: 0.005,
-          longitudeDelta: 0.005,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
         });
       } catch (error) {
         setLocationErrorMsg(`Failed to obtain location, ${error}`);
@@ -286,30 +231,26 @@ export default function App() {
             },
           }
         );
-        console.log("response data fetchRoutesFromServer", response.data);
         return response.data;
       } catch (error) {
-        setRouteErrorMsg("Server issues, please try again later.");
+        setRouteErrorMsg("Server issues, please try again later. SERVER ERROR");
         console.error(
-          "Route could not be found. Please try again later: ",
-          error
+          "Route could not be found. Please try again later: ",error
         );
         throw new Error("Route could not be found. Please try again later");
       }
     } else {
-      setRouteErrorMsg("Server issues, please try again later.");
+      setRouteErrorMsg("Server issues, please try again later. API TOKEN ERROR");
       console.error("api token for OneMap not declared. Check server settings");
       throw new Error("API token could not be found. Please try again");
     }
   }
-
 
   async function fetchBestRoute(
     originCoords: LatLng,
     destinationCoords: LatLng
   ) {
     //fetches best route between two points, can pass a check to see if
-    try {
       setIsLoading(true);
       const result = await fetchRoutesFromServer(
         originCoords,
@@ -326,17 +267,19 @@ export default function App() {
           baseResultsData: JSON.stringify(result),
         },
       });
-    } catch (error) {
-      console.error("parsing error: ", error);
-      setRouteErrorMsg("service not available, please try again");
-    }
-  }
+    };
+
+  useImperativeHandle(ref, () => ({
+    fetchRoutesFromServer, fetchBestRoute, getDestinationResult, getLatLngFromId, setDestination
+  }));
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <MapView style={styles.map} provider={PROVIDER_GOOGLE} region={region}>
+        <MapView style={styles.map} provider={PROVIDER_GOOGLE} region={region} testID="current-location-map">
           {currentLocation && (
             <Marker
+              testID="current-location-marker"
               coordinate={{
                 latitude: currentLocation.latitude,
                 longitude: currentLocation.longitude,
@@ -350,13 +293,16 @@ export default function App() {
             <RouteSearchBar
               location={currentLocation}
               getDestinationResult={getDestinationResult}
+              testID="dest-search-bar"
             />
           </View>
         </View>
       </View>
     </GestureHandlerRootView>
   );
-}
+});
+
+
 
 //stylesheet
 const styles = StyleSheet.create({
@@ -376,3 +322,4 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0)",
   },
 });
+export default App;
