@@ -9,7 +9,7 @@ import { BusNumberCard } from "@/components/detailedRouteScreen/BusNumber";
 import { TramTypeCard } from "@/components/detailedRouteScreen/TramNumber";
 import { useRouter, useLocalSearchParams, useSegments } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Leg, destinationType, baseResultsCardType, SingleResultCardData } from "@/types";
+import { PublicTransportLeg, destinationType, baseResultsCardType, SingleResultCardData } from "@/types";
 
 //interfaces and types
 
