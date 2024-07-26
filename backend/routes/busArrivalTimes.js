@@ -129,14 +129,11 @@ async function fetchLTAData(busStop) {
         bus.timings = cachedData;
       } else {
         try {
-          const response = await axios.get(
-            `http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=${stopId}&ServiceNo=${serviceNo}`,
-            {
-              headers: {
-                AccountKey: process.env.LTA_DATAMALL_KEY,
-              },
-            }
-          );
+          const response = await axios.get(`http://datamall2.mytransport.sg/ltaodataservice/BusArrivalv2?BusStopCode=${busStop.busStopId}&ServiceNo=${bus.busNumber}`, {
+            headers: {
+              AccountKey: process.env.LTA_DATAMALL_KEY,
+            },
+          });
 
           // Check if the response is ok and has a body
           if (response.status !== 200) {

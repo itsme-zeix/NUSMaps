@@ -3,7 +3,6 @@ import { Stack } from "expo-router";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import Toast from "react-native-toast-message";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "react-native";
 import axios from "axios";
@@ -12,11 +11,16 @@ import * as SplashScreen from "expo-splash-screen";
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+<<<<<<< HEAD
   const [fontsLoaded, error] = useFonts({
     'Inter-Bold': require('../assets/fonts/Inter-Bold.otf'),
     'Inter-Medium': require('../assets/fonts/Inter-Medium.otf'),
     'Inter-SemiBold': require('../assets/fonts/Inter-SemiBold.otf'),
     'Inter-Semibold': require('../assets/fonts/Inter-SemiBold.otf')
+=======
+  const [loaded] = useFonts({
+    // SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+>>>>>>> e814e1e69354c3856e5d0f68f490edbc1b9291e8
   });
 
   
