@@ -9,60 +9,9 @@ import { BusNumberCard } from "@/components/detailedRouteScreen/BusNumber";
 import { TramTypeCard } from "@/components/detailedRouteScreen/TramNumber";
 import { useRouter, useLocalSearchParams, useSegments } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import { Leg, destinationType, baseResultsCardType, SingleResultCardData } from "@/types";
 
 //interfaces and types
-type destinationType = {
-  address: string;
-  placeId: string;
-} & LatLng;
-
-interface LegBase {
-  //base template for the info that is displayed in the leg
-  type: string;
-}
-
-interface WalkLeg extends LegBase {
-  walkInfo: {
-    distance: number;
-    direction: string;
-  }[];
-  distance: number;
-}
-
-interface PublicTransportLeg extends LegBase {
-  //used to display the routes info
-  startingStopETA: number;
-  serviceType: string;
-  startingStopName: string;
-  destinationStopName: string;
-  intermediateStopCount: number;
-  duration: number;
-  intermediateStopNames: string[];
-  intermediateStopGPSLatLng: LatLng[];
-}
-
-type Leg = PublicTransportLeg | WalkLeg;
-
-interface baseResultsCardType {
-  types: string[];
-  journeyTiming: string;
-  wholeJourneyTiming: string;
-  journeyLegs: Leg[]; //an array of all the legs in 1 route
-  polylineArray: string[]; //each leg's polyline is a string
-  stopsCoordsArray: string[];
-}
-
-interface ResultObject {
-  origin: LatLng;
-  destination: destinationType;
-  baseResultsData: baseResultsCardType[];
-}
-
-interface SingleResultCardData {
-  origin: LatLng;
-  destination: destinationType;
-  resultData: baseResultsCardType;
-}
 
 // Define a type for all possible icon names
 type IconName = keyof typeof MaterialIcons.glyphMap;
