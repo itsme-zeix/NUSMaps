@@ -11,19 +11,13 @@ import * as SplashScreen from "expo-splash-screen";
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-<<<<<<< HEAD
   const [fontsLoaded, error] = useFonts({
     'Inter-Bold': require('../assets/fonts/Inter-Bold.otf'),
     'Inter-Medium': require('../assets/fonts/Inter-Medium.otf'),
     'Inter-SemiBold': require('../assets/fonts/Inter-SemiBold.otf'),
     'Inter-Semibold': require('../assets/fonts/Inter-SemiBold.otf')
-=======
-  const [loaded] = useFonts({
-    // SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
->>>>>>> e814e1e69354c3856e5d0f68f490edbc1b9291e8
   });
 
-  
   // Forces dark status bar text (ignores device light/dark mode).
   useEffect(() => {
     StatusBar.setBarStyle("dark-content");
