@@ -1,48 +1,36 @@
-import {
-  NavigationContainer,
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack, Slot } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
+import { Stack } from "expo-router";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import Toast from "react-native-toast-message";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "react-native";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery,
-} from "@tanstack/react-query";
 import axios from "axios";
-
+import * as SplashScreen from "expo-splash-screen";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    // SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+  const [fontsLoaded, error] = useFonts({
+    'Inter-Bold': require('../assets/fonts/Inter-Bold.otf'),
+    'Inter-Medium': require('../assets/fonts/Inter-Medium.otf'),
+    'Inter-SemiBold': require('../assets/fonts/Inter-SemiBold.otf'),
+    'Inter-Semibold': require('../assets/fonts/Inter-SemiBold.otf')
   });
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
+  
   // Forces dark status bar text (ignores device light/dark mode).
   useEffect(() => {
     StatusBar.setBarStyle("dark-content");
   }, []);
+
+  useEffect(() => {
+    if (fontsLoaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, error]);
+
 
   // Uncomment to clear existing database for testing
   // AsyncStorage.clear();
@@ -89,8 +77,9 @@ export default function RootLayout() {
     };
     setupLocalStorage();
   }, []);
-
-  // <Stack.Screen name="DetailedRoutingScreen" component={RouteCard}/>
+  if (!fontsLoaded && !error) {
+    return null;
+  }
   return (
     <>
       <Stack>
