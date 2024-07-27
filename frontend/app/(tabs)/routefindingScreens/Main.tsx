@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
-import { StyleSheet, View, BackHandler } from "react-native";
+import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef  } from "react";
+import { StyleSheet, View, Text } from "react-native";
 import MapView, {
   PROVIDER_GOOGLE,
   Marker,
@@ -14,63 +14,12 @@ import { GooglePlaceData } from "react-native-google-places-autocomplete";
 import { useRouter, useSegments } from "expo-router";
 import Constants from "expo-constants";
 import axios from 'axios';
+import { baseResultsCardType, destinationType } from "@/types";
 
-//interface and types
-
-
-interface LegBase {
-  //base template for the info that is displayed in the leg
-  type: string;
-}
-
-interface WalkLeg extends LegBase {
-  walkInfo: {
-    distance: number;
-    direction: string;
-  }[];
-  distance: number;
-}
-
-interface PublicTransportLeg extends LegBase {
-  //used to display the routes info
-  startingStopETA: number;
-  serviceType: string;
-  startingStopName: string;
-  destinationStopName: string;
-  intermediateStopCount: number;
-  duration: number;
-  intermediateStopNames: string[];
-  intermediateStopGPSLatLng: LatLng[];
-}
-
-type Leg = PublicTransportLeg | WalkLeg;
-
-interface baseResultsCardType {
-  types: string[];
-  journeyTiming: string;
-  wholeJourneyTiming: string;
-  journeyLegs: Leg[]; //an array of all the legs in 1 route
-  polylineArray: string[]; //each leg's polyline is a string
-  stopsCoordsArray: string[];
-}
-
-type DestinationResult = {
-  address: string;
-  placeId: string;
-} & LatLng;
-
-//constants and variables
-const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY == undefined ? Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY : process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY ;
-console.log("maps api key:", mapsApiKey);
+//constants and variablesEXPO_PUBLIC_MAPS_API_KEY
+const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY == undefined ? Constants.expoConfig.extra.EXPO_PUBLIC_GOOGLEMAPS_API_KEY : process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY ;
 const oneMapsAPIToken = process.env.EXPO_PUBLIC_ONEMAPAPITOKEN == undefined ?  Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN : process.env.EXPO_PUBLIC_ONEMAPAPITOKEN;
-console.log("api token: ", oneMapsAPIToken);
-//USE THIS FOR PRODUCTION BUILDS
-// const mapsApiKey = Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
-// const oneMapsAPIToken = Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN;
-//exporter
-
-
-export default function App() {
+const App = forwardRef((props, ref) => {
   //hooks
   const router = useRouter();
   const segments = useSegments();
@@ -92,7 +41,7 @@ export default function App() {
   });
   const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
   const [locationErrorMsg, setLocationErrorMsg] = useState("");
-  const [isResultAttained, setisResultAttained] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); //state used to maintain whether to show the user the loading screen
   const [routeErrorMsg, setRouteErrorMsg] = useState("");
   const DEFAULTDESTINATIONLatLng = {
     latitude: NaN,
@@ -100,13 +49,9 @@ export default function App() {
     address: "DEFAULT",
     placeId: "DEFAULT",
   };
-  const [destination, setDestination] = useState<DestinationResult>(
+  const [destination, setDestination] = useState<destinationType>(
     DEFAULTDESTINATIONLatLng
   );
-  const [baseResultsCardData, setbaseResultsCardData] = useState<
-    //the results needed to be displayed
-    baseResultsCardType[]
-  >([]);
   const isNotInitialExec = useRef(false);
 
   //effects arranged in execution order
@@ -115,6 +60,26 @@ export default function App() {
   //(3)Route error messages when unable to query backend
   //(4) State changes when user inputs a new destination, leading to a new visible modal
   //(5)
+
+  const showLoadingScreen = () => {
+    router.push({
+      pathname:"../routefindingScreens/loadingScreen",
+    });
+  };
+  // const showResultsScreenAfterLoading = (originCoords, destCoords, ) => {
+
+  // }
+
+  useEffect(()=> {
+    // if (!isNotInitialExec.current) {
+      //not the initial load
+      if (isLoading) {
+        showLoadingScreen();
+      } // nothing is done if set to false, as the other use effect will handle the replacement of the screen with the results screen
+    // }
+  }
+  , [isLoading]);
+
   useEffect(() => {
     //to query for location permission
     const getLocation = async () => {
@@ -132,8 +97,8 @@ export default function App() {
         setRegion({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
-          latitudeDelta: 0.005,
-          longitudeDelta: 0.005,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
         });
       } catch (error) {
         setLocationErrorMsg(`Failed to obtain location, ${error}`);
@@ -183,13 +148,6 @@ export default function App() {
   }, [routeErrorMsg]);
 
   useEffect(() => {
-    //to change when the destination state changes due to search bar having user input
-    if (destination.address !== "DEFAULT") {
-      setisResultAttained(true);
-    }
-  }, [destination]);
-
-  useEffect(() => {
     //function that is executed when destination is changed (a new search result is attained)
     if (isNotInitialExec.current && destination !== DEFAULTDESTINATIONLatLng) {
       console.log("new destination: ", destination);
@@ -222,10 +180,8 @@ export default function App() {
         address: data.description,
         placeId: data.place_id,
       });
-    } else {
-      return undefined;
     }
-  }
+  };
 
   async function getLatLngFromId(placeId: string) {
     //reverses geocoding
@@ -272,53 +228,38 @@ export default function App() {
               headers: {
               "Content-Type": "application/json",
               Authorization: oneMapsAPIToken,
-              //or use this for authorization when building Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN
             },
           }
         );
-        console.log("response data fetchRoutesFromServer", response.data);
         return response.data;
       } catch (error) {
-        setRouteErrorMsg("Server issues, please try again later.");
+        setRouteErrorMsg("Server issues, please try again later. SERVER ERROR");
         console.error(
-          "Route could not be found. Please try again later: ",
-          error
+          "Route could not be found. Please try again later: ",error
         );
         throw new Error("Route could not be found. Please try again later");
       }
     } else {
-      setRouteErrorMsg("Server issues, please try again later.");
+      setRouteErrorMsg("Server issues, please try again later. API TOKEN ERROR");
       console.error("api token for OneMap not declared. Check server settings");
       throw new Error("API token could not be found. Please try again");
     }
   }
-
 
   async function fetchBestRoute(
     originCoords: LatLng,
     destinationCoords: LatLng
   ) {
     //fetches best route between two points, can pass a check to see if
-    // const {data, error, isLoading} = useQuery({queryKey:['routeData', originCoords, destinationCoords], queryFn:() => fetchRoutesFromServer(origin, destination)});
-    // if (isLoading) {
-    // console.log("loading...");
-    // };
-    // if (error) {
-    // console.error("Couldn't fetch best route from server");
-    // } else if (data) {
-    // setbaseResultsCardData(data);
-    // }
-    //issue: Timing issue +
-    try {
+      setIsLoading(true);
       const result = await fetchRoutesFromServer(
         originCoords,
         destinationCoords
       );
       console.log("finally", result);
-      setbaseResultsCardData(result);
-      console.log("data: ", baseResultsCardData);
       console.log('Current path:', segments.join('/'));
-      router.push({
+      setIsLoading(false);
+      router.replace({
         pathname: "../routefindingScreens/ResultsScreen",
         params: {
           origin: JSON.stringify(originCoords),
@@ -326,17 +267,19 @@ export default function App() {
           baseResultsData: JSON.stringify(result),
         },
       });
-    } catch (error) {
-      console.error("parsing error: ", error);
-      setRouteErrorMsg("service not available, please try again");
-    }
-  }
+    };
+
+  useImperativeHandle(ref, () => ({
+    fetchRoutesFromServer, fetchBestRoute, getDestinationResult, getLatLngFromId, setDestination
+  }));
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <MapView style={styles.map} provider={PROVIDER_GOOGLE} region={region}>
+        <MapView style={styles.map} provider={PROVIDER_GOOGLE} region={region} testID="current-location-map">
           {currentLocation && (
             <Marker
+              testID="current-location-marker"
               coordinate={{
                 latitude: currentLocation.latitude,
                 longitude: currentLocation.longitude,
@@ -350,13 +293,16 @@ export default function App() {
             <RouteSearchBar
               location={currentLocation}
               getDestinationResult={getDestinationResult}
+              testID="dest-search-bar"
             />
           </View>
         </View>
       </View>
     </GestureHandlerRootView>
   );
-}
+});
+
+
 
 //stylesheet
 const styles = StyleSheet.create({
@@ -376,3 +322,4 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0)",
   },
 });
+export default App;
