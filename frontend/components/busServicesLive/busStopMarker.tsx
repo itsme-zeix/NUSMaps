@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "column",
-    opacity: 0.75,
+    opacity: 0.85,
   },
   iconContainer: {
     position: "relative",
@@ -52,9 +52,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "#848484",
-    shadowColor: "#212121",
-    shadowOpacity: 0.3,
-    shadowOffset: { width: 0, height: 2 },
   },
   text: {
     fontSize: 10,
