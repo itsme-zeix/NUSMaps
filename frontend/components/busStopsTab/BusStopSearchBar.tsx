@@ -2,9 +2,16 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { StackNavigationProp } from "@react-navigation/stack";
+
+type BusStopSearchStackParamList = {
+  BusStopSearchScreen: { initialQuery: string };
+};
+
+type BusStopSearchScreenNavigationProp = StackNavigationProp<BusStopSearchStackParamList, "BusStopSearchScreen">;
 
 export default function BusStopSearchBar() {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<BusStopSearchScreenNavigationProp>();
 
   const handlePress = () => {
     navigation.navigate("BusStopSearchScreen", { initialQuery: "" });

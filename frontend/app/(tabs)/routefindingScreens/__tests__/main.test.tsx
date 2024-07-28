@@ -5,9 +5,8 @@ import Toast from "react-native-toast-message";
 import App from "../Main"; // Ensure this is the correct path to your component
 import axios from "axios";
 import { BackHandler } from "react-native";
-import { LatLng } from "react-native-maps";
-import { useSegments } from "expo-router";
-import { GooglePlaceData, StructuredFormatting } from "react-native-google-places-autocomplete";
+import { LatLng } from "react-native-maps"
+import { GooglePlaceData } from "react-native-google-places-autocomplete";
 
 jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn(),
@@ -97,8 +96,8 @@ describe("Straight forward toasts/error handling", () => {
     expect(map.props.region).toEqual({
       latitude: TESTLOCATION.latitude,
       longitude: TESTLOCATION.longitude,
-      latitudeDelta: 0.05,
-      longitudeDelta: 0.05,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
     });
   }, 10000);
 

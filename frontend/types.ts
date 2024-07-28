@@ -54,4 +54,12 @@ export interface SingleResultCardData {
 export interface RouteSearchBarInput {
     location: Location.LocationObjectCoords;
 };
+export interface busStopType extends LatLng{
+  name:string;
+};
 
+export interface activeBusType extends LatLng {
+  direction:number,
+  crowdLevel:string,
+  licensePlate:string
+};

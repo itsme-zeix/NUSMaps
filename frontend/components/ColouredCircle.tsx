@@ -1,6 +1,6 @@
 import { View } from "react-native";
 
-const ColouredCircle = ({ color, size = 50 }: { color: string; size?: number }) => {
+const ColouredCircle = ({ color, size = 15 }: { color: string; size?: number }) => {
   return (
     <View
       style={{
