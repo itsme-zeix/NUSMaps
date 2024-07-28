@@ -15,6 +15,27 @@ jest.mock('@react-navigation/native', () => {
     }),
   };
 });
+jest.mock('@expo/vector-icons/MaterialIcons', () => {
+  const React = require('react');
+  const { Text } = require('react-native');
+  return ({ name, ...props }) => {
+    return <Text {...props}>{name}</Text>;
+  };
+});
+
+jest.mock('@expo/vector-icons/Ionicons', () => {
+  const React = require('react');
+  const { Text } = require('react-native');
+  return ({ name, ...props }) => {
+    return <Text {...props}>{name}</Text>;
+  };
+});
+jest.mock('react-native-vector-icons/Ionicons', () => {
+  const React = require('react');
+  const { Text } = require('react-native');
+  return ({ name, ...props }) => <Text {...props}>{name}</Text>;
+});
+
 
 describe('BusStopSearchBar', () => {
   it('renders correctly', () => {

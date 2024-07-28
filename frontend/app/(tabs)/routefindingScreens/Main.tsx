@@ -16,7 +16,7 @@ import Constants from "expo-constants";
 import axios from 'axios';
 import { baseResultsCardType, destinationType } from "@/types";
 
-//constants and variablesEXPO_PUBLIC_MAPS_API_KEY
+//constants and variables
 const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY == undefined ? Constants.expoConfig.extra.EXPO_PUBLIC_GOOGLEMAPS_API_KEY : process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY ;
 const oneMapsAPIToken = process.env.EXPO_PUBLIC_ONEMAPAPITOKEN == undefined ?  Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN : process.env.EXPO_PUBLIC_ONEMAPAPITOKEN;
 const App = forwardRef((props, ref) => {
@@ -97,8 +97,8 @@ const App = forwardRef((props, ref) => {
         setRegion({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
+          latitudeDelta: 0.005,
+          longitudeDelta: 0.005,
         });
       } catch (error) {
         setLocationErrorMsg(`Failed to obtain location, ${error}`);

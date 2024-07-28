@@ -97,8 +97,8 @@ describe("Straight forward toasts/error handling", () => {
     expect(map.props.region).toEqual({
       latitude: TESTLOCATION.latitude,
       longitude: TESTLOCATION.longitude,
-      latitudeDelta: 0.05,
-      longitudeDelta: 0.05,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
     });
   }, 10000);
 

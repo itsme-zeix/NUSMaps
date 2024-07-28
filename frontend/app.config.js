@@ -43,7 +43,7 @@ export default {
         "package": "com.NUSMaps",
         "config": {
           "googleMaps": {
-            "apiKey": process.env.EXPO_PUBLIC_MAPS_API_KEY,
+            "apiKey": process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY,
           }
         }
       },
@@ -83,7 +83,7 @@ export default {
         "eas": {
           "projectId": "7c6d0b5b-f9eb-43e5-9bf5-ef7349af0fe3"
         },
-        EXPO_PUBLIC_MAPS_API_KEY: process.env.EXPO_PUBLIC_MAPS_API_KEY,
+        EXPO_PUBLIC_GOOGLEMAPS_API_KEY: process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY,
         EXPO_PUBLIC_ONEMAPAPITOKEN: process.env.EXPO_PUBLIC_ONEMAPAPITOKEN,
     }
   }
