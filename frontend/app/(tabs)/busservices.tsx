@@ -715,7 +715,7 @@ export default function NUSBusServices() {
     <View style={{ flex: 1 }}>
       <View style={styles.mapContainer}>
         <MapView style={styles.map} provider={PROVIDER_GOOGLE} region={routeSelected == "BTC" ? NUS_BTC : routeSelected == "L" ? BUKITTIMAHCAMPUS : NUS} rotateEnabled={false}>
-          <Polyline coordinates={routeDataShown.checkPointCoordsArray} strokeColor="#27f" strokeWidth={2} tappable={false} />
+          <Polyline coordinates={routeDataShown.checkPointCoordsArray} strokeColor="#27f" strokeWidth={3} tappable={false} />
           {routeDataShown.busStopsCoordsArray.map((busStopMarker, index) => (
             <Marker
               key={index}
