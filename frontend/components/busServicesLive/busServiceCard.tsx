@@ -11,8 +11,6 @@ interface ServiceCardProps {
 }
 
 export const ServiceCard: React.FC<ServiceCardProps> = ({ busService, busStops, displayedStops }) => {
-  // it will pass a json with the service and the bus stop
-  // add pressable
   let stops = displayedStops.flatMap((stop: string) => [stop, "rightArrow"]);
   stops.pop(); //removes the last arrow
   return (
@@ -20,14 +18,14 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ busService, busStops, 
       <View style={styles.cardContentContainer}>
         <ColouredCircle color={mapBusServiceColour(busService)} size={15} />
         <View style={styles.textContainer}>
-          <Text style={{ fontFamily: "Inter-Bold" }}>{busService}</Text>
+          <Text style={styles.busServiceText}>{busService}</Text>
           <View style={styles.busStopArrowContainer}>
             {stops.map((stop, index) => {
               if (stop == "rightArrow") {
                 return <MaterialCommunityIcons key={index} name="chevron-right" size={20} color="black" />;
               } else {
                 return (
-                  <Text style={{ fontFamily: "Inter" }} key={index}>
+                  <Text style={styles.stopText} key={index}>
                     {stop}
                   </Text>
                 );
@@ -58,15 +56,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     paddingVertical: 8,
   },
   textContainer: {
-    marginHorizontal: 8,
+    marginHorizontal: 12,
+    flex: 1, // Allow the text container to take up remaining space
   },
   busStopArrowContainer: {
     flexDirection: "row",
     alignItems: "center",
     flexWrap: "wrap",
   },
+  busServiceText: {
+    fontFamily: "Inter-Bold",
+    marginBottom: 4, // Add some space between bus service text and stops
+  },
+  stopText: {
+    fontFamily: "Inter",
+  },
 });
+
+export default ServiceCard;
