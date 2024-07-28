@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Marker } from 'react-native-maps';
+import { Marker, LatLng } from 'react-native-maps';
 import { FontAwesome5 } from '@expo/vector-icons';
 
 const determineBG = (crowdLevel: string) => {
@@ -15,16 +15,22 @@ const determineBG = (crowdLevel: string) => {
     }
 };
 
-const ActiveBusMarker = ({ coordinate, vehicleLicensePlate, crowdLevel }) => {
+type ActiveBusMarkerProps = {
+  coordinate: LatLng;
+  vehicleLicensePlate: string;
+  crowdLevel: string;
+};
+
+const ActiveBusMarker: React.FC<ActiveBusMarkerProps> = ({ coordinate, vehicleLicensePlate, crowdLevel }) => {
   return (
     <Marker coordinate={coordinate}>
-    <View style={styles.stopContainer}>
-      <View style = {[{backgroundColor:determineBG(crowdLevel)}, styles.crowdLevelRectangle]}/>
-      <View style={styles.textContainer}>
-        <Text style={styles.markerText}>{vehicleLicensePlate}</Text>
+      <View style={styles.stopContainer}>
+        <View style={[{ backgroundColor: determineBG(crowdLevel) }, styles.crowdLevelRectangle]} />
+        <View style={styles.textContainer}>
+          <Text style={styles.markerText}>{vehicleLicensePlate}</Text>
+        </View>
       </View>
-    </View>
-      <FontAwesome5 name="bus" size={16} color="orange" style={styles.iconStyle}/>
+      <FontAwesome5 name="bus" size={16} color="orange" style={styles.iconStyle} />
     </Marker>
   );
 };
