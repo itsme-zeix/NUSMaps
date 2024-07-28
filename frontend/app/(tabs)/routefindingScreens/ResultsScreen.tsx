@@ -1,4 +1,4 @@
-import React from "react";
+import React, {forwardRef, useImperativeHandle } from "react";
 import { StyleSheet, ScrollView, Text, View, Image, StatusBar, Platform, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
@@ -28,12 +28,14 @@ const iconList: IconCatalog = {
 };
 
 //constant variables
-// const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY;
 //USE THIS FOR PRODUCTION BUILDS
-const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY || Constants.expoConfig.extra.EXPO_PUBLIC_MAPS_API_KEY;
+const apiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY || Constants.expoConfig.extra.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
 
 //result card(singular card)
-const ResultCard: React.FC<SingleResultCardData & {testId:string}> = ({ origin, destination, resultData, testId }) => {
+export const ResultCard = forwardRef((
+  { origin, destination, resultData, testID }: SingleResultCardData & { testID: string },
+  ref // Add ref parameter
+) => {
   //Put in a pressable that when expanded, will
   // console.log("destination received in resultcard", destination);
   const types = resultData.types.flatMap((icon) => [icon, "RCHEVRON"]);
@@ -50,8 +52,11 @@ const ResultCard: React.FC<SingleResultCardData & {testId:string}> = ({ origin, 
       },
     });
   };
+  useImperativeHandle(ref, () => ({
+    nextScreenFunc,
+  }));
   return (
-    <Pressable style={[{ backgroundColor: "white" }, styles.resultCard]} onPress={nextScreenFunc} testID={testId}>
+    <Pressable style={[{ backgroundColor: "white" }, styles.resultCard]} onPress={nextScreenFunc} testID={testID}>
       <View style={{ flexDirection: "column" }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <View style={styles.iconsContainer}>
@@ -60,26 +65,26 @@ const ResultCard: React.FC<SingleResultCardData & {testId:string}> = ({ origin, 
                 const ptLeg = resultData.journeyLegs[Math.floor(index / 2)] as PublicTransportLeg;
                 return (
                   <View key={`bus-${index}`} style={styles.iconWrapper}>
-                    <BusNumberCard busNumber={ptLeg.serviceType} busType={ptLeg.type} />
+                    <BusNumberCard busNumber={ptLeg.serviceType} busType={ptLeg.type} testID= {`${testID}-BusNumberCard-${index}`}/>
                   </View>
-                );
+                ) 
               } else if (icon === "SUBWAY") {
                 const ptLeg = resultData.journeyLegs[Math.floor(index / 2)] as PublicTransportLeg;
                 return (
                   <View key={`subway-${index}`} style={styles.iconWrapper}>
-                    <SubwayTypeCard serviceType={ptLeg.serviceType} />
+                    <SubwayTypeCard serviceType={ptLeg.serviceType} testID= {`${testID}-SubwayTypeCard-${index}`} />
                   </View>
                 );
               } else if (icon === "TRAM") {
                 const ptLeg = resultData.journeyLegs[Math.floor(index / 2)] as PublicTransportLeg;
                 return (
                   <View key={`tram-${index}`} style={styles.iconWrapper}>
-                    <TramTypeCard serviceType={ptLeg.serviceType} />
+                    <TramTypeCard serviceType={ptLeg.serviceType} testID= {`${testID}-TramTypeCard-${index}`}/>
                   </View>
                 );
               } else {
                 return (
-                  <View key={`icon-${index}`} style={styles.iconWrapper}>
+                  <View key={`icon-${index}`} style={styles.iconWrapper} testID= {`${testID}-WalkOrChevronCard-${index}`}>
                     <MaterialIcons
                       key={`icon-${index}`}
                       size={22}
@@ -102,13 +107,9 @@ const ResultCard: React.FC<SingleResultCardData & {testId:string}> = ({ origin, 
       </View>
     </Pressable>
   );
-};
+});
 
-//   ResultObject & {
-//     isVisible: boolean;
-//     setIsVisible: (isVisible: boolean) => void;
-//   }
-// result screen
+
 const _parseParams = (result: string | string[] | undefined) => {
   return typeof result === "string" ? JSON.parse(result) : undefined;
 };
@@ -191,7 +192,7 @@ const RefactoredResultsScreen: React.FC = () => {
           <ScrollView>
             <View style={styles.resultContainer}>
               {typeCastedBaseResultsCard.map((data, index) => (
-                <ResultCard key={`result-${index}`} origin={parsedOrigin} resultData={data} destination={parsedDestination} testId={`result-card-${index}`}/>
+                <ResultCard key={`result-${index}`} origin={parsedOrigin} resultData={data} destination={parsedDestination} testID={`result-card-${index}`}/>
               ))}
             </View>
           </ScrollView>

@@ -299,9 +299,7 @@ const WalkLegPart: React.FC<WalkLegProps> = ({ walkLeg, legHeight }) => {
   );
 };
 
-const DetailedRouteScreen: React.FC<
-  baseResultsCardType & destinationType & LatLng
-> = () => {
+const DetailedRouteScreen: React.FC = () => {
   //add a base current location and end flag
   const params = useLocalSearchParams();
   // console.log("destination type:", params.destination);
@@ -354,7 +352,8 @@ const DetailedRouteScreen: React.FC<
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <View style={stylesheet.SafeAreaView}>
+    <View style={stylesheet.SafeAreaView} testID="test">
+
       <MapView
         style={stylesheet.MapView}
         provider={PROVIDER_GOOGLE}
@@ -365,13 +364,15 @@ const DetailedRouteScreen: React.FC<
           longitudeDelta:
             Math.abs(origin.longitude - destination.longitude) * 2,
         }}
-      >
+        testID="current-location-map"
+      > 
         <Marker
           title="Origin"
           coordinate={{
             latitude: origin.latitude,
             longitude: origin.longitude,
           }}
+          testID="current-location-marker"
         />
         {stopsCoordsArray.map((stop, index) => {
           if (stop.name != "Origin" && stop.name != "Destination") {
@@ -401,10 +402,11 @@ const DetailedRouteScreen: React.FC<
             strokeWidth={4}
             strokeColor="purple"
             zIndex={1}
+            testID="current-location-polyline"
           />
         )}
       </MapView>
-      <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
+      <ScrollView style={{ flex: 1, backgroundColor: "white" }} testID="ok">
         <View style={{ marginVertical: 15, marginHorizontal: 20 }}>
           <View style={{ flexDirection: "row" }}>
             <OriginRectangle />

@@ -27,12 +27,12 @@ const determineBG = (input: string) => {
     }
 };
 
-export const SubwayTypeCard: React.FC<MRTServiceType> = ({ serviceType }) => {
+export const SubwayTypeCard: React.FC<MRTServiceType & {testID:string}> = ({ serviceType, testID }) => {
     const bgColor = determineBG(serviceType);
     const fontColor = determineFontColor(bgColor);
 
     return (
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }} testID={testID}>
             <MaterialIcons name="train" size={26} color="#434343" style={{ marginRight: 3 }} />
             <View style={[styles.MRTNumberContainer, { backgroundColor: bgColor }]}>
                 <Text style={[styles.MRTNumber, { color: fontColor }]}>{serviceType}</Text>

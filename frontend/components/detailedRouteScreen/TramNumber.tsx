@@ -9,9 +9,9 @@ interface TramServiceType {
 
 // const TRAMICON = require("@/assets/images/tram-icon.png");
 
-export const TramTypeCard: React.FC<TramServiceType> = ({serviceType}) => {
+export const TramTypeCard: React.FC<TramServiceType & {testID:string}> = ({serviceType, testID}) => {
     return (
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }} testID={testID}>
             <MaterialIcons name="tram" size={20} color="#434343" style={{ marginRight: 3 }} />
             <View style = {styles.LRTNumberContainer}>
                 <Text style = {styles.LRTNumber}>{serviceType}</Text>
