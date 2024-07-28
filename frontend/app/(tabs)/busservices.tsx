@@ -7,7 +7,6 @@ import MapView, {
   Polyline,
 } from "react-native-maps";
 import axios from "axios";
-// import BusStopFilterDropDownMenu from "@/components/busServicesLive/busStopsOptions";
 import { ServiceCard } from "@/components/busServicesLive/busServiceCard";
 import CustomMarker from "@/components/busServicesLive/busStopMarker";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
