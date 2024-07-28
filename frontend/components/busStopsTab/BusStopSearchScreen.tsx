@@ -1,12 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { SafeAreaView, FlatList, View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 import { SearchBar, Icon } from "@rneui/base";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { NUSTag } from "@/components/busStopsTab/NUSTag";
+import { RouteProp } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
 
-const ITEMS_PER_PAGE = 20; // Number of items to load per page
+type RootStackParamList = {
+  BusStopSearch: { initialQuery: string };
+};
+type BusStopSearchRouteProp = RouteProp<RootStackParamList, "BusStopSearch">;
+type BusStopSearchNavigationProp = StackNavigationProp<RootStackParamList, "BusStopSearch">;
+
+interface BusStopItem {
+  busStopId: string;
+  busStopName: string;
+  isFavourited: boolean;
+}
 
 const mapNUSCodeNameToFullName = [
   { value: "All", label: "All" },
@@ -45,16 +57,15 @@ const mapNUSCodeNameToFullName = [
   { value: "RAFFLES", label: "Raffles Hall" },
 ];
 
-const BusStopSearchScreen = () => {
-  const route = useRoute();
-  const navigation = useNavigation();
+const BusStopSearchScreen: React.FC = () => {
+  const route = useRoute<BusStopSearchRouteProp>();
+  const navigation = useNavigation<BusStopSearchNavigationProp>();
   const { initialQuery } = route.params;
-  const [search, setSearch] = useState(initialQuery);
-  const [data, setData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
-  const [page, setPage] = useState(1); // Current page
-  const [loading, setLoading] = useState(false);
-  const [searchBarRef, setSearchBarRef] = useState(null);
+  const [search, setSearch] = useState<string>(initialQuery);
+  const [data, setData] = useState<BusStopItem[]>([]);
+  const [filteredData, setFilteredData] = useState<BusStopItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [searchBarRef, setSearchBarRef] = useState<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,9 +73,11 @@ const BusStopSearchScreen = () => {
         const storedData = await AsyncStorage.getItem("busStops");
         let parsedData = storedData ? JSON.parse(storedData) : [];
         setData(parsedData);
-        setFilteredData(parsedData.slice(0, ITEMS_PER_PAGE)); // Load the first page
+        setFilteredData(parsedData);
       } catch (error) {
         console.error("Error fetching data from AsyncStorage:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -75,7 +88,7 @@ const BusStopSearchScreen = () => {
   }, [initialQuery]);
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       if (searchBarRef) {
         searchBarRef.focus();
       }
@@ -84,41 +97,33 @@ const BusStopSearchScreen = () => {
 
   const updateSearch = (search: string) => {
     setSearch(search);
-    const newData = data.filter((item) => item.busStopName.toLowerCase().includes(search.toLowerCase()));
-    setFilteredData(newData.slice(0, ITEMS_PER_PAGE)); // Reset to the first page of results
-    setPage(1); // Reset the page to 1
+    const newData = data.filter((item) => {
+      const busStopName = item.busStopName ? item.busStopName.toLowerCase() : "";
+      const busStopId = item.busStopId ? item.busStopId.toString() : "";
+      return busStopName.includes(search.toLowerCase()) || busStopId.includes(search.toLowerCase());
+    });
+    setFilteredData(newData);
   };
 
-  const loadMoreData = () => {
-    if (loading) return;
-
-    setLoading(true);
-    const nextPage = page + 1;
-    const start = nextPage * ITEMS_PER_PAGE;
-    const end = start + ITEMS_PER_PAGE;
-    const moreData = data.slice(start, end);
-
-    if (moreData.length > 0) {
-      setFilteredData([...filteredData, ...moreData]);
-      setPage(nextPage);
-    }
-    setLoading(false);
-  };
-
-  const toggleFavourite = async (busStopId) => {
-    const updatedData = data.map((item) => (item.busStopId === busStopId ? { ...item, isFavourited: !item.isFavourited } : item));
+  const toggleFavourite = async (busStopId: string) => {
+    const updatedData = data.map((item) =>
+      item.busStopId === busStopId ? { ...item, isFavourited: !item.isFavourited } : item
+    );
 
     setData(updatedData);
 
-    const newFilteredData = updatedData.filter((item) => item.busStopName.toLowerCase().includes(search.toLowerCase()));
+    const newFilteredData = updatedData.filter((item) => {
+      const busStopName = item.busStopName ? item.busStopName.toLowerCase() : "";
+      const busStopId = item.busStopId ? item.busStopId.toString() : "";
+      return busStopName.includes(search.toLowerCase()) || busStopId.includes(search.toLowerCase());
+    });
 
-    setFilteredData(newFilteredData.slice(0, page * ITEMS_PER_PAGE));
+    setFilteredData(newFilteredData);
 
-    // Update AsyncStorage
     await AsyncStorage.setItem("busStops", JSON.stringify(updatedData));
   };
 
-  const mapBusStopNames = (busStopName) => {
+  const mapBusStopNames = (busStopName: string) => {
     if (busStopName.startsWith("NUSSTOP_")) {
       const code = busStopName.replace("NUSSTOP_", "");
       const fullNameEntry = mapNUSCodeNameToFullName.find((entry) => entry.value === code);
@@ -127,22 +132,37 @@ const BusStopSearchScreen = () => {
     return busStopName;
   };
 
-  const renderItem = ({ item }) => {
+  const renderItem = ({ item }: { item: BusStopItem }) => {
     const isNUSStop = item.busStopName.startsWith("NUSSTOP_");
     const busStopName = mapBusStopNames(item.busStopName);
 
     return (
       <View style={styles.item}>
-        <Text style={styles.busStopText}>{busStopName}</Text>
+        <Text style={styles.busStopText}>
+          {isNUSStop ? busStopName : busStopName + " " + "(" + item.busStopId + ")"}
+        </Text>
         <View style={styles.iconContainer}>
           {isNUSStop && <NUSTag />}
           <TouchableOpacity onPress={() => toggleFavourite(item.busStopId)}>
-            <Icon name={item.isFavourited ? "star" : "star-outline"} type="ionicon" color={item.isFavourited ? "#FFD700" : "#000"} style={{ marginLeft: 5 }} />
+            <Icon
+              name={item.isFavourited ? "star" : "star-outline"}
+              type="ionicon"
+              color={item.isFavourited ? "#FFD700" : "#000"}
+              style={{ marginLeft: 5 }}
+            />
           </TouchableOpacity>
         </View>
       </View>
     );
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -150,8 +170,21 @@ const BusStopSearchScreen = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
           <Text>Close</Text>
         </TouchableOpacity>
-        <SearchBar placeholder="Search" onChangeText={(text) => updateSearch(text)} value={search} platform="ios" searchIcon={<Ionicons name="search" size={20} color="gray" />} clearIcon={<Ionicons name="close-circle" size={23} color="gray" />} autoFocus={true} ref={(ref) => setSearchBarRef(ref)} />
-        <FlatList data={filteredData} keyExtractor={(item) => item.busStopId} renderItem={renderItem} onEndReached={loadMoreData} onEndReachedThreshold={0.5} ListFooterComponent={loading ? <ActivityIndicator size="large" /> : null} />
+        <SearchBar
+          placeholder="Search"
+          onChangeText={(text) => updateSearch(text)}
+          value={search}
+          platform="ios"
+          searchIcon={<Ionicons name="search" size={20} color="gray" />}
+          clearIcon={<Ionicons name="close-circle" size={23} color="gray" style={{opacity: 0}} />}
+          autoFocus={true}
+          ref={(ref: any) => setSearchBarRef(ref)}
+        />
+        <FlatList
+          data={filteredData}
+          keyExtractor={(item) => item.busStopId}
+          renderItem={renderItem}
+        />
       </View>
     </SafeAreaView>
   );
@@ -179,7 +212,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   busStopText: {
-    fontSize: 17,
+    fontSize: 16,
+    fontFamily: "Inter",
   },
 });
 
