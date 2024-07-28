@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     marginBottom: 4, // Add some space between bus service text and stops
   },
   stopText: {
-    fontFamily: "Inter",
+    fontFamily: "Inter-Regular",
   },
 });
 
