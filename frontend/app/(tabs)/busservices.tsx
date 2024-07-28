@@ -667,7 +667,6 @@ export default function NUSBusServices() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Text style={{ marginTop: 50 }}>Filter by bus service</Text>
       <View style={styles.mapContainer}>
         <MapView style={styles.map} provider={PROVIDER_GOOGLE} region={routeSelected == "BTC" ? NUS_BTC : routeSelected == "L" ? BUKITTIMAHCAMPUS : NUS} rotateEnabled={false}>
           <Polyline coordinates={routeDataShown.checkPointCoordsArray} strokeColor="#27f" strokeWidth={5} tappable={false} />
