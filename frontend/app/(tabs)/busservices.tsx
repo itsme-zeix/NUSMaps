@@ -1,11 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { StyleSheet, View, Text, Pressable, ScrollView } from "react-native";
-import MapView, { Marker, LatLng, PROVIDER_GOOGLE, Polyline } from "react-native-maps";
+import React, {useEffect, useState, forwardRef, useImperativeHandle} from "react";
+import { StyleSheet, View, Text, Pressable} from "react-native";
+import MapView, {
+  Marker,
+  LatLng,
+  PROVIDER_GOOGLE,
+  Polyline,
+} from "react-native-maps";
 import axios from "axios";
 import { ServiceCard } from "@/components/busServicesLive/busServiceCard";
 import CustomMarker from "@/components/busServicesLive/busStopMarker";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import ActiveBusMarker from "@/components/busServicesLive/activeBusMarker";
+import {busStopType, activeBusType} from "@/types";
 const polyline = require("@mapbox/polyline");
 
 // Types
@@ -203,22 +209,13 @@ function _convertPolylineToCoordsArray(polylineString: string): number[][] {
   return polyline.decode(polylineString);
 }
 
-interface busStopType extends LatLng {
-  name: string;
-}
-
-interface activeBusType extends LatLng {
-  direction: number;
-  crowdLevel: string;
-  licensePlate: string;
-}
 interface routeDataType {
-  checkPointCoordsArray: LatLng[];
-  busStopsCoordsArray: busStopType[];
-  activeBusesArray: activeBusType[]; //TENTATIVE TO CHANGE, update to interface[] type
-}
+  checkPointPolylineString: string,
+  busStopsCoordsArray: busStopType[],
+  activeBusesArray: activeBusType[] //TENTATIVE TO CHANGE, update to interface[] type
+};
 
-export default function NUSBusServices() {
+const NUSBusServices = forwardRef((props, ref) => {
   //make it a live query, when u click on the route
   const [routeDataShown, setRouteDataShown] = useState<RouteDataShown>({
     checkPointCoordsArray: [],
@@ -711,12 +708,51 @@ export default function NUSBusServices() {
     ],
   };
 
+  useImperativeHandle(ref, () => ({
+    fetchBusRoute
+  }));
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <View style={styles.mapContainer}>
-        <MapView style={styles.map} provider={PROVIDER_GOOGLE} region={routeSelected == "BTC" ? NUS_BTC : routeSelected == "L" ? BUKITTIMAHCAMPUS : NUS} rotateEnabled={false}>
-          <Polyline coordinates={routeDataShown.checkPointCoordsArray} strokeColor="#27f" strokeWidth={5} tappable={false} />
+        <MapView
+          style={styles.map}
+          provider={PROVIDER_GOOGLE}
+          region={
+            routeSelected == "BTC"
+              ? NUS_BTC
+              : routeSelected == "L"
+                ? BUKITTIMAHCAMPUS
+                : NUS
+          }
+          rotateEnabled={false}
+          testID="current-location-map"
+        >
+          {routeDataShown.checkPointCoordsArray && (
+            <Polyline
+            coordinates={routeDataShown.checkPointCoordsArray}
+            strokeColor="#27f"
+            strokeWidth={5}
+            tappable={false}
+            testID="current-location-polyline"
+            />
+          )}
           {routeDataShown.busStopsCoordsArray.map((busStopMarker, index) => (
+            <Marker key={index} coordinate={{
+              latitude: busStopMarker.latitude,
+              longitude: busStopMarker.longitude
+            }} testID={`marker-${index}`}>
+              <CustomMarker stopName={busStopMarker.name} />
+            </Marker>
+          ))}
+          {activeBusData.length > 0 && activeBusData.map((activeBus, index) => (
+            <ActiveBusMarker key={index} coordinate={{
+              latitude: activeBus.latitude,
+              longitude: activeBus.longitude
+            }}
+              vehicleLicensePlate={activeBus.licensePlate}
+              crowdLevel={activeBus.crowdLevel} />
+          ))}
+          {MARKERDIRECTIONS[routeSelected] != undefined && MARKERDIRECTIONS[routeSelected].map((directionMarker, index) => (    
             <Marker
               key={index}
               coordinate={{
@@ -763,8 +799,8 @@ export default function NUSBusServices() {
       </ScrollView>
     </View>
   );
-}
-
+  
+});
 const styles = StyleSheet.create({
   mapContainer: {
     width: "100%",
@@ -775,3 +811,4 @@ const styles = StyleSheet.create({
     height: "100%",
   },
 });
+export default NUSBusServices;
