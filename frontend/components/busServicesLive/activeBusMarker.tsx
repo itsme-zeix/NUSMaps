@@ -77,13 +77,15 @@ const styles = StyleSheet.create({
   },
   busIconContainer: {
     backgroundColor: "#EF7C01",
-    height: 20,
-    width: 20,
+    height: 25,
+    width: 25,
     borderRadius: 3,
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     marginTop: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#828282",
   },
   iconStyle: {
     alignSelf: "center",
