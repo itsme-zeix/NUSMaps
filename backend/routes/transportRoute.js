@@ -439,7 +439,7 @@ router.post("/", async (req, res) => {
       const finalCombinedResult = await _processData(addedLeg);
       return res.json(finalCombinedResult);
     }
-    return res.json(result);
+    return res.json(await result);
   } catch (err) {
     console.error("Error:", err);
     return res.status(401).send("Error retrieving route.");
