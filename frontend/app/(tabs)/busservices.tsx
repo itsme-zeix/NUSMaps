@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, Text, Pressable } from "react-native";
+import { StyleSheet, View, Text, Pressable, ScrollView } from "react-native";
 import MapView, { Marker, LatLng, PROVIDER_GOOGLE, Polyline } from "react-native-maps";
 import axios from "axios";
 import { ServiceCard } from "@/components/busServicesLive/busServiceCard";
@@ -754,11 +754,13 @@ export default function NUSBusServices() {
             ))}
         </MapView>
       </View>
-      {NUS_BUS_SERVICES.map((busService, index) => (
-        <Pressable key={index} onPress={() => setRouteSelected(busService)}>
-          <ServiceCard busService={busService} busStops={fetchDetailedStopNames(busService)} displayedStops={fetchBaseCardData(busService)} />
-        </Pressable>
-      ))}
+      <ScrollView>
+        {NUS_BUS_SERVICES.map((busService, index) => (
+          <Pressable key={index} onPress={() => setRouteSelected(busService)}>
+            <ServiceCard busService={busService} busStops={fetchDetailedStopNames(busService)} displayedStops={fetchBaseCardData(busService)} />
+          </Pressable>
+        ))}
+      </ScrollView>
     </View>
   );
 }
