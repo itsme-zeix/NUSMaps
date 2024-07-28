@@ -11,7 +11,7 @@ import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { getFavouritedBusStops } from "@/utils/storage";
 import BusStopSearchBar from "@/components/busStopsTab/BusStopSearchBar";
 import BusStopSearchScreen from "@/components/busStopsTab/BusStopSearchScreen";
-import ColouredCircle from "@/components/busStopsTab/ColouredCircle";
+import ColouredCircle from "@/components/ColouredCircle";
 import CollapsibleContainer from "@/components/busStopsTab/CollapsibleContainer";
 import useUserLocation from "@/hooks/useUserLocation";
 import { NUSTag } from "@/components/busStopsTab/NUSTag";
