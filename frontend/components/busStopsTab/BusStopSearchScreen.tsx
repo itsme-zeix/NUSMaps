@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   },
   busStopText: {
     fontSize: 16,
-    fontFamily: "Inter",
+    fontFamily: "Inter-Regular",
   },
 });
 
