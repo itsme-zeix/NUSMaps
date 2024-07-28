@@ -15,6 +15,7 @@ import ColouredCircle from "@/components/ColouredCircle";
 import CollapsibleContainer from "@/components/busStopsTab/CollapsibleContainer";
 import useUserLocation from "@/hooks/useUserLocation";
 import { NUSTag } from "@/components/busStopsTab/NUSTag";
+import mapBusServiceColour from "@/utils/mapBusServiceColor";
 
 // Stack navigator to redirect from bus stop screen to bus stop search screen (vice-versa)
 const Stack = createStackNavigator();
@@ -66,30 +67,6 @@ const ExpandableBusStop = ({ item }: { item: BusStop }) => {
 
   const onItemPress = () => {
     setExpanded(!expanded);
-  };
-
-  // Function to determine the color based on bus stop name
-  function mapBusServiceColour(busService: string) {
-    switch (busService) {
-      case "A1":
-        return "#FF0000"; // Red
-      case "A2":
-        return "#E4CE0C"; // Yellow
-      case "D1":
-        return "#CD82E2"; // Purple
-      case "D2":
-        return "#6F1B6F"; // Dark Purple
-      case "K":
-        return "#345A9B"; // Blue
-      case "E":
-        return "#00B050"; // Green
-      case "BTC":
-        return "#EE8136"; // Orange
-      case "L":
-        return "#BFBFBF"; // Gray
-      default:
-        return "green"; // Default color for other bus stops
-    }
   }
 
   return (
