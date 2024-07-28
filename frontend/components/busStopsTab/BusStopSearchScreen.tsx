@@ -95,12 +95,22 @@ const BusStopSearchScreen: React.FC = () => {
     }, [searchBarRef])
   );
 
+  const mapBusStopNames = (busStopName: string) => {
+    if (busStopName.startsWith("NUSSTOP_")) {
+      const code = busStopName.replace("NUSSTOP_", "");
+      const fullNameEntry = mapNUSCodeNameToFullName.find((entry) => entry.value === code);
+      return fullNameEntry ? fullNameEntry.label : busStopName;
+    }
+    return busStopName;
+  };
+
   const updateSearch = (search: string) => {
     setSearch(search);
     const newData = data.filter((item) => {
       const busStopName = item.busStopName ? item.busStopName.toLowerCase() : "";
+      const fullBusStopName = busStopName.startsWith("nusstop_") ? mapBusStopNames(item.busStopName).toLowerCase() : "";
       const busStopId = item.busStopId ? item.busStopId.toString() : "";
-      return busStopName.includes(search.toLowerCase()) || busStopId.includes(search.toLowerCase());
+      return busStopName.includes(search.toLowerCase()) || busStopId.includes(search.toLowerCase()) || fullBusStopName.includes(search.toLowerCase());
     });
     setFilteredData(newData);
   };
@@ -114,22 +124,14 @@ const BusStopSearchScreen: React.FC = () => {
 
     const newFilteredData = updatedData.filter((item) => {
       const busStopName = item.busStopName ? item.busStopName.toLowerCase() : "";
+      const fullBusStopName = busStopName.startsWith("nusstop_") ? mapBusStopNames(item.busStopName).toLowerCase() : "";
       const busStopId = item.busStopId ? item.busStopId.toString() : "";
-      return busStopName.includes(search.toLowerCase()) || busStopId.includes(search.toLowerCase());
+      return busStopName.includes(search.toLowerCase()) || busStopId.includes(search.toLowerCase()) || fullBusStopName.includes(search.toLowerCase());
     });
 
     setFilteredData(newFilteredData);
 
     await AsyncStorage.setItem("busStops", JSON.stringify(updatedData));
-  };
-
-  const mapBusStopNames = (busStopName: string) => {
-    if (busStopName.startsWith("NUSSTOP_")) {
-      const code = busStopName.replace("NUSSTOP_", "");
-      const fullNameEntry = mapNUSCodeNameToFullName.find((entry) => entry.value === code);
-      return fullNameEntry ? fullNameEntry.label : busStopName;
-    }
-    return busStopName;
   };
 
   const renderItem = ({ item }: { item: BusStopItem }) => {
