@@ -1,8 +1,6 @@
 import React from 'react';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react-native';
 import DetailedRouteScreen from '../DetailedRouteScreen';
-import { Polyline } from 'react-native-maps';
-
 
 //drs accepts baseResultsCardData (one element), destination, originCoords
 const mockRouter = {
@@ -13,7 +11,7 @@ const mockRouter = {
 const JOURNEYTIMINGTEST = '15 mins';
 const WHOLEJOURNEYTIMINGTEST = '12:00 PM - 12:15 PM';
 const mockOrigin = JSON.stringify({ latitude: 1.3521, longitude: 103.8198 });
-const mockDestination = JSON.stringify({ latitude: 1.3975288346798842, longitude: 103.7470784569654 });
+const mockDestination = JSON.stringify({ latitude: 1.397288346798842, longitude: 103.7470784569654 });
 const mockBaseResultsData = JSON.stringify(
 {
     types: ['SUBWAY', 'TRAM', 'WALK'],

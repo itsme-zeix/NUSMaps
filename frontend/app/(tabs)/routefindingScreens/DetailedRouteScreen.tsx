@@ -353,7 +353,6 @@ const DetailedRouteScreen: React.FC = () => {
 
   return (
     <View style={stylesheet.SafeAreaView} testID="test">
-
       <MapView
         style={stylesheet.MapView}
         provider={PROVIDER_GOOGLE}
