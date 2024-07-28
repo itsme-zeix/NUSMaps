@@ -8,7 +8,51 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import ActiveBusMarker from "@/components/busServicesLive/activeBusMarker";
 const polyline = require("@mapbox/polyline");
 
-const NUS_SHUTTLE_ROUTES = {
+// Types
+type BusStopNames = {
+  [key: string]: string;
+};
+
+type Coordinate = {
+  latitude: number;
+  longitude: number;
+};
+
+type BusStopMarker = {
+  latitude: number;
+  longitude: number;
+  name: string;
+};
+
+type ActiveBus = {
+  latitude: number;
+  longitude: number;
+  licensePlate: string;
+  crowdLevel: string;
+};
+
+type RouteData = {
+  checkPointPolylineString: string;
+  busStopsCoordsArray: BusStopMarker[];
+  processedActiveBuses: ActiveBus[];
+};
+
+type RouteDataShown = {
+  checkPointCoordsArray: Coordinate[];
+  busStopsCoordsArray: BusStopMarker[];
+  activeBusesArray: ActiveBus[];
+};
+
+type NUSBusServices = 'A1' | 'A2' | 'BTC' | 'D1' | 'D2' | 'K' | 'L';
+
+type DirectionMarker = {
+  latitude: number;
+  longitude: number;
+  angle: string;
+};
+
+// Constants
+const NUS_SHUTTLE_ROUTES: { [key: string]: string[] } = {
   //LT13-OPP is ventus
   A1: ["KRB", "LT13", "AS5", "BIZ2", "TCOMS-OPP", "PGP", "KR-MRT", "LT27", "UHALL", "UHC-OPP", "YIH", "CLB", "KRB"], // will always start and end in the same station, only count sequentially
   A2: ["KRB", "IT", "YIH-OPP", "MUSEUM", "UHC", "UHALL-OPP", "S17", "KR-MRT-OPP", "PGPR", "TCOMS", "HSSML-OPP", "NUSS-OPP", "LT13-OPP", "KRB"],
@@ -19,12 +63,12 @@ const NUS_SHUTTLE_ROUTES = {
   L: ["OTH", "BG-MRT", "CG", "OTH"],
 };
 
-const busStopsWithBaseNames =
+const busStopsWithBaseNames: BusStopNames =
   //used for testing, migrate to postgres
   //used for display on the base cards for users to choose
   { COM3: "SOC", PGP: "PGP", "KR-MRT": "KR MRT", UTOWN: "UT", "KR-MRT-OPP": "Opp KR MRT", IT: "IT", CLB: "CLB", BIZ2: "BIZ", KRB: "KRT", KV: "KV", OTH: "BTC", "BG-MRT": "BG-MRT", CG: "College Gr" };
 
-const additionalMarkerNames = {
+const additionalMarkerNames: BusStopNames = {
   //adds onto existing bus stops with base names list, will show the names for the stops (markers) on the map
   "JP-SCH-16151": "Jpn Pr Sch",
   KV: "Kent Vale",
@@ -51,12 +95,12 @@ const additionalMarkerNames = {
   OTH: "OTH",
 };
 
-const markerNames = {
+const markerNames: BusStopNames = {
   ...busStopsWithBaseNames,
   ...additionalMarkerNames,
 };
 
-const busStopsWithDisplayNames =
+const busStopsWithDisplayNames: BusStopNames =
   //used to map the values of the route to the detailed naming shown to users when they click on the route
   {
     COM3: "COM 3",
@@ -94,7 +138,7 @@ const busStopsWithDisplayNames =
     RAFFLES: "Raffles Hall",
   };
 
-function getMarkerName(busStopName: string) {
+function getMarkerName(busStopName: string): string | undefined {
   const result = markerNames[busStopName];
   if (result == undefined) {
     return busStopsWithDisplayNames[busStopName];
@@ -102,19 +146,20 @@ function getMarkerName(busStopName: string) {
   return result;
 }
 
-function fetchBaseCardData(busService: string) {
+function fetchBaseCardData(busService: string): string[] {
   const routeArray = NUS_SHUTTLE_ROUTES[busService];
-  if (routeArray != undefined) {
+  if (routeArray !== undefined) {
     return routeArray
       .map((value) => {
         const displayNameOnCard = busStopsWithBaseNames[value];
-        if (displayNameOnCard != undefined) return displayNameOnCard;
+        return displayNameOnCard;
       })
-      .filter((value) => value != undefined);
+      .filter((value): value is string => value !== undefined);
   }
+  return [];
 }
 
-function fetchDetailedStopNames(busService: string) {
+function fetchDetailedStopNames(busService: string): string[] {
   const routeArray = NUS_SHUTTLE_ROUTES[busService];
   if (routeArray != undefined) {
     return routeArray.map((value) => {
@@ -123,15 +168,16 @@ function fetchDetailedStopNames(busService: string) {
       else {
         console.log("problematic value:", value);
         console.log("name: ", displayNameDetailed);
+        return "Unknown Stop";
       }
     });
   } else {
     console.log("bus service:", busService);
-    return "undefined stop, please report this bug";
+    return ["undefined stop, please report this bug"];
   }
 }
 
-const NUS_BUS_SERVICES = ["A1", "A2", "BTC", "D1", "D2", "K", "L"];
+const NUS_BUS_SERVICES: NUSBusServices[] = ["A1", "A2", "BTC", "D1", "D2", "K", "L"];
 
 async function fetchBusRoute(serviceName: string) {
   //returns 5 things in 1 array,
@@ -174,16 +220,16 @@ interface routeDataType {
 
 export default function NUSBusServices() {
   //make it a live query, when u click on the route
-  const [routeDataShown, setRouteDataShown] = useState({
+  const [routeDataShown, setRouteDataShown] = useState<RouteDataShown>({
     checkPointCoordsArray: [],
     busStopsCoordsArray: [],
     activeBusesArray: [],
   });
-  const [routeSelected, setRouteSelected] = useState("A1");
-  const [activeBusData, setActiveBusData] = useState([]);
+  const [routeSelected, setRouteSelected] = useState<NUSBusServices>("A1");
+  const [activeBusData, setActiveBusData] = useState<ActiveBus[]>([]);
 
   const routeDataToBeShown = async () => {
-    const routeData = await fetchBusRoute(routeSelected);
+    const routeData: RouteData = await fetchBusRoute(routeSelected);
     const checkPointCoordsPolyline = routeData.checkPointPolylineString;
     const busStopsCoordsArray = routeData.busStopsCoordsArray;
     const activeBusesArray = routeData.processedActiveBuses;
@@ -242,7 +288,7 @@ export default function NUSBusServices() {
     latitudeDelta: 0.01,
     longitudeDelta: 0.01,
   };
-  const MARKERDIRECTIONS = {
+  const MARKERDIRECTIONS: { [key in NUSBusServices]: DirectionMarker[] } = {
     A1: [
       {
         latitude: 1.29405,
