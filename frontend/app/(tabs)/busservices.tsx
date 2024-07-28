@@ -43,7 +43,7 @@ type RouteDataShown = {
   activeBusesArray: ActiveBus[];
 };
 
-type NUSBusServices = 'A1' | 'A2' | 'BTC' | 'D1' | 'D2' | 'K' | 'L';
+type NUSBusServices = "A1" | "A2" | "BTC" | "D1" | "D2" | "K" | "L";
 
 type DirectionMarker = {
   latitude: number;
