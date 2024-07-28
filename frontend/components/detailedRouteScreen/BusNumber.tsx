@@ -6,15 +6,16 @@ import { determineFontColor } from "./determineFontColor";
 interface busNumberType {
   busNumber: string;
   busType: string;
+  testID:string;
 }
 
-export const BusNumberCard: React.FC<busNumberType> = ({ busNumber, busType }) => {
+export const BusNumberCard: React.FC<busNumberType> = ({ busNumber, busType, testID }) => {
   const busBackgroundColor = busType === "NUS_BUS" ? busBGMapping[busNumber] : styles.PUBLICBUSBG;
   const backgroundColor = busBackgroundColor.backgroundColor;
   const fontColor = determineFontColor(backgroundColor);
 
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center"  }}>
+    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center"  }} testID={testID}>
       <Ionicons name="bus" size={23} color="#434343" style={{ marginRight: 3 }} />
       <View style={[styles.busNumberContainer, busBackgroundColor]}>
         <Text style={[styles.busNumber, { color: fontColor }]}>{busNumber}</Text>

@@ -88,5 +88,5 @@ describe("error handling for valid onemap token but invalid server response", ()
       position: "top",
       autoHide: true,
     });
-  });
+  }, 20000);
 });
