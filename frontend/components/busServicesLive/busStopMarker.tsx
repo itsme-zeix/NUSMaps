@@ -28,6 +28,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "column",
+    opacity: 0.75,
   },
   iconContainer: {
     position: "relative",
@@ -57,7 +58,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 10,
-    fontFamily: "Inter-Medium",
+    fontFamily: "Inter-Semibold",
   },
 });
 
