@@ -15,7 +15,7 @@ const CustomMarker: React.FC<CustomMarkerProps> = ({ stopName }) => {
       </View>
       <View style={styles.iconContainer}>
         <Svg height="40" width="30" viewBox="0 0 24 24" style={styles.svg}>
-          <Rect x="4.5" y="4.5" width={15} height={15} rx="2" ry="2" fill="#1A72E6" />
+          <Rect x="4.5" y="4.5" width={15} height={15} rx="2" ry="2" fill="grey" />
         </Svg>
         <MaterialCommunityIcons name="bus-stop" size={18} color="white" style={styles.icon} />
       </View>
@@ -44,8 +44,8 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   textContainer: {
-    paddingHorizontal: 7,
-    paddingVertical: 5,
+    paddingHorizontal: 5,
+    paddingVertical: 3,
     backgroundColor: "white",
     borderRadius: 5,
     justifyContent: "center",
