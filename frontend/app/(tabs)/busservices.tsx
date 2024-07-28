@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, forwardRef, useImperativeHandle} from "react";
 import { StyleSheet, View, Text, Pressable} from "react-native";
 import MapView, {
   Marker,
@@ -12,6 +12,7 @@ import { ServiceCard } from "@/components/busServicesLive/busServiceCard";
 import CustomMarker from "@/components/busServicesLive/busStopMarker";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import ActiveBusMarker from "@/components/busServicesLive/activeBusMarker";
+import {busStopType, activeBusType} from "@/types";
 const polyline = require("@mapbox/polyline");
 
 const NUS_SHUTTLE_ROUTES = {
@@ -270,25 +271,17 @@ async function fetchBusRoute(serviceName:string) {
 
 
 function _convertPolylineToCoordsArray(polylineString:string):number[][] {
+  console.log('str:', polylineString);
   return polyline.decode(polylineString);
 };
 
-interface busStopType extends LatLng{
-  name:string;
-};
-
-interface activeBusType extends LatLng {
-  direction:number,
-  crowdLevel:string,
-  licensePlate:string
-};
 interface routeDataType {
-  checkPointCoordsArray: LatLng[],
+  checkPointPolylineString: string,
   busStopsCoordsArray: busStopType[],
   activeBusesArray: activeBusType[] //TENTATIVE TO CHANGE, update to interface[] type
 };
 
-export default function NUSBusServices() {
+const NUSBusServices = forwardRef((props, ref) => {
   //make it a live query, when u click on the route
   const [routeDataShown, setRouteDataShown] = useState({
     checkPointCoordsArray: [],
@@ -300,6 +293,7 @@ export default function NUSBusServices() {
 
   const routeDataToBeShown = async () => {
     const routeData = await fetchBusRoute(routeSelected);
+    console.log('routeData:', routeData);
     const checkPointCoordsPolyline = routeData.checkPointPolylineString;
     const busStopsCoordsArray = routeData.busStopsCoordsArray;
     const activeBusesArray = routeData.processedActiveBuses;
@@ -773,6 +767,9 @@ export default function NUSBusServices() {
     }]
   };
 
+  useImperativeHandle(ref, () => ({
+    fetchBusRoute
+  }));
   return (
     <View style={{ flex: 1 }}>
       <Text style={{ marginTop: 50 }}>Filter by bus service</Text>
@@ -788,18 +785,22 @@ export default function NUSBusServices() {
                 : NUS
           }
           rotateEnabled={false}
+          testID="current-location-map"
         >
-          <Polyline
+          {routeDataShown.checkPointCoordsArray && (
+            <Polyline
             coordinates={routeDataShown.checkPointCoordsArray}
             strokeColor="#27f"
             strokeWidth={5}
             tappable={false}
-          />
+            testID="current-location-polyline"
+            />
+          )}
           {routeDataShown.busStopsCoordsArray.map((busStopMarker, index) => (
             <Marker key={index} coordinate={{
               latitude: busStopMarker.latitude,
               longitude: busStopMarker.longitude
-            }}>
+            }} testID={`marker-${index}`}>
               <CustomMarker stopName={busStopMarker.name} />
             </Marker>
           ))}
@@ -837,8 +838,7 @@ export default function NUSBusServices() {
       ))}
     </View>
   );
-};
-
+});
 const styles = StyleSheet.create({
   mapContainer: {
     width: "100%",
@@ -849,3 +849,4 @@ const styles = StyleSheet.create({
     height: "100%",
   },
 });
+export default NUSBusServices;
