@@ -1,5 +1,5 @@
 import React, {useEffect, useState, forwardRef, useImperativeHandle} from "react";
-import { StyleSheet, View, Text, Pressable} from "react-native";
+import { StyleSheet, View, Text, Pressable, ScrollView} from "react-native";
 import MapView, {
   Marker,
   LatLng,
@@ -751,17 +751,6 @@ const NUSBusServices = forwardRef((props, ref) => {
             }}
               vehicleLicensePlate={activeBus.licensePlate}
               crowdLevel={activeBus.crowdLevel} />
-          ))}
-          {MARKERDIRECTIONS[routeSelected] != undefined && MARKERDIRECTIONS[routeSelected].map((directionMarker, index) => (    
-            <Marker
-              key={index}
-              coordinate={{
-                latitude: busStopMarker.latitude,
-                longitude: busStopMarker.longitude,
-              }}
-            >
-              <CustomMarker stopName={busStopMarker.name} />
-            </Marker>
           ))}
           {activeBusData.length > 0 &&
             activeBusData.map((activeBus, index) => (

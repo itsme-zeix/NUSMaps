@@ -15,7 +15,7 @@ export default function RootLayout() {
     'Inter-Bold': require('../assets/fonts/Inter-Bold.otf'),
     'Inter-Medium': require('../assets/fonts/Inter-Medium.otf'),
     'Inter-Regular': require('../assets/fonts/Inter-Regular.otf'),
-    'Inter-Semibold': require('../assets/fonts/Inter-SemiBold.otf')
+    'Inter-SemiBold': require('../assets/fonts/Inter-SemiBold.otf')
   });
 
   // Forces dark status bar text (ignores device light/dark mode).

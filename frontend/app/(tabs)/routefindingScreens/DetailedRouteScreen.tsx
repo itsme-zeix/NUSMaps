@@ -216,9 +216,6 @@ const PublicTransportLegPart: React.FC<PublicTransportLegProps> = ({
   expanded,
   setExpanded,
 }) => {
-  //TO-DO: put in Tram type
-  // console.log("type:", ptLeg.type);
-  // console.log("duration:", ptLeg.duration);
 
   return (
     <View style={stylesheet.legDetails}>
@@ -276,7 +273,7 @@ const PublicTransportLegPart: React.FC<PublicTransportLegProps> = ({
             )}
           </View>
 
-          <Text style={{ fontFamily: "Inter-Semibold" }}>
+          <Text style={{ fontFamily: "Inter-SemiBold" }}>
             {ptLeg.destinationStopName}
           </Text>
         </View>

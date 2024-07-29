@@ -14,11 +14,13 @@ import { GooglePlaceData } from "react-native-google-places-autocomplete";
 import { useRouter, useSegments } from "expo-router";
 import Constants from "expo-constants";
 import axios from 'axios';
+import useUserLocation from "@/hooks/useUserLocation";
 import { baseResultsCardType, destinationType } from "@/types";
 
 //constants and variables
 const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY == undefined ? Constants.expoConfig.extra.EXPO_PUBLIC_GOOGLEMAPS_API_KEY : process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY ;
 const oneMapsAPIToken = process.env.EXPO_PUBLIC_ONEMAPAPITOKEN == undefined ?  Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN : process.env.EXPO_PUBLIC_ONEMAPAPITOKEN;
+const INTERVALFORLOCATIONREFRESH = 3 * 1000; //in ms
 const App = forwardRef((props, ref) => {
   //hooks
   const router = useRouter();
@@ -83,7 +85,7 @@ const App = forwardRef((props, ref) => {
   useEffect(() => {
     //to query for location permission
     const getLocation = async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
+      let { status } = await Location.requestForegroundPermissionsAsync(); //could be slow for ios
       if (status !== "granted") {
         console.log("Permission to access location was denied");
         setPermissionErrorMsg("Permission to access location was denied.");
@@ -91,8 +93,10 @@ const App = forwardRef((props, ref) => {
       }
 
       try {
-        let location = await Location.getCurrentPositionAsync({});
-        console.log(location);
+        let location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+          timeInterval: INTERVALFORLOCATIONREFRESH,
+        });
         setCurrentLocation(location.coords);
         setRegion({
           latitude: location.coords.latitude,
@@ -105,8 +109,14 @@ const App = forwardRef((props, ref) => {
         console.error("Failed to obtain location.", error);
       }
     };
-    getLocation();
-  }, []);
+    getLocation(); //initial call
+
+    const intervalId = setInterval(() => {
+      getLocation();
+    }, INTERVALFORLOCATIONREFRESH); //refreshes location every 10s
+
+    return () => clearInterval(intervalId);
+  }, [INTERVALFORLOCATIONREFRESH]);
 
   useEffect(() => {
     // Toast to display error from denial of gps permission
@@ -256,8 +266,7 @@ const App = forwardRef((props, ref) => {
         originCoords,
         destinationCoords
       );
-      console.log("finally", result);
-      console.log('Current path:', segments.join('/'));
+      // console.log("finally", result);
       setIsLoading(false);
       router.replace({
         pathname: "../routefindingScreens/ResultsScreen",
