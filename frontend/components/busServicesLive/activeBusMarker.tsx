@@ -7,7 +7,7 @@ const determineBG = (crowdLevel: string) => {
   if (crowdLevel == "low") {
     return "green";
   } else if (crowdLevel == "medium") {
-    return "yellow";
+    return "#D17501";
   } else if (crowdLevel == "high") {
     return "red";
   } else {
