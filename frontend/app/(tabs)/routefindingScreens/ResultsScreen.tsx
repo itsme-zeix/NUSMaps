@@ -130,7 +130,7 @@ const RefactoredResultsScreen: React.FC = () => {
   if (parsedOrigin && parsedDestination && parsedBaseResultsData) {
     const typeCastedBaseResultsCard: baseResultsCardType[] = parsedBaseResultsData;
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+      <View style={{ flex: 1, backgroundColor: "white" }}>
         <View style={{ flex: 1 }}>
           <View style={{ width: "100%", height: "50%" }}>
             <MapView
@@ -159,8 +159,8 @@ const RefactoredResultsScreen: React.FC = () => {
               />
             </MapView>
           </View>
-          <View style={styles.doubleSearchBarsContainer}>
-            <View style={{ flex: 1, alignItems: "center" }}>
+          <SafeAreaView style={styles.doubleSearchBarsContainer}>
+            <View style={{ alignItems: "center" }}>
               <GooglePlacesAutocomplete
                 placeholder="Current location"
                 query={{ queryParams }}
@@ -174,7 +174,7 @@ const RefactoredResultsScreen: React.FC = () => {
                 }}
               />
             </View>
-            <View style={{ flex: 1, alignItems: "center" }}>
+            <View style={{ alignItems: "center" }}>
               <GooglePlacesAutocomplete
                 placeholder={parsedDestination.address}
                 query={{ queryParams }}
@@ -188,7 +188,7 @@ const RefactoredResultsScreen: React.FC = () => {
                 }}
               />
             </View>
-          </View>
+          </SafeAreaView>
           <ScrollView>
             <View style={styles.resultContainer}>
               {typeCastedBaseResultsCard.map((data, index) => (
@@ -197,7 +197,7 @@ const RefactoredResultsScreen: React.FC = () => {
             </View>
           </ScrollView>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 };
@@ -205,7 +205,6 @@ const RefactoredResultsScreen: React.FC = () => {
 //stylesheet
 const styles = StyleSheet.create({
   topGoogleSearchBar: {
-    marginTop: "5%",
     width: "93%",
     borderRadius: 12,
     shadowColor: "#000000",
@@ -213,7 +212,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 1, height: 3 },
   },
   bottomGoogleSearchBar: {
-    paddingTop: 5,
+    paddingTop: 0,
     width: "93%",
     borderRadius: 12,
     shadowColor: "#000000",
@@ -225,7 +224,6 @@ const styles = StyleSheet.create({
   },
   doubleSearchBarsContainer: {
     position: "absolute",
-    height: 140,
     width: "100%",
     justifyContent: "center",
     alignContent: "flex-start",
