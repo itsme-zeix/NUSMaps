@@ -61,7 +61,7 @@ const calculateMinutesDifference = (isoTime: string): string => {
 };
 
 // This returns a React component of each bus stop that is expandable.
-const ExpandableBusStop = ({ item }: { item: BusStop }) => {
+export const ExpandableBusStop = ({ item }: { item: BusStop }) => {
   //Used to render details for 1 bus stop
   const [expanded, setExpanded] = useState(false);
 
