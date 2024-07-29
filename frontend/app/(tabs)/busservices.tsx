@@ -1,5 +1,5 @@
 import React, {useEffect, useState, forwardRef, useImperativeHandle} from "react";
-import { StyleSheet, View, Text, Pressable} from "react-native";
+import { StyleSheet, View, Text, Pressable, ScrollView} from "react-native";
 import MapView, {
   Marker,
   LatLng,
@@ -714,45 +714,9 @@ const NUSBusServices = forwardRef((props, ref) => {
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <View style={styles.mapContainer}>
-        <MapView
-          style={styles.map}
-          provider={PROVIDER_GOOGLE}
-          region={
-            routeSelected == "BTC"
-              ? NUS_BTC
-              : routeSelected == "L"
-                ? BUKITTIMAHCAMPUS
-                : NUS
-          }
-          rotateEnabled={false}
-          testID="current-location-map"
-        >
-          {routeDataShown.checkPointCoordsArray && (
-            <Polyline
-            coordinates={routeDataShown.checkPointCoordsArray}
-            strokeColor="#27f"
-            strokeWidth={5}
-            tappable={false}
-            testID="current-location-polyline"
-            />
-          )}
+        <MapView style={styles.map} provider={PROVIDER_GOOGLE} region={routeSelected == "BTC" ? NUS_BTC : routeSelected == "L" ? BUKITTIMAHCAMPUS : NUS} rotateEnabled={false}>
+          <Polyline coordinates={routeDataShown.checkPointCoordsArray} strokeColor="#27f" strokeWidth={5} tappable={false} />
           {routeDataShown.busStopsCoordsArray.map((busStopMarker, index) => (
-            <Marker key={index} coordinate={{
-              latitude: busStopMarker.latitude,
-              longitude: busStopMarker.longitude
-            }} testID={`marker-${index}`}>
-              <CustomMarker stopName={busStopMarker.name} />
-            </Marker>
-          ))}
-          {activeBusData.length > 0 && activeBusData.map((activeBus, index) => (
-            <ActiveBusMarker key={index} coordinate={{
-              latitude: activeBus.latitude,
-              longitude: activeBus.longitude
-            }}
-              vehicleLicensePlate={activeBus.licensePlate}
-              crowdLevel={activeBus.crowdLevel} />
-          ))}
-          {MARKERDIRECTIONS[routeSelected] != undefined && MARKERDIRECTIONS[routeSelected].map((directionMarker, index) => (    
             <Marker
               key={index}
               coordinate={{
@@ -799,8 +763,8 @@ const NUSBusServices = forwardRef((props, ref) => {
       </ScrollView>
     </View>
   );
-  
 });
+
 const styles = StyleSheet.create({
   mapContainer: {
     width: "100%",
