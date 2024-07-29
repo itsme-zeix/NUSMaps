@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 10,
-    fontFamily: "Inter-Semibold",
+    fontFamily: "Inter-SemiBold",
   },
 });
 

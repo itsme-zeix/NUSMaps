@@ -11,6 +11,9 @@ import { GooglePlaceData } from "react-native-google-places-autocomplete";
 jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn(),
   getCurrentPositionAsync: jest.fn(),
+  Accuracy: {
+    High: 'true'
+  }
 }));
 
 jest.mock("react-native-toast-message", () => ({
@@ -81,7 +84,6 @@ describe("Straight forward toasts/error handling", () => {
     (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValue({
       coords: TESTLOCATION,
     });
-
     const { getByTestId } = render(<App />);
     const marker = await waitFor(() => getByTestId("current-location-marker"));
     const map = await waitFor(() => getByTestId("current-location-map"));
