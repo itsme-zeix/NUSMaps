@@ -247,11 +247,13 @@ const App = forwardRef((props, ref) => {
         console.error(
           "Route could not be found. Please try again later: ",error
         );
+        setIsLoading(false);
         throw new Error("Route could not be found. Please try again later");
       }
     } else {
       setRouteErrorMsg("Server issues, please try again later. API TOKEN ERROR");
       console.error("api token for OneMap not declared. Check server settings");
+      setIsLoading(false);
       throw new Error("API token could not be found. Please try again");
     }
   }
