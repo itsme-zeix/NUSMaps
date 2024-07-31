@@ -102,7 +102,7 @@ describe("BusStopSearchScreen", () => {
     expect(updatedBusStops[1].isFavourited).toBe(false);
   });
 
-  test("Search page renders FlatList of bus stops", async () => {
+  test("Search page renders FlatList of bus stops retrieved from AsyncStorage", async () => {
     const { getByText, getByLabelText } = render(
       <NavigationContainer>
         <Stack.Navigator>
