@@ -3,7 +3,7 @@ import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import BusStopSearchScreen from "../BusStopSearchScreen"; // Adjust the import path
+import BusStopSearchScreen from "@/components/busStopsTab/BusStopSearchScreen";
 
 // Mock @expo/vector-icons
 jest.mock("@expo/vector-icons", () => {
