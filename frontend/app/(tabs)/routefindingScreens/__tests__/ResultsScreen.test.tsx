@@ -41,6 +41,12 @@ jest.mock('expo-router', () => ({
     },
     useRouter: () => mockRouter
   }));
+jest.mock("@expo/vector-icons", () => {
+  return {
+    Ionicons: "Ionicons",
+    MaterialCommunityIcons: "MaterialCommunityIcons",
+  };
+});
 
 jest.mock('@expo/vector-icons/MaterialIcons', () => {
     const React = require('react');
@@ -49,13 +55,19 @@ jest.mock('@expo/vector-icons/MaterialIcons', () => {
       return <Text {...props}>{name}</Text>;
     };
   });
-jest.mock('@expo/vector-icons/Ionicons', () => {
-    const React = require('react');
-    const { Text } = require('react-native');
-    return ({ name, ...props }) => {
-      return <Text {...props}>{name}</Text>;
-    };
-  });
+
+jest.mock("@expo/vector-icons/Ionicons", () => {
+  const React = require("react");
+  const { Text } = require("react-native");
+  return ({ name, ...props }: { name: string }) => {
+    return <Text {...props}>{name}</Text>;
+  };
+});
+jest.mock("react-native-vector-icons/Ionicons", () => {
+  const React = require("react");
+  const { Text } = require("react-native");
+  return ({ name, ...props }: { name: string }) => <Text {...props}>{name}</Text>;
+});
 
 interface ResultsCardInterface {
   nextScreenFunc: () => void;
