@@ -5,15 +5,17 @@ import Toast from "react-native-toast-message";
 import App from "../Main"; // Ensure this is the correct path to your component
 import axios from "axios";
 import { BackHandler } from "react-native";
-import { LatLng } from "react-native-maps"
+import { LatLng } from "react-native-maps";
 import { GooglePlaceData } from "react-native-google-places-autocomplete";
+
+jest.useFakeTimers();
 
 jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn(),
   getCurrentPositionAsync: jest.fn(),
   Accuracy: {
-    High: 'true'
-  }
+    High: "true",
+  },
 }));
 
 jest.mock("react-native-toast-message", () => ({
@@ -22,8 +24,8 @@ jest.mock("react-native-toast-message", () => ({
 
 jest.mock("react-native-maps", () => {
   const React = require("react");
-  const MockMapView = (props) => <div {...props} />;
-  const MockMarker = (props) => <div {...props} />;
+  const MockMapView = (props: React.JSX.IntrinsicAttributes & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>) => <div {...props} />;
+  const MockMarker = (props: React.JSX.IntrinsicAttributes & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>) => <div {...props} />;
   return {
     __esModule: true,
     default: MockMapView,
@@ -35,22 +37,20 @@ jest.mock("axios"); // Mock axios to simulate API calls
 
 const mockRouter = {
   replace: jest.fn(),
-  push: jest.fn()
+  push: jest.fn(),
 };
 const mockSegments = ["home", "details"];
-jest.mock('expo-router', () => {
-  const actual = jest.requireActual('expo-router');
+jest.mock("expo-router", () => {
+  const actual = jest.requireActual("expo-router");
   return {
     ...actual,
     useRouter: () => mockRouter,
-    useSegments: () => mockSegments
+    useSegments: () => mockSegments,
   };
 });
 
-jest.mock('react-native/Libraries/Utilities/BackHandler', () => {
-  return jest.requireActual(
-    'react-native/Libraries/Utilities/__mocks__/BackHandler.js',
-  );
+jest.mock("react-native/Libraries/Utilities/BackHandler", () => {
+  return jest.requireActual("react-native/Libraries/Utilities/__mocks__/BackHandler.js");
 });
 
 const DEFAULTLOCATION = {
@@ -65,10 +65,10 @@ const TESTLOCATION = {
 
 interface AppInstance {
   fetchBestRoute: (origin: LatLng, destination: LatLng) => Promise<void>;
-  getLatLngFromId: (placeId:string) => Promise<LatLng>;
-  getDestinationResult: (data:GooglePlaceData) => Promise<void>;
-  setDestination:(destination: {address:string, placeId:string} & LatLng) => void
-};
+  getLatLngFromId: (placeId: string) => Promise<LatLng>;
+  getDestinationResult: (data: GooglePlaceData) => Promise<void>;
+  setDestination: (destination: { address: string; placeId: string } & LatLng) => void;
+}
 
 describe("Straight forward toasts/error handling", () => {
   afterEach(() => {
@@ -78,9 +78,7 @@ describe("Straight forward toasts/error handling", () => {
   });
 
   it("requests location permission and checks if the screen is rendered correctly + whether the mapview renders correctly", async () => {
-    (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue(
-      { status: "granted" }
-    );
+    (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({ status: "granted" });
     (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValue({
       coords: TESTLOCATION,
     });
@@ -104,9 +102,7 @@ describe("Straight forward toasts/error handling", () => {
   }, 10000);
 
   it("handles permission denied", async () => {
-    (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue(
-      { status: "denied" }
-    );
+    (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({ status: "denied" });
 
     const { getByTestId } = render(<App />);
 
@@ -135,12 +131,8 @@ describe("Straight forward toasts/error handling", () => {
   });
 
   it("handles permission granted but location cannot be attained", async () => {
-    (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue(
-      { status: "granted" }
-    );
-    (Location.getCurrentPositionAsync as jest.Mock).mockRejectedValue(
-      "GPS failed"
-    );
+    (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({ status: "granted" });
+    (Location.getCurrentPositionAsync as jest.Mock).mockRejectedValue("GPS failed");
     render(<App />);
     await waitFor(() => {
       expect(Toast.show).toHaveBeenCalledWith({
@@ -155,21 +147,22 @@ describe("Straight forward toasts/error handling", () => {
 });
 
 describe("Tests that involve user navigation", () => {
-  
   const setup = async () => {
     (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({ status: "granted" });
     (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValue({ coords: TESTLOCATION });
 
     const origin = { latitude: 1.3521, longitude: 103.8198 };
     const mockDestination = { latitude: 1.3489977386432621, longitude: 103.7492952313956 };
-    const mockBaseResultsCard = [{
-      types: ['BUS'],
-      journeyTiming: '2 min',
-      wholeJourneyTiming: '3:00pm- 4:00pm',
-      journeyLegs: [],
-      polylineArray: [],
-      stopsCoordsArray: []
-    }];
+    const mockBaseResultsCard = [
+      {
+        types: ["BUS"],
+        journeyTiming: "2 min",
+        wholeJourneyTiming: "3:00pm- 4:00pm",
+        journeyLegs: [],
+        polylineArray: [],
+        stopsCoordsArray: [],
+      },
+    ];
     const DEFAULTDESTINATIONLatLng = {
       latitude: NaN,
       longitude: NaN,
@@ -184,9 +177,9 @@ describe("Tests that involve user navigation", () => {
     // Make sure the component is mounted and ref is assigned
     expect(ref.current).toBeDefined();
 
-    const fetchBestRouteSpy = jest.spyOn(ref.current!, 'fetchBestRoute');
-    const routerReplaceSpy = jest.spyOn(mockRouter, 'replace');
-    const routerPushSpy = jest.spyOn(mockRouter, 'push');
+    const fetchBestRouteSpy = jest.spyOn(ref.current!, "fetchBestRoute");
+    const routerReplaceSpy = jest.spyOn(mockRouter, "replace");
+    const routerPushSpy = jest.spyOn(mockRouter, "push");
 
     return { ref, fetchBestRouteSpy, routerReplaceSpy, routerPushSpy, origin, mockDestination, mockBaseResultsCard, DEFAULTDESTINATIONLatLng };
   };
@@ -198,21 +191,21 @@ describe("Tests that involve user navigation", () => {
         latitude: mockDestination.latitude,
         longitude: mockDestination.longitude,
         address: "DEFAULT",
-        placeId: "DEFAULT"
+        placeId: "DEFAULT",
       });
     });
     await waitFor(() => {
       //this replacement is the sign that the function has been called, despite bugs with the func itself being called
       expect(routerPushSpy).toHaveBeenCalledWith({
-        pathname: "../routefindingScreens/loadingScreen"
+        pathname: "../routefindingScreens/loadingScreen",
       });
       expect(routerReplaceSpy).toHaveBeenCalledWith({
         pathname: "../routefindingScreens/ResultsScreen", // COULD BREAK WITH REFACTORING
         params: {
           origin: JSON.stringify(origin),
-          destination: JSON.stringify({latitude:mockDestination.latitude, longitude:mockDestination.longitude, address:DEFAULTDESTINATIONLatLng.address, placeId: DEFAULTDESTINATIONLatLng.placeId}),
-          baseResultsData: JSON.stringify(mockBaseResultsCard)
-        }
+          destination: JSON.stringify({ latitude: mockDestination.latitude, longitude: mockDestination.longitude, address: DEFAULTDESTINATIONLatLng.address, placeId: DEFAULTDESTINATIONLatLng.placeId }),
+          baseResultsData: JSON.stringify(mockBaseResultsCard),
+        },
       });
     });
     fetchBestRouteSpy.mockRestore();
