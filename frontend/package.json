@@ -8,7 +8,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "test": "jest --watchAll",
+    "test": "jest",
     "lint": "expo lint"
   },
   "jest": {
@@ -17,11 +17,12 @@
       "./jest.setup.js"
     ],
     "transformIgnorePatterns": [
-      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg)"
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@rneui/base)"
     ]
   },
   "dependencies": {
-    "@expo/vector-icons": "^14.0.0",
+    "@babel/plugin-transform-class-properties": "^7.24.7",
+    "@expo/vector-icons": "^14.0.2",
     "@mapbox/polyline": "^1.2.1",
     "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-native-segmented-control/segmented-control": "^2.5.2",
