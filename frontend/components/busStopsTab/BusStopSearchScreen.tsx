@@ -7,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { NUSTag } from "@/components/busStopsTab/NUSTag";
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import Toast from "react-native-toast-message";
 
 type RootStackParamList = {
   BusStopSearch: { initialQuery: string };
@@ -66,6 +67,7 @@ const BusStopSearchScreen: React.FC = () => {
   const [filteredData, setFilteredData] = useState<BusStopItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [searchBarRef, setSearchBarRef] = useState<any>(null);
+  const [updateAsyncStorageErrorMsg, setUpdateAsyncStorageErrorMsg] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -116,9 +118,7 @@ const BusStopSearchScreen: React.FC = () => {
   };
 
   const toggleFavourite = async (busStopId: string) => {
-    const updatedData = data.map((item) =>
-      item.busStopId === busStopId ? { ...item, isFavourited: !item.isFavourited } : item
-    );
+    const updatedData = data.map((item) => (item.busStopId === busStopId ? { ...item, isFavourited: !item.isFavourited } : item));
 
     setData(updatedData);
 
@@ -131,8 +131,26 @@ const BusStopSearchScreen: React.FC = () => {
 
     setFilteredData(newFilteredData);
 
-    await AsyncStorage.setItem("busStops", JSON.stringify(updatedData));
+    // Update AsyncStorage
+    try {
+      await AsyncStorage.setItem("busStops", JSON.stringify(updatedData));
+    } catch (error) {
+      console.error("Error saving to AsyncStorage:", error);
+      setUpdateAsyncStorageErrorMsg(`Failed to update AsyncStorage, ${error}`);
+    }
   };
+  // Display toast is Async Storage was not updated
+  useEffect(() => {
+    if (updateAsyncStorageErrorMsg) {
+      Toast.show({
+        type: "error",
+        text1: updateAsyncStorageErrorMsg,
+        text2: "Please restart the application before trying again.",
+        position: "top",
+        autoHide: true,
+      });
+    }
+  }, [updateAsyncStorageErrorMsg]);
 
   const renderItem = ({ item }: { item: BusStopItem }) => {
     const isNUSStop = item.busStopName.startsWith("NUSSTOP_");
@@ -140,18 +158,11 @@ const BusStopSearchScreen: React.FC = () => {
 
     return (
       <View style={styles.item}>
-        <Text style={styles.busStopText}>
-          {isNUSStop ? busStopName : busStopName + " " + "(" + item.busStopId + ")"}
-        </Text>
+        <Text style={styles.busStopText}>{isNUSStop ? busStopName : busStopName + " " + "(" + item.busStopId + ")"}</Text>
         <View style={styles.iconContainer}>
           {isNUSStop && <NUSTag />}
-          <TouchableOpacity onPress={() => toggleFavourite(item.busStopId)}>
-            <Icon
-              name={item.isFavourited ? "star" : "star-outline"}
-              type="ionicon"
-              color={item.isFavourited ? "#FFD700" : "#000"}
-              style={{ marginLeft: 5 }}
-            />
+          <TouchableOpacity onPress={() => toggleFavourite(item.busStopId)} accessibilityLabel={`toggle-favourite-${item.busStopId}`}>
+            <Icon name={item.isFavourited ? "star" : "star-outline"} type="ionicon" color={item.isFavourited ? "#FFD700" : "#000"} style={{ marginLeft: 5 }} />
           </TouchableOpacity>
         </View>
       </View>
@@ -172,21 +183,8 @@ const BusStopSearchScreen: React.FC = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
           <Text>Close</Text>
         </TouchableOpacity>
-        <SearchBar
-          placeholder="Search"
-          onChangeText={(text) => updateSearch(text)}
-          value={search}
-          platform="ios"
-          searchIcon={<Ionicons name="search" size={20} color="gray" />}
-          clearIcon={<Ionicons name="close-circle" size={23} color="gray" style={{opacity: 0}} />}
-          autoFocus={true}
-          ref={(ref: any) => setSearchBarRef(ref)}
-        />
-        <FlatList
-          data={filteredData}
-          keyExtractor={(item) => item.busStopId}
-          renderItem={renderItem}
-        />
+        <SearchBar placeholder="Search" onChangeText={(text) => updateSearch(text)} value={search} platform="ios" searchIcon={<Ionicons name="search" size={20} color="gray" />} clearIcon={<Ionicons name="close-circle" size={23} color="gray" style={{ opacity: 0 }} />} autoFocus={true} ref={(ref: any) => setSearchBarRef(ref)} />
+        <FlatList data={filteredData} keyExtractor={(item) => item.busStopId} renderItem={renderItem} />
       </View>
     </SafeAreaView>
   );
