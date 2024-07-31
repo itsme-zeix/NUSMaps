@@ -1,5 +1,5 @@
 // jest.setup.js
-export * from '@react-native-async-storage/async-storage/jest/async-storage-mock';
+export * from "@react-native-async-storage/async-storage/jest/async-storage-mock";
 
 //GLOBAL JEST settings
 jest.mock("expo-constants", () => ({
@@ -45,10 +45,11 @@ jest.mock("@expo/vector-icons", () => {
   };
 });
 
-jest.mock('expo-font', () => ({
+jest.mock("expo-font", () => ({
   useFonts: jest.fn(() => [false, null]), // Default mock return value
+  loadAsync: jest.fn(),
+  isLoaded: jest.fn().mockReturnValue(true),
 }));
-
 
 jest.mock("expo-asset");
 jest.mock("expo", () => ({
@@ -61,8 +62,7 @@ jest.mock("expo", () => ({
   },
 }));
 
-jest.mock("expo-dev-client", () => ({
-}));
+jest.mock("expo-dev-client", () => ({}));
 
 jest.mock("expo-linking", () => ({
   openURL: jest.fn(),
@@ -102,8 +102,6 @@ jest.mock("expo-web-browser", () => ({
   openBrowserAsync: jest.fn(),
 }));
 
-jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
-);
+jest.mock("@react-native-async-storage/async-storage", () => require("@react-native-async-storage/async-storage/jest/async-storage-mock"));
 
-jest.mock('axios');
+jest.mock("axios");
