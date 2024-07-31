@@ -19,7 +19,7 @@ import mapBusServiceColour from "@/utils/mapBusServiceColor";
 
 // Stack navigator to redirect from bus stop screen to bus stop search screen (vice-versa)
 const Stack = createStackNavigator();
-export default function BusStopSearchNavigator(): React.JSX.Element {
+export function BusStopSearchNavigator(): React.JSX.Element {
   return (
     <QueryClientProvider client={queryClient}>
       <Stack.Navigator initialRouteName="MainScreen">
@@ -67,11 +67,11 @@ export const ExpandableBusStop = ({ item }: { item: BusStop }) => {
 
   const onItemPress = () => {
     setExpanded(!expanded);
-  }
+  };
 
   return (
     <View style={styles.wrap}>
-      <TouchableWithoutFeedback onPress={onItemPress}>
+      <TouchableWithoutFeedback onPress={onItemPress} testID="expandable-bus-stop">
         <View style={styles.cardContainer}>
           <View style={styles.textContainer}>
             <Text style={styles.busStopName}>{item.busStopName.startsWith("NUSSTOP") ? item.busStopName.slice(8) : item.busStopName}</Text>
@@ -276,7 +276,7 @@ function NUSBusStops({ refreshLocation, refresh }: { refreshLocation: number; re
   );
 }
 
-function BusStopsScreen() {
+export default function BusStopsScreen() {
   const [refreshLocation, setRefreshLocation] = useState(0); // State to handle the re-retrieval of user location.
   const [selectedIndex, setSelectedIndex] = useState(0); // State to handle the logic of rendering Favourites, Nearby or NUS bus stops.
 
