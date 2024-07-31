@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import BusStopSearchScreen from "@/components/busStopsTab/BusStopSearchScreen";
+import { getFavouritedBusStops } from "@/utils/storage";
 
 // Mock @expo/vector-icons
 jest.mock("@expo/vector-icons", () => {
@@ -39,6 +40,10 @@ const mockBusStops = [
   },
 ];
 
+jest.mock("@/utils/storage", () => ({
+  getFavouritedBusStops: jest.fn(async () => mockBusStops),
+}));
+
 let asyncStorageData = JSON.stringify(mockBusStops);
 
 AsyncStorage.getItem = jest.fn((key) => {
@@ -51,6 +56,10 @@ AsyncStorage.setItem = jest.fn((key, value) => {
 });
 
 describe("BusStopSearchScreen", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test("toggle/untoggle favourite status of a bus stop", async () => {
     const component = (
       <NavigationContainer>
@@ -78,7 +87,6 @@ describe("BusStopSearchScreen", () => {
     // Verify the data is updated in AsyncStorage
     let storedData = await AsyncStorage.getItem("busStops");
     let updatedBusStops = JSON.parse(storedData!);
-    console.log(updatedBusStops[0].isFavourited, updatedBusStops[1].isFavourited);
     expect(updatedBusStops[0].isFavourited).toBe(true);
     expect(updatedBusStops[1].isFavourited).toBe(false);
 
@@ -90,8 +98,67 @@ describe("BusStopSearchScreen", () => {
     // Verify the data is updated in AsyncStorage again
     storedData = await AsyncStorage.getItem("busStops");
     updatedBusStops = JSON.parse(storedData!);
-    console.log(updatedBusStops[0].isFavourited, updatedBusStops[1].isFavourited);
     expect(updatedBusStops[0].isFavourited).toBe(false);
     expect(updatedBusStops[1].isFavourited).toBe(false);
+  });
+
+  test("Search page renders FlatList of bus stops", async () => {
+    const { getByText, getByLabelText } = render(
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen name="BusStopSearch" component={BusStopSearchScreen} initialParams={{ initialQuery: "" }} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+
+    await waitFor(() => {
+      expect(getByText("COM 3")).toBeTruthy();
+      expect(getByText("Prince George's Park Foyer")).toBeTruthy();
+    });
+  });
+
+  test("Search bar on search page is touchable", async () => {
+    const { getByText, getByPlaceholderText } = render(
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen name="BusStopSearch" component={BusStopSearchScreen} initialParams={{ initialQuery: "" }} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+
+    // Give time for page to be rendered
+    await waitFor(() => {
+      expect(getByText("COM 3")).toBeTruthy();
+    });
+
+    // Ensure the search bar is touchable
+    const searchBar = getByPlaceholderText("Search");
+    expect(searchBar).toBeTruthy();
+  });
+
+  test("Search bar on search page takes input and filters results in FlatList", async () => {
+    const { getByPlaceholderText, getByText, queryByText } = render(
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen name="BusStopSearch" component={BusStopSearchScreen} initialParams={{ initialQuery: "" }} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+
+    // Give time for page to be rendered
+    await waitFor(() => {
+      expect(getByText("COM 3")).toBeTruthy();
+    });
+
+    const searchBar = getByPlaceholderText("Search");
+
+    // Type into search bar
+    fireEvent.changeText(searchBar, "COM");
+
+    // Ensure FlatList updates with filtered results
+    await waitFor(() => {
+      expect(getByText("COM 3")).toBeTruthy();
+      expect(queryByText("Prince George's Park Foyer")).toBeNull();
+    });
   });
 });
