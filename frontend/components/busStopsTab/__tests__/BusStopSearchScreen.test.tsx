@@ -19,7 +19,7 @@ jest.mock("@expo/vector-icons", () => {
 jest.mock("@rneui/base", () => {
   const { Text, TextInput } = require("react-native");
   return {
-    SearchBar: ({ value, onChangeText, ...props }: {value: string, onChangeText: string}) => <TextInput value={value} onChangeText={onChangeText} {...props} />,
+    SearchBar: ({ value, onChangeText, ...props }: { value: string; onChangeText: string }) => <TextInput value={value} onChangeText={onChangeText} {...props} />,
     Icon: ({ name }: { name: string }) => <Text>{name}</Text>,
   };
 });
@@ -51,7 +51,7 @@ AsyncStorage.setItem = jest.fn((key, value) => {
 });
 
 describe("BusStopSearchScreen", () => {
-  test("toggles favourite status of a bus stop", async () => {
+  test("toggle/untoggle favourite status of a bus stop", async () => {
     const component = (
       <NavigationContainer>
         <Stack.Navigator>
@@ -76,10 +76,22 @@ describe("BusStopSearchScreen", () => {
     await waitFor(() => expect(queryByText("star")).toBeTruthy());
 
     // Verify the data is updated in AsyncStorage
-    const storedData = await AsyncStorage.getItem("busStops");
-    const updatedBusStops = JSON.parse(storedData!);
+    let storedData = await AsyncStorage.getItem("busStops");
+    let updatedBusStops = JSON.parse(storedData!);
     console.log(updatedBusStops[0].isFavourited, updatedBusStops[1].isFavourited);
     expect(updatedBusStops[0].isFavourited).toBe(true);
+    expect(updatedBusStops[1].isFavourited).toBe(false);
+
+    fireEvent.press(getByLabelText("toggle-favourite-1"));
+
+    // Wait for the state to update and check the text inside the icon
+    await waitFor(() => expect(queryByText("star")).toBeFalsy());
+
+    // Verify the data is updated in AsyncStorage again
+    storedData = await AsyncStorage.getItem("busStops");
+    updatedBusStops = JSON.parse(storedData!);
+    console.log(updatedBusStops[0].isFavourited, updatedBusStops[1].isFavourited);
+    expect(updatedBusStops[0].isFavourited).toBe(false);
     expect(updatedBusStops[1].isFavourited).toBe(false);
   });
 });
