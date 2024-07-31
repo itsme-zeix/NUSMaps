@@ -42,3 +42,4 @@ jobs:
           VALIDATE_PYTHON_ISORT: false
           VALIDATE_SQLFLUFF: false
           VALIDATE_JSCPD: false
+          VALIDATE_RUBY: false
