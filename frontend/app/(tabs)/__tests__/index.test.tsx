@@ -3,8 +3,8 @@ import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NavigationContainer } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import BusStopsScreen from "@/app/(tabs)/index";
 import axios from "axios";
+import { BusStopsScreen } from "@/app/(tabs)/index";
 
 // Mock axios
 jest.mock("axios");
