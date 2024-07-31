@@ -39,7 +39,7 @@ const PublicBusStop: BusStop = {
   distanceAway: "0.05",
   savedBuses: [
     {
-      busNumber: "D1",
+      busNumber: "945A",
       timings: ["2024-07-29T00:30:00Z", "2024-07-29T01:00:00Z"],
     },
   ],
