@@ -1,4 +1,4 @@
-name: Jest Unit Tests
+name: Frontend Jest Unit Tests
 
 on:
   pull_request:
@@ -27,7 +27,7 @@ jobs:
           cd frontend
           npm install
 
-      - name: Run Jest tests
+      - name: Run Frontend Jest Unit Tests
         run: |
           cd frontend
           NODE_ENV=test npm test
