@@ -16,6 +16,7 @@ import CollapsibleContainer from "@/components/busStopsTab/CollapsibleContainer"
 import useUserLocation from "@/hooks/useUserLocation";
 import { NUSTag } from "@/components/busStopsTab/NUSTag";
 import mapBusServiceColour from "@/utils/mapBusServiceColor";
+import { mapNUSCodeNametoFullName } from "@/utils/mapNUSCodeNametoFullName";
 
 // Stack navigator to redirect from bus stop screen to bus stop search screen (vice-versa)
 const Stack = createStackNavigator();
@@ -74,7 +75,7 @@ export const ExpandableBusStop = ({ item }: { item: BusStop }) => {
       <TouchableWithoutFeedback onPress={onItemPress} testID="expandable-bus-stop">
         <View style={styles.cardContainer}>
           <View style={styles.textContainer}>
-            <Text style={styles.busStopName}>{item.busStopName.startsWith("NUSSTOP") ? item.busStopName.slice(8) : item.busStopName}</Text>
+            <Text style={styles.busStopName}>{mapNUSCodeNametoFullName(item.busStopName)}</Text>
             <Text style={styles.distanceAwayText}>{Number(item.distanceAway) < 1 ? `~${(Number(item.distanceAway) * 1000).toFixed(0)}m away` : `~${Number(item.distanceAway).toFixed(2)}km away`}</Text>
           </View>
           <View style={styles.nusTagAndChevronContainer}>
