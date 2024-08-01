@@ -1,4 +1,4 @@
-const codeNameFullNameDict = {
+const codeNameFullNameDict: { [key: string]: string } = {
   COM3: "COM 3",
   "TCOMS-OPP": "Opp TCOMS",
   PGP: "Prince George's Park",
