@@ -1,4 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
+import Toast from "react-native-toast-message";
 
 interface BusService {
   busNumber: string;
@@ -14,6 +16,33 @@ interface BusStop {
   isFavourited: boolean;
 }
 
+// display toast for errors
+const [favouritedBusStopsErrorMsg, setFavouritedBusStopsErrorMsg] = useState("");
+const [resetFavouritesErrorMsg, setResetFavouritesErrorMsg] = useState("");
+useEffect(() => {
+  if (favouritedBusStopsErrorMsg) {
+    Toast.show({
+      type: "error",
+      text1: favouritedBusStopsErrorMsg,
+      text2: "Please restart the application before trying again.",
+      position: "top",
+      autoHide: true,
+    });
+  }
+}, [favouritedBusStopsErrorMsg]);
+
+useEffect(() => {
+  if (resetFavouritesErrorMsg) {
+    Toast.show({
+      type: "error",
+      text1: resetFavouritesErrorMsg,
+      text2: "Please restart the application before trying again.",
+      position: "top",
+      autoHide: true,
+    });
+  }
+}, [resetFavouritesErrorMsg]);
+
 export const getFavouritedBusStops = async () => {
   try {
     const busStops = await AsyncStorage.getItem("busStops");
@@ -26,6 +55,29 @@ export const getFavouritedBusStops = async () => {
     return [];
   } catch (error) {
     console.error("Failed to fetch favourited bus stops from storage", error);
+    setFavouritedBusStopsErrorMsg(`Failed to fetch favourited bus stops from storage: ${error}`)
     return [];
+  }
+};
+
+export const resetFavourites = async () => {
+  try {
+    const busStops = await AsyncStorage.getItem("busStops");
+    if (busStops !== null) {
+      let busStopsArray = JSON.parse(busStops);
+
+      // Reset the isFavourited property for all bus stops
+      busStopsArray = busStopsArray.map((busStop: BusStop) => ({
+        ...busStop,
+        isFavourited: false,
+      }));
+
+      // Save the updated bus stops array back to AsyncStorage
+      await AsyncStorage.setItem("busStops", JSON.stringify(busStopsArray));
+      console.log("Successfully reset favourites");
+    }
+  } catch (error) {
+    console.error("Failed to reset favourites", error);
+    setResetFavouritesErrorMsg(`Failed to fetch favourited bus stops from storage: ${error}`)
   }
 };
