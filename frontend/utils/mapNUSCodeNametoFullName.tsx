@@ -35,8 +35,6 @@ const codeNameFullNameDict = {
 };
 
 export const mapNUSCodeNametoFullName = (busStopName: string) => {
-  console.log(`Original busStopName: "${busStopName}"`);
-
   if (busStopName.startsWith("NUSSTOP_")) {
     const codeName = busStopName.replace("NUSSTOP_", "").trim();
     const fullName = codeNameFullNameDict[codeName] || codeName;
