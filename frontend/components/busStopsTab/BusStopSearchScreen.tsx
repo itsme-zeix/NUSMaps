@@ -161,9 +161,9 @@ const BusStopSearchScreen: React.FC = () => {
         <Text style={styles.busStopText}>{isNUSStop ? busStopName : busStopName + " " + "(" + item.busStopId + ")"}</Text>
         <View style={styles.iconContainer}>
           {isNUSStop && <NUSTag />}
-          <TouchableOpacity onPress={() => toggleFavourite(item.busStopId)} accessibilityLabel={`toggle-favourite-${item.busStopId}`}>
+          <Pressable onPress={() => toggleFavourite(item.busStopId)} accessibilityLabel={`toggle-favourite-${item.busStopId}`}>
             <Icon name={item.isFavourited ? "star" : "star-outline"} type="ionicon" color={item.isFavourited ? "#FFD700" : "#000"} style={{ marginLeft: 5 }} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
     );
