@@ -16,33 +16,6 @@ interface BusStop {
   isFavourited: boolean;
 }
 
-// display toast for errors
-const [favouritedBusStopsErrorMsg, setFavouritedBusStopsErrorMsg] = useState("");
-const [resetFavouritesErrorMsg, setResetFavouritesErrorMsg] = useState("");
-useEffect(() => {
-  if (favouritedBusStopsErrorMsg) {
-    Toast.show({
-      type: "error",
-      text1: favouritedBusStopsErrorMsg,
-      text2: "Please restart the application before trying again.",
-      position: "top",
-      autoHide: true,
-    });
-  }
-}, [favouritedBusStopsErrorMsg]);
-
-useEffect(() => {
-  if (resetFavouritesErrorMsg) {
-    Toast.show({
-      type: "error",
-      text1: resetFavouritesErrorMsg,
-      text2: "Please restart the application before trying again.",
-      position: "top",
-      autoHide: true,
-    });
-  }
-}, [resetFavouritesErrorMsg]);
-
 export const getFavouritedBusStops = async () => {
   try {
     const busStops = await AsyncStorage.getItem("busStops");
@@ -55,7 +28,6 @@ export const getFavouritedBusStops = async () => {
     return [];
   } catch (error) {
     console.error("Failed to fetch favourited bus stops from storage", error);
-    setFavouritedBusStopsErrorMsg(`Failed to fetch favourited bus stops from storage: ${error}`)
     return [];
   }
 };
@@ -78,6 +50,5 @@ export const resetFavourites = async () => {
     }
   } catch (error) {
     console.error("Failed to reset favourites", error);
-    setResetFavouritesErrorMsg(`Failed to fetch favourited bus stops from storage: ${error}`)
   }
 };
