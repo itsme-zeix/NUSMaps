@@ -91,7 +91,7 @@ const BusStopSearchScreen: React.FC = () => {
       await AsyncStorage.setItem("busStops", JSON.stringify(updatedData));
     } catch (error) {
       console.error("Error saving to AsyncStorage:", error);
-      setUpdateAsyncStorageErrorMsg(`Failed to update AsyncStorage, ${error}`);
+      setUpdateAsyncStorageErrorMsg(`Failed to update AsyncStorage: ${error}`);
     }
   };
   // Display toast is Async Storage was not updated
