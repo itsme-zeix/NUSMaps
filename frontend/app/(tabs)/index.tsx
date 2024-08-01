@@ -65,6 +65,7 @@ const calculateMinutesDifference = (isoTime: string): string => {
 export const ExpandableBusStop = ({ item }: { item: BusStop }) => {
   //Used to render details for 1 bus stop
   const [expanded, setExpanded] = useState(false);
+  const updatedBusStopName = mapNUSCodeNametoFullName(item.busStopName);
 
   const onItemPress = () => {
     setExpanded(!expanded);
@@ -75,7 +76,7 @@ export const ExpandableBusStop = ({ item }: { item: BusStop }) => {
       <TouchableWithoutFeedback onPress={onItemPress} testID="expandable-bus-stop">
         <View style={styles.cardContainer}>
           <View style={styles.textContainer}>
-            <Text style={styles.busStopName}>{mapNUSCodeNametoFullName(item.busStopName)}</Text>
+            <Text style={styles.busStopName}>{updatedBusStopName}</Text>
             <Text style={styles.distanceAwayText}>{Number(item.distanceAway) < 1 ? `~${(Number(item.distanceAway) * 1000).toFixed(0)}m away` : `~${Number(item.distanceAway).toFixed(2)}km away`}</Text>
           </View>
           <View style={styles.nusTagAndChevronContainer}>
