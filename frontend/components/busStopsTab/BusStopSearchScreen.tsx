@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { SafeAreaView, FlatList, View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Pressable } from "react-native";
+import { SafeAreaView, FlatList, View, Text, StyleSheet, ActivityIndicator, Pressable } from "react-native";
 import { SearchBar, Icon } from "@rneui/base";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
@@ -136,9 +136,9 @@ const BusStopSearchScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <View style={{ marginHorizontal: 10 }}>
         <Pressable onPress={() => navigation.goBack()} style={styles.closeButton}>
-          <Text>Close</Text>
+          <Ionicons name="arrow-back" color="848484" size={25} />
         </Pressable>
-        <SearchBar placeholder="Search" onChangeText={(text) => updateSearch(text)} value={search} platform="ios" searchIcon={<Ionicons name="search" size={20} color="gray" />} clearIcon={<Ionicons name="close-circle" size={23} color="gray" style={{ opacity: 0 }} />} autoFocus={true} ref={(ref: any) => setSearchBarRef(ref)} />
+        <SearchBar placeholder="Search" platform="ios" onChangeText={(text) => updateSearch(text)} value={search} searchIcon={{ name: "search" }} clearIcon={{ name: "close-circle" }} autoFocus={true} style={{height: 15}} ref={(ref: any) => setSearchBarRef(ref)} />
         <FlatList data={filteredData} keyExtractor={(item) => item.busStopId} renderItem={renderItem} />
       </View>
     </SafeAreaView>
@@ -151,8 +151,8 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   closeButton: {
-    alignSelf: "flex-end",
-    padding: 10,
+    alignSelf: "flex-start",
+    marginHorizontal: 10,
   },
   item: {
     padding: 15,
