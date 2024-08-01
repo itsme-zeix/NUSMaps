@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { SafeAreaView, FlatList, View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+import { SafeAreaView, FlatList, View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Pressable } from "react-native";
 import { SearchBar, Icon } from "@rneui/base";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
@@ -180,9 +180,9 @@ const BusStopSearchScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ marginHorizontal: 10 }}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
+        <Pressable onPress={() => navigation.goBack()} style={styles.closeButton}>
           <Text>Close</Text>
-        </TouchableOpacity>
+        </Pressable>
         <SearchBar placeholder="Search" onChangeText={(text) => updateSearch(text)} value={search} platform="ios" searchIcon={<Ionicons name="search" size={20} color="gray" />} clearIcon={<Ionicons name="close-circle" size={23} color="gray" style={{ opacity: 0 }} />} autoFocus={true} ref={(ref: any) => setSearchBarRef(ref)} />
         <FlatList data={filteredData} keyExtractor={(item) => item.busStopId} renderItem={renderItem} />
       </View>
