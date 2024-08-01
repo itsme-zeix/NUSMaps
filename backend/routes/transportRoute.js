@@ -309,7 +309,6 @@ const handleRouting = async (origin, destination) => {
   const isOriginInNUS = isPointInNUSPolygons(originTurfPoint); //true or false
   const isDestInNUS = isPointInNUSPolygons(destinationTurfPoint); //true or false
   if (isOriginInNUS && isDestInNUS) {
-    sendProgress(res, progress += 20);
     console.log("Code 1: Origin in NUS, Destination Not in NUS");
     const result = await axios.post(
       "https://nusmaps.onrender.com/NUSBusRoutes",
