@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef  } from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, Pressable, Animated  } from "react-native";
 import MapView, {
   PROVIDER_GOOGLE,
   Marker,
@@ -16,6 +16,7 @@ import Constants from "expo-constants";
 import axios from 'axios';
 import useUserLocation from "@/hooks/useUserLocation";
 import { baseResultsCardType, destinationType } from "@/types";
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 
 //constants and variables
 const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY == undefined ? Constants.expoConfig.extra.EXPO_PUBLIC_GOOGLEMAPS_API_KEY : process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY ;
@@ -24,7 +25,7 @@ const INTERVALFORLOCATIONREFRESH = 3 * 1000; //in ms
 const App = forwardRef((props, ref) => {
   //hooks
   const router = useRouter();
-  const segments = useSegments();
+  const scaleAnim = useRef(new Animated.Value(1)).current;
   const [currentLocation, setCurrentLocation] =
     useState<Location.LocationObjectCoords>({
       latitude: 1.3521,
@@ -71,7 +72,6 @@ const App = forwardRef((props, ref) => {
   // const showResultsScreenAfterLoading = (originCoords, destCoords, ) => {
 
   // }
-
   useEffect(()=> {
     // if (!isNotInitialExec.current) {
       //not the initial load
@@ -82,35 +82,51 @@ const App = forwardRef((props, ref) => {
   }
   , [isLoading]);
 
+  const getLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync(); //could be slow for ios
+    if (status !== "granted") {
+      console.log("Permission to access location was denied");
+      setPermissionErrorMsg("Permission to access location was denied.");
+      return;
+    }
+
+    try {
+      let location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+        timeInterval: INTERVALFORLOCATIONREFRESH,
+      });
+      setCurrentLocation(location.coords);
+      setRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      });
+    } catch (error) {
+      setLocationErrorMsg(`Failed to obtain location, ${error}`);
+      console.error("Failed to obtain location.", error);
+    }
+  };
+  
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.6,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    getLocation();
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  };
+
+
   useEffect(() => {
     //to query for location permission
-    const getLocation = async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync(); //could be slow for ios
-      if (status !== "granted") {
-        console.log("Permission to access location was denied");
-        setPermissionErrorMsg("Permission to access location was denied.");
-        return;
-      }
-
-      try {
-        let location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.High,
-          timeInterval: INTERVALFORLOCATIONREFRESH,
-        });
-        setCurrentLocation(location.coords);
-        setRegion({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.005,
-          longitudeDelta: 0.005,
-        });
-      } catch (error) {
-        setLocationErrorMsg(`Failed to obtain location, ${error}`);
-        console.error("Failed to obtain location.", error);
-      }
-    };
     getLocation(); //initial call
-
     const intervalId = setInterval(() => {
       getLocation();
     }, INTERVALFORLOCATIONREFRESH); //refreshes location every 10s
@@ -308,6 +324,14 @@ const App = forwardRef((props, ref) => {
             />
           </View>
         </View>
+        <View style={styles.floatingButtonContainer}>
+        {/* <View style = {{backgroundColor:'red', position:'absolute', bottom:120, right:30}}> */}
+          <Pressable onPressIn={handlePressIn} onPressOut={handlePressOut}>
+            <Animated.View style={[styles.floatingButton, { transform: [{ scale: scaleAnim }]}]}>
+              <FontAwesome6 name="location-crosshairs" size={24} color="black" />
+            </Animated.View>
+          </Pressable>
+        </View>
       </View>
     </GestureHandlerRootView>
   );
@@ -331,6 +355,24 @@ const styles = StyleSheet.create({
     alignContent: "center",
     width: "100%",
     backgroundColor: "rgba(255, 255, 255, 0)",
+  },
+  floatingButtonContainer: {
+    position: "absolute",
+    bottom: 80,
+    right: 30,
+  },
+  floatingButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });
 export default App;
