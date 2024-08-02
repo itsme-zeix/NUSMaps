@@ -226,11 +226,8 @@ describe("Tests that involve user navigation", () => {
     fetchBestRouteSpy.mockRestore();
     routerReplaceSpy.mockRestore();
   });
-  // const TESTLOCATION = {
-  //   latitude: 1.3489977386432621,
-  //   longitude: 103.7492952313956,
-  // };
   it("checks if pressing the current location button refetches the location" , async () => {
+    //tests whether button is rendered + whether pressing it calls the location change
     (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({ status: "granted" });
     (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValue({ coords: {latitude: 1.3, longitude:105} });
     const ref = React.createRef<AppInstance>();
