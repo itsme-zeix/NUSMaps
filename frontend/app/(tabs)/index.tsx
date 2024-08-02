@@ -16,10 +16,11 @@ import CollapsibleContainer from "@/components/busStopsTab/CollapsibleContainer"
 import useUserLocation from "@/hooks/useUserLocation";
 import { NUSTag } from "@/components/busStopsTab/NUSTag";
 import mapBusServiceColour from "@/utils/mapBusServiceColor";
+import { mapNUSCodeNametoFullName } from "@/utils/mapNUSCodeNametoFullName";
 
 // Stack navigator to redirect from bus stop screen to bus stop search screen (vice-versa)
 const Stack = createStackNavigator();
-export function BusStopSearchNavigator(): React.JSX.Element {
+export default function BusStopSearchNavigator(): React.JSX.Element {
   return (
     <QueryClientProvider client={queryClient}>
       <Stack.Navigator initialRouteName="MainScreen">
@@ -64,6 +65,7 @@ const calculateMinutesDifference = (isoTime: string): string => {
 export const ExpandableBusStop = ({ item }: { item: BusStop }) => {
   //Used to render details for 1 bus stop
   const [expanded, setExpanded] = useState(false);
+  const updatedBusStopName = mapNUSCodeNametoFullName(item.busStopName);
 
   const onItemPress = () => {
     setExpanded(!expanded);
@@ -74,7 +76,7 @@ export const ExpandableBusStop = ({ item }: { item: BusStop }) => {
       <TouchableWithoutFeedback onPress={onItemPress} testID="expandable-bus-stop">
         <View style={styles.cardContainer}>
           <View style={styles.textContainer}>
-            <Text style={styles.busStopName}>{item.busStopName.startsWith("NUSSTOP") ? item.busStopName.slice(8) : item.busStopName}</Text>
+            <Text style={styles.busStopName}>{updatedBusStopName}</Text>
             <Text style={styles.distanceAwayText}>{Number(item.distanceAway) < 1 ? `~${(Number(item.distanceAway) * 1000).toFixed(0)}m away` : `~${Number(item.distanceAway).toFixed(2)}km away`}</Text>
           </View>
           <View style={styles.nusTagAndChevronContainer}>
@@ -276,7 +278,7 @@ function NUSBusStops({ refreshLocation, refresh }: { refreshLocation: number; re
   );
 }
 
-export default function BusStopsScreen() {
+export function BusStopsScreen() {
   const [refreshLocation, setRefreshLocation] = useState(0); // State to handle the re-retrieval of user location.
   const [selectedIndex, setSelectedIndex] = useState(0); // State to handle the logic of rendering Favourites, Nearby or NUS bus stops.
 
