@@ -28,15 +28,6 @@ jest.mock("@expo/vector-icons", () => {
   };
 });
 
-jest.mock("@expo/vector-icons/FontAwesome6", () => {
-  const React = require("react");
-  const { Text } = require("react-native");
-  return ({ name, ...props }: { name: string }) => {
-    return <Text {...props}>{name}</Text>;
-  };
-  }
-);
-
 jest.mock("react-native-maps", () => {
   const React = require("react");
   const MockMapView = (props: React.JSX.IntrinsicAttributes & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>) => <div {...props} />;
