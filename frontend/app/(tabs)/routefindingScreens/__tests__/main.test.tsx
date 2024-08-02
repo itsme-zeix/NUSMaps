@@ -83,7 +83,6 @@ interface AppInstance {
   getLatLngFromId: (placeId: string) => Promise<LatLng>;
   getDestinationResult: (data: GooglePlaceData) => Promise<void>;
   setDestination: (destination: { address: string; placeId: string } & LatLng) => void;
-  handlePressOut: () => void;
 }
 
 describe("Straight forward toasts/error handling", () => {

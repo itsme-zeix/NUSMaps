@@ -296,7 +296,7 @@ const App = forwardRef((props, ref) => {
     };
 
   useImperativeHandle(ref, () => ({
-    fetchRoutesFromServer, fetchBestRoute, getDestinationResult, getLatLngFromId, setDestination, handlePressOut
+    fetchRoutesFromServer, fetchBestRoute, getDestinationResult, getLatLngFromId, setDestination
   }));
 
   return (
