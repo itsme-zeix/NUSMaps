@@ -11,10 +11,9 @@ import { RouteSearchBar } from "@/components/RouteSearchBar";
 import Toast from "react-native-toast-message";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { GooglePlaceData } from "react-native-google-places-autocomplete";
-import { useRouter, useSegments } from "expo-router";
+import { useRouter } from "expo-router";
 import Constants from "expo-constants";
 import axios from 'axios';
-import useUserLocation from "@/hooks/useUserLocation";
 import { baseResultsCardType, destinationType } from "@/types";
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 
@@ -297,7 +296,7 @@ const App = forwardRef((props, ref) => {
     };
 
   useImperativeHandle(ref, () => ({
-    fetchRoutesFromServer, fetchBestRoute, getDestinationResult, getLatLngFromId, setDestination
+    fetchRoutesFromServer, fetchBestRoute, getDestinationResult, getLatLngFromId, setDestination, handlePressOut
   }));
 
   return (
@@ -326,7 +325,7 @@ const App = forwardRef((props, ref) => {
         </View>
         <View style={styles.floatingButtonContainer}>
         {/* <View style = {{backgroundColor:'red', position:'absolute', bottom:120, right:30}}> */}
-          <Pressable onPressIn={handlePressIn} onPressOut={handlePressOut}>
+          <Pressable onPressIn={handlePressIn} onPressOut={handlePressOut} testID = "current-location-button">
             <Animated.View style={[styles.floatingButton, { transform: [{ scale: scaleAnim }]}]}>
               <FontAwesome6 name="location-crosshairs" size={24} color="black" />
             </Animated.View>
