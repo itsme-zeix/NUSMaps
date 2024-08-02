@@ -1,5 +1,5 @@
 import React from "react";
-import { render, waitFor, act } from "@testing-library/react-native";
+import { render, waitFor, act, fireEvent } from "@testing-library/react-native";
 import * as Location from "expo-location";
 import Toast from "react-native-toast-message";
 import App from "../Main"; // Ensure this is the correct path to your component
@@ -21,6 +21,12 @@ jest.mock("expo-location", () => ({
 jest.mock("react-native-toast-message", () => ({
   show: jest.fn(),
 }));
+
+jest.mock("@expo/vector-icons", () => {
+  return {
+    FontAwesome6: "FontAwesome6",
+  };
+});
 
 jest.mock("react-native-maps", () => {
   const React = require("react");
@@ -211,30 +217,28 @@ describe("Tests that involve user navigation", () => {
     fetchBestRouteSpy.mockRestore();
     routerReplaceSpy.mockRestore();
   });
-  // it("check if the back button on the result screen results in navigation back to the base search screen", async () => {
-  //   const { ref, fetchBestRouteSpy, routerReplaceSpy, routerPushSpy, origin, mockDestination, mockBaseResultsCard, DEFAULTDESTINATIONLatLng } = await setup();
-  //   await act(async ()=> {
-  //     ref.current!.setDestination({
-  //       latitude: mockDestination.latitude,
-  //       longitude: mockDestination.longitude,
-  //       address: "DEFAULT",
-  //       placeId: "DEFAULT"
-  //     });
-  //   });
-  //   await waitFor(() => {
-  //     //this replacement is the sign that the function has been called, despite bugs with the func itself being called
-  //     expect(routerPushSpy).toHaveBeenCalledWith({
-  //       pathname: "../routefindingScreens/loadingScreen"
-  //     });
-  //     expect(routerReplaceSpy).toHaveBeenCalledWith({
-  //       pathname: "../routefindingScreens/ResultsScreen", // COULD BREAK WITH REFACTORING
-  //       params: {
-  //         origin: JSON.stringify(origin),
-  //         destination: JSON.stringify({latitude:mockDestination.latitude, longitude:mockDestination.longitude, address:DEFAULTDESTINATIONLatLng.address, placeId: DEFAULTDESTINATIONLatLng.placeId}),
-  //         baseResultsData: JSON.stringify(mockBaseResultsCard)
-  //       }
-  //     });
-  //   });
+  it("checks if pressing the current location button refetches the location" , async () => {
+    //tests whether button is rendered + whether pressing it calls the location change
+    (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({ status: "granted" });
+    (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValue({ coords: {latitude: 1.3, longitude:105} });
+    const ref = React.createRef<AppInstance>();
+    expect(ref.current).toBeDefined(); 
+    const {getByTestId} = render(<App ref = {ref}/>); 
+    const currentLocationButton = getByTestId('current-location-button');
+    const marker = await waitFor(() => getByTestId("current-location-marker"));
+    const map = await waitFor(() => getByTestId("current-location-map"));
+    expect(currentLocationButton).toBeTruthy();
+    await fireEvent(currentLocationButton, 'pressOut');
+    expect(marker.props.coordinate).toEqual({
+      latitude: 1.3,
+      longitude: 105
+    });
+    expect(map.props.region).toEqual({
+      latitude: 1.3,
+      longitude: 105,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
+    });
+  });
 
-  // })
-});
+})
