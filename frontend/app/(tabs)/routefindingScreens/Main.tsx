@@ -211,8 +211,8 @@ const App = forwardRef((props, ref) => {
 
   async function fetchRoutesFromServer(origin: LatLng, destination: LatLng): Promise<baseResultsCardType[]> {
     if (oneMapsAPIToken) {
+      console.log(oneMapsAPIToken);
       try {
-        console.log("Origin location:", origin);
         const response = await axios.post(
           "https://nusmaps.onrender.com/transportRoute",
           {
