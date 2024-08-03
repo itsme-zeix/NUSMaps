@@ -84,6 +84,7 @@ const App = forwardRef((props, ref) => {
 
   const getLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync(); //could be slow for ios
+    
     if (status !== "granted") {
       console.log("Permission to access location was denied");
       setPermissionErrorMsg("Permission to access location was denied.");
@@ -127,10 +128,10 @@ const App = forwardRef((props, ref) => {
     }).start();
   };
 
-
   useEffect(() => {
     //to query for location permission
     getLocation(); //initial call
+    
     const intervalId = setInterval(() => {
       getLocation();
     }, INTERVALFORLOCATIONREFRESH); 
@@ -307,8 +308,8 @@ const App = forwardRef((props, ref) => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <MapView style={styles.map} region={region} testID="current-location-map">
-          {currentLocation && (
+        <MapView style={styles.map} region={region} testID="current-location-map" userInterfaceStyle="light" showsUserLocation={true}>
+          {/* {currentLocation && (
             <Marker
               testID="current-location-marker"
               coordinate={{
@@ -321,7 +322,7 @@ const App = forwardRef((props, ref) => {
                 <CurrentLocationIcon></CurrentLocationIcon>
               </View>
             </Marker>
-          )}
+          )} */}
         </MapView>
         <View style={styles.overlay}>
           <View style={{ paddingTop: "5%" }}>
@@ -377,9 +378,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
   },
 });
 export default App;
