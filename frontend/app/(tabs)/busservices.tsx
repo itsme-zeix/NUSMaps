@@ -748,7 +748,7 @@ const NUSBusServices = forwardRef((props, ref) => {
                 }}
                 anchor={{ x: 0.5, y: 0.5 }}
               >
-                <FontAwesome name="location-arrow" size={18} color="#27f" style={{ transform: [{ rotate: `${directionMarker.angle}` }] }} />
+                <FontAwesome name="location-arrow" size={25} color="#27f" style={{ transform: [{ rotate: `${directionMarker.angle}` }] }} />
               </Marker>
             ))}
         </MapView>
