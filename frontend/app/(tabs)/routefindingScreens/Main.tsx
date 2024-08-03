@@ -302,7 +302,7 @@ const App = forwardRef((props, ref) => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <MapView style={styles.map} region={region} testID="current-location-map">
+        <MapView style={styles.map} provider={PROVIDER_GOOGLE} region={region} testID="current-location-map">
           {currentLocation && (
             <Marker
               testID="current-location-marker"
@@ -324,6 +324,7 @@ const App = forwardRef((props, ref) => {
           </View>
         </View>
         <View style={styles.floatingButtonContainer}>
+        {/* <View style = {{backgroundColor:'red', position:'absolute', bottom:120, right:30}}> */}
           <Pressable onPressIn={handlePressIn} onPressOut={handlePressOut} testID = "current-location-button">
             <Animated.View style={[styles.floatingButton, { transform: [{ scale: scaleAnim }]}]}>
               <FontAwesome6 name="location-crosshairs" size={24} color="black" />
@@ -356,7 +357,7 @@ const styles = StyleSheet.create({
   },
   floatingButtonContainer: {
     position: "absolute",
-    bottom: 30,
+    bottom: 80,
     right: 30,
   },
   floatingButton: {
