@@ -11,7 +11,6 @@ const useUserLocation = (refreshLocation: number) => {
 
   const getLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
-    Location.getBackgroundPermissionsAsync();
     if (status !== "granted") {
       setPermissionErrorMsg("Permission to access location was denied.");
       return;
