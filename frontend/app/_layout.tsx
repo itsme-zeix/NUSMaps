@@ -7,12 +7,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "react-native";
 import axios from "axios";
 import * as SplashScreen from "expo-splash-screen";
-import Location from "expo-location";
+import * as Location from "expo-location";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default async function RootLayout() {
+export default function RootLayout() {
   const [fontsLoaded, error] = useFonts({
     "Inter-Bold": require("../assets/fonts/Inter-Bold.otf"),
     "Inter-Medium": require("../assets/fonts/Inter-Medium.otf"),
@@ -70,17 +70,20 @@ export default async function RootLayout() {
     setupLocalStorage();
   }, []);
 
-  
-  // REQUEST OCATION PERMISSIONS
+  // REQUEST LOCATION PERMISSIONS
   const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
-  let { status } = await Location.requestForegroundPermissionsAsync(); //could be slow for ios
+  useEffect(() => {
+    const requestLocationPermissions = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync(); //could be slow for ios
 
-  if (status !== "granted") {
-    console.log("Permission to access location was denied");
-    setPermissionErrorMsg("Permission to access location was denied.");
-    return;
-  }
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        setPermissionErrorMsg("Permission to access location was denied.");
+      }
+    };
 
+    requestLocationPermissions();
+  }, []);
   useEffect(() => {
     if (permissionErrorMsg) {
       Toast.show({
