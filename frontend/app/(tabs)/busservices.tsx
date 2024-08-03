@@ -714,7 +714,7 @@ const NUSBusServices = forwardRef((props, ref) => {
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <View style={styles.mapContainer}>
         <MapView style={styles.map} userInterfaceStyle="light" region={routeSelected == "BTC" ? NUS_BTC : routeSelected == "L" ? BUKITTIMAHCAMPUS : NUS} rotateEnabled={false}>
-          <Polyline coordinates={routeDataShown.checkPointCoordsArray} strokeColor="#27f" strokeWidth={5} tappable={false} />
+          <Polyline coordinates={routeDataShown.checkPointCoordsArray} strokeColor="#27f" strokeWidth={4} tappable={false} />
           {routeDataShown.busStopsCoordsArray.map((busStopMarker, index) => (
             <Marker
               key={index}
@@ -748,12 +748,12 @@ const NUSBusServices = forwardRef((props, ref) => {
                 }}
                 anchor={{ x: 0.5, y: 0.5 }}
               >
-                <FontAwesome name="location-arrow" size={25} color="orange" style={{ transform: [{ rotate: `${directionMarker.angle}` }] }} />
+                <FontAwesome name="location-arrow" size={18} color="#27f" style={{ transform: [{ rotate: `${directionMarker.angle}` }] }} />
               </Marker>
             ))}
         </MapView>
       </View>
-      <ScrollView>
+      <ScrollView style={{marginTop: 10}}>
         {NUS_BUS_SERVICES.map((busService, index) => (
           <Pressable key={index} onPress={() => setRouteSelected(busService)}>
             <ServiceCard busService={busService} busStops={fetchDetailedStopNames(busService)} displayedStops={fetchBaseCardData(busService)} />
