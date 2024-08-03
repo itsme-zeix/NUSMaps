@@ -4,8 +4,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import RootLayout from "@/app/_layout";
 
+jest.mock("expo-router", () => ({
+  Stack: ({ children }: { children: string }) => "children",
+  Screen: ({ children }: { children: string }) => "children",
+  useRouter: jest.fn(),
+}));
+
 jest.mock("expo-location", () => ({
-  requestForegroundPermissionsAsync: jest.fn(),
+  requestForegroundPermissionsAsync: jest.fn().mockResolvedValue({ status: "granted" }),
   getCurrentPositionAsync: jest.fn(),
   Accuracy: {
     High: "true",
