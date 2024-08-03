@@ -121,10 +121,12 @@ describe("Straight forward toasts/error handling", () => {
 });
 
 describe("Tests that involve user navigation", () => {
-  const setup = async () => {;
+
+  const setup = async () => {
     (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValue({ coords: TESTLOCATION });
 
-    const origin = { latitude: 1.3521, longitude: 103.8198 };
+    //const origin = { latitude: 1.3521, longitude: 103.8198 };
+    const origin = TESTLOCATION;
     const mockDestination = { latitude: 1.3489977386432621, longitude: 103.7492952313956 };
     const mockBaseResultsCard = [
       {
@@ -159,7 +161,6 @@ describe("Tests that involve user navigation", () => {
   it("checks if the router.push and router.replace function is called when a successful result is attained from backend.", async () => {
     const { ref, fetchBestRouteSpy, routerReplaceSpy, routerPushSpy, origin, mockDestination, mockBaseResultsCard, DEFAULTDESTINATIONLatLng } = await setup();
     await act(async () => {
-      console.log("Setting destination state...");
       ref.current!.setDestination({
         latitude: mockDestination.latitude,
         longitude: mockDestination.longitude,
@@ -184,20 +185,20 @@ describe("Tests that involve user navigation", () => {
     fetchBestRouteSpy.mockRestore();
     routerReplaceSpy.mockRestore();
   });
-  it("checks if pressing the current location button refetches the location" , async () => {
+  it("checks if pressing the current location button refetches the location", async () => {
     //tests whether button is rendered + whether pressing it calls the location change
-    (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValue({ coords: {latitude: 1.3, longitude:105} });
+    (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValue({ coords: { latitude: 1.3, longitude: 105 } });
     const ref = React.createRef<AppInstance>();
-    expect(ref.current).toBeDefined(); 
-    const {getByTestId} = render(<App ref = {ref}/>); 
-    const currentLocationButton = getByTestId('current-location-button');
+    expect(ref.current).toBeDefined();
+    const { getByTestId } = render(<App ref={ref} />);
+    const currentLocationButton = getByTestId("current-location-button");
     const marker = await waitFor(() => getByTestId("current-location-marker"));
     const map = await waitFor(() => getByTestId("current-location-map"));
     expect(currentLocationButton).toBeTruthy();
-    await fireEvent(currentLocationButton, 'pressOut');
+    await fireEvent(currentLocationButton, "pressOut");
     expect(marker.props.coordinate).toEqual({
       latitude: 1.3,
-      longitude: 105
+      longitude: 105,
     });
     expect(map.props.region).toEqual({
       latitude: 1.3,
@@ -206,5 +207,4 @@ describe("Tests that involve user navigation", () => {
       longitudeDelta: 0.005,
     });
   });
-
-})
+});
