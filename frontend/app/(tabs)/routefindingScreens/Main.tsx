@@ -109,7 +109,7 @@ const App = forwardRef((props, ref) => {
   
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
-      toValue: 0.6,
+      toValue: 0.85,
       useNativeDriver: true,
     }).start();
   };
@@ -324,7 +324,6 @@ const App = forwardRef((props, ref) => {
           </View>
         </View>
         <View style={styles.floatingButtonContainer}>
-        {/* <View style = {{backgroundColor:'red', position:'absolute', bottom:120, right:30}}> */}
           <Pressable onPressIn={handlePressIn} onPressOut={handlePressOut} testID = "current-location-button">
             <Animated.View style={[styles.floatingButton, { transform: [{ scale: scaleAnim }]}]}>
               <FontAwesome6 name="location-crosshairs" size={24} color="black" />
