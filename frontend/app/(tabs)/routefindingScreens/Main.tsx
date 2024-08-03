@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef } from "react";
-import { StyleSheet, View, Text, Pressable, Animated } from "react-native";
+import { StyleSheet, View, Platform, Pressable, Animated } from "react-native";
 import MapView, { PROVIDER_GOOGLE, Marker, Region, LatLng } from "react-native-maps";
 import * as Location from "expo-location";
 import { RouteSearchBar } from "@/components/RouteSearchBar";
@@ -74,10 +74,23 @@ const App = forwardRef((props, ref) => {
 
   const getLocation = async () => {
     try {
-      let location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
-        timeInterval: INTERVALFORLOCATIONREFRESH,
-      });
+      let location;
+      // Because getCurrentPositionAsync() is awfully slow in IOS (~9seconds), expo-location documentation
+      // recommends using getLastKnownPositionAsync() instead. 
+      if (Platform.OS === "ios") {
+        const last = await Location.getLastKnownPositionAsync();
+        if (last) {
+          location = last;
+        } else {
+          const current = await Location.getCurrentPositionAsync();
+          location = current;
+        }
+      } else {
+        location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+          timeInterval: INTERVALFORLOCATIONREFRESH,
+        });
+      }
       setCurrentLocation(location.coords);
       setRegion({
         latitude: location.coords.latitude,
