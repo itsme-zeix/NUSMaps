@@ -308,8 +308,8 @@ const App = forwardRef((props, ref) => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <MapView style={styles.map} region={region} testID="current-location-map" userInterfaceStyle="light" showsUserLocation={true}>
-          {/* {currentLocation && (
+        <MapView style={styles.map} region={region} testID="current-location-map" userInterfaceStyle="light">
+          {currentLocation && (
             <Marker
               testID="current-location-marker"
               coordinate={{
@@ -322,7 +322,7 @@ const App = forwardRef((props, ref) => {
                 <CurrentLocationIcon></CurrentLocationIcon>
               </View>
             </Marker>
-          )} */}
+          )}
         </MapView>
         <View style={styles.overlay}>
           <View style={{ paddingTop: "5%" }}>
