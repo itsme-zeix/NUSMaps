@@ -111,7 +111,6 @@ const App = forwardRef((props, ref) => {
   };
 
   useEffect(() => {
-    //to query for location permission
     getLocation(); //initial call
 
     const intervalId = setInterval(() => {
