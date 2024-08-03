@@ -87,7 +87,7 @@ export default async function RootLayout() {
       Toast.show({
         type: "error",
         text1: permissionErrorMsg,
-        text2: "Please try again later",
+        text2: "Please enable the permission.",
         position: "top",
         autoHide: true,
       });
