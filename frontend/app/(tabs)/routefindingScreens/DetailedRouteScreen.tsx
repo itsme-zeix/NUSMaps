@@ -352,7 +352,6 @@ const DetailedRouteScreen: React.FC = () => {
     <View style={stylesheet.SafeAreaView} testID="test">
       <MapView
         style={stylesheet.MapView}
-        provider={PROVIDER_GOOGLE}
         initialRegion={{
           latitude: (origin.latitude + destination.latitude) / 2,
           longitude: (origin.longitude + destination.longitude) / 2,

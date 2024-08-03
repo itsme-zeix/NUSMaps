@@ -1,25 +1,28 @@
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "react-native-reanimated";
 import Toast from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "react-native";
 import axios from "axios";
 import * as SplashScreen from "expo-splash-screen";
+import * as Location from "expo-location";
+
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded, error] = useFonts({
-    'Inter-Bold': require('../assets/fonts/Inter-Bold.otf'),
-    'Inter-Medium': require('../assets/fonts/Inter-Medium.otf'),
-    'Inter-Regular': require('../assets/fonts/Inter-Regular.otf'),
-    'Inter-SemiBold': require('../assets/fonts/Inter-SemiBold.otf')
+    "Inter-Bold": require("../assets/fonts/Inter-Bold.otf"),
+    "Inter-Medium": require("../assets/fonts/Inter-Medium.otf"),
+    "Inter-Regular": require("../assets/fonts/Inter-Regular.otf"),
+    "Inter-SemiBold": require("../assets/fonts/Inter-SemiBold.otf"),
   });
 
   // Forces dark status bar text (ignores device light/dark mode).
   useEffect(() => {
+    StatusBar.setBackgroundColor("white");
     StatusBar.setBarStyle("dark-content");
   }, []);
 
@@ -28,7 +31,6 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, error]);
-
 
   // Uncomment to clear existing database for testing
   // AsyncStorage.clear();
@@ -41,13 +43,9 @@ export default function RootLayout() {
         const lastUpdated = await AsyncStorage.getItem("lastUpdated");
         if (!isInitialized) {
           // Perform API call to retrieve database
-          const response = await axios.get(
-            `https://nusmaps.onrender.com/busStopDatabase?lastUpdated=${lastUpdated}`
-          );
+          const response = await axios.get(`https://nusmaps.onrender.com/busStopDatabase?lastUpdated=${lastUpdated}`);
           if (response.status !== 200) {
-            throw new Error(
-              "Network response was not ok. Please try again later."
-            );
+            throw new Error("Network response was not ok. Please try again later.");
           }
           const busStops = await response.data;
 
@@ -57,10 +55,7 @@ export default function RootLayout() {
             isFavourited: false,
           }));
 
-          await AsyncStorage.setItem(
-            "busStops",
-            JSON.stringify(busStopsWithFavourite)
-          );
+          await AsyncStorage.setItem("busStops", JSON.stringify(busStopsWithFavourite));
           await AsyncStorage.setItem("isInitialized", "true");
           console.log("ASYNC STORAGE INITIALIZED");
         } else {
@@ -75,9 +70,33 @@ export default function RootLayout() {
     };
     setupLocalStorage();
   }, []);
-  if (!fontsLoaded && !error) {
-    return null;
-  }
+
+  // REQUEST LOCATION PERMISSIONS
+  const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
+  useEffect(() => {
+    const requestLocationPermissions = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync(); //could be slow for ios
+
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        setPermissionErrorMsg("Permission to access location was denied.");
+      }
+    };
+
+    requestLocationPermissions();
+  }, []);
+  useEffect(() => {
+    if (permissionErrorMsg) {
+      Toast.show({
+        type: "error",
+        text1: permissionErrorMsg,
+        text2: "Please enable location permissions for NUSMaps.",
+        position: "top",
+        autoHide: true,
+      });
+    }
+  }, [permissionErrorMsg]);
+
   return (
     <>
       <Stack>

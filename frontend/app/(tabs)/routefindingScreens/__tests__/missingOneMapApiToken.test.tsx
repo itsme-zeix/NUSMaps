@@ -74,7 +74,7 @@ describe("error handling for valid onemap token but invalid server response", ()
       // );
     });
     await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith("api token for OneMap not declared. Check server settings");
+      expect(consoleErrorSpy).toHaveBeenCalledWith("API token for OneMap not declared. Check server settings");
     });
     consoleErrorSpy.mockRestore();
     // Assert: Check if the Toast was shown with the correct message
