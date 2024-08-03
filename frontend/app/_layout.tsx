@@ -7,7 +7,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import * as SplashScreen from "expo-splash-screen";
 import * as Location from "expo-location";
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from "react-native";
+import { Text, View } from "react-native";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -91,9 +92,16 @@ export default function RootLayout() {
     }
   }, [permissionErrorMsg]);
 
+  // Setting the status bar to dark colour requires a delay due to a known bug (see: https://github.com/expo/expo/issues/2813)
+  const delay = (fun: any, timeout: number) => new Promise((resolve) => setTimeout(resolve, timeout)).then(fun);
+  const closePreview = () => {
+    delay(() => StatusBar.setBarStyle("dark-content"), 3);
+  };
+  closePreview();
+
   return (
     <>
-      <StatusBar backgroundColor="white" style="dark" />
+      <StatusBar />
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
