@@ -16,6 +16,7 @@ import Constants from "expo-constants";
 import axios from 'axios';
 import { baseResultsCardType, destinationType } from "@/types";
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import CurrentLocationIcon from "@/components/CurrentLocationIcon";
 
 //constants and variables
 const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY == undefined ? Constants.expoConfig.extra.EXPO_PUBLIC_GOOGLEMAPS_API_KEY : process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY ;
@@ -132,7 +133,7 @@ const App = forwardRef((props, ref) => {
     getLocation(); //initial call
     const intervalId = setInterval(() => {
       getLocation();
-    }, INTERVALFORLOCATIONREFRESH); //refreshes location every 10s
+    }, INTERVALFORLOCATIONREFRESH); 
 
     return () => clearInterval(intervalId);
   }, [INTERVALFORLOCATIONREFRESH]);
@@ -315,7 +316,11 @@ const App = forwardRef((props, ref) => {
                 longitude: currentLocation.longitude,
               }}
               title="Your Location"
-            />
+            >
+              <View>
+                <CurrentLocationIcon></CurrentLocationIcon>
+              </View>
+            </Marker>
           )}
         </MapView>
         <View style={styles.overlay}>
