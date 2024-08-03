@@ -36,7 +36,6 @@ const App = forwardRef((props, ref) => {
     latitudeDelta: 0.05,
     longitudeDelta: 0.05,
   });
-  const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
   const [locationErrorMsg, setLocationErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false); //state used to maintain whether to show the user the loading screen
   const [routeErrorMsg, setRouteErrorMsg] = useState("");
@@ -74,14 +73,6 @@ const App = forwardRef((props, ref) => {
   }, [isLoading]);
 
   const getLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync(); //could be slow for ios
-
-    if (status !== "granted") {
-      console.log("Permission to access location was denied");
-      setPermissionErrorMsg("Permission to access location was denied.");
-      return;
-    }
-
     try {
       let location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
@@ -129,19 +120,6 @@ const App = forwardRef((props, ref) => {
 
     return () => clearInterval(intervalId);
   }, [INTERVALFORLOCATIONREFRESH]);
-
-  useEffect(() => {
-    // Toast to display error from denial of gps permission
-    if (permissionErrorMsg != "") {
-      Toast.show({
-        type: "error",
-        text1: permissionErrorMsg,
-        text2: "Please try again later",
-        position: "top",
-        autoHide: true,
-      });
-    }
-  }, [permissionErrorMsg]);
 
   useEffect(() => {
     //Toast to display error from inability to fetch location even with gps permission

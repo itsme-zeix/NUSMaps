@@ -1,16 +1,18 @@
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "react-native-reanimated";
 import Toast from "react-native-toast-message";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "react-native";
 import axios from "axios";
 import * as SplashScreen from "expo-splash-screen";
+import Location from "expo-location"
+
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+export default async function RootLayout() {
   const [fontsLoaded, error] = useFonts({
     "Inter-Bold": require("../assets/fonts/Inter-Bold.otf"),
     "Inter-Medium": require("../assets/fonts/Inter-Medium.otf"),
@@ -67,6 +69,30 @@ export default function RootLayout() {
     };
     setupLocalStorage();
   }, []);
+
+  
+  // REQUEST OCATION PERMISSIONS
+  const [permissionErrorMsg, setPermissionErrorMsg] = useState("");
+  let { status } = await Location.requestForegroundPermissionsAsync(); //could be slow for ios
+
+  if (status !== "granted") {
+    console.log("Permission to access location was denied");
+    setPermissionErrorMsg("Permission to access location was denied.");
+    return;
+  }
+
+  useEffect(() => {
+    // Toast to display error from denial of gps permission
+    if (permissionErrorMsg != "") {
+      Toast.show({
+        type: "error",
+        text1: permissionErrorMsg,
+        text2: "Please try again later",
+        position: "top",
+        autoHide: true,
+      });
+    }
+  }, [permissionErrorMsg]);
 
   return (
     <>
