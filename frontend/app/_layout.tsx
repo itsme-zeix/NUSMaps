@@ -22,6 +22,7 @@ export default function RootLayout() {
 
   // Forces dark status bar text (ignores device light/dark mode).
   useEffect(() => {
+    StatusBar.setBackgroundColor("white");
     StatusBar.setBarStyle("dark-content");
   }, []);
 
