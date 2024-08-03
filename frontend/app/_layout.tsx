@@ -12,10 +12,10 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded, error] = useFonts({
-    'Inter-Bold': require('../assets/fonts/Inter-Bold.otf'),
-    'Inter-Medium': require('../assets/fonts/Inter-Medium.otf'),
-    'Inter-Regular': require('../assets/fonts/Inter-Regular.otf'),
-    'Inter-SemiBold': require('../assets/fonts/Inter-SemiBold.otf')
+    "Inter-Bold": require("../assets/fonts/Inter-Bold.otf"),
+    "Inter-Medium": require("../assets/fonts/Inter-Medium.otf"),
+    "Inter-Regular": require("../assets/fonts/Inter-Regular.otf"),
+    "Inter-SemiBold": require("../assets/fonts/Inter-SemiBold.otf"),
   });
 
   // Forces dark status bar text (ignores device light/dark mode).
@@ -29,7 +29,6 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, error]);
 
-
   // Uncomment to clear existing database for testing
   // AsyncStorage.clear();
 
@@ -41,13 +40,9 @@ export default function RootLayout() {
         const lastUpdated = await AsyncStorage.getItem("lastUpdated");
         if (!isInitialized) {
           // Perform API call to retrieve database
-          const response = await axios.get(
-            `https://nusmaps.onrender.com/busStopDatabase?lastUpdated=${lastUpdated}`
-          );
+          const response = await axios.get(`https://nusmaps.onrender.com/busStopDatabase?lastUpdated=${lastUpdated}`);
           if (response.status !== 200) {
-            throw new Error(
-              "Network response was not ok. Please try again later."
-            );
+            throw new Error("Network response was not ok. Please try again later.");
           }
           const busStops = await response.data;
 
@@ -57,10 +52,7 @@ export default function RootLayout() {
             isFavourited: false,
           }));
 
-          await AsyncStorage.setItem(
-            "busStops",
-            JSON.stringify(busStopsWithFavourite)
-          );
+          await AsyncStorage.setItem("busStops", JSON.stringify(busStopsWithFavourite));
           await AsyncStorage.setItem("isInitialized", "true");
           console.log("ASYNC STORAGE INITIALIZED");
         } else {
@@ -75,9 +67,7 @@ export default function RootLayout() {
     };
     setupLocalStorage();
   }, []);
-  if (!fontsLoaded && !error) {
-    return null;
-  }
+
   return (
     <>
       <Stack>
