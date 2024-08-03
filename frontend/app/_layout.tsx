@@ -20,12 +20,6 @@ export default function RootLayout() {
     "Inter-SemiBold": require("../assets/fonts/Inter-SemiBold.otf"),
   });
 
-  // Forces dark status bar text (ignores device light/dark mode).
-  useEffect(() => {
-    StatusBar.setBackgroundColor("white");
-    StatusBar.setBarStyle("dark-content");
-  }, []);
-
   useEffect(() => {
     if (fontsLoaded || error) {
       SplashScreen.hideAsync();
@@ -99,6 +93,7 @@ export default function RootLayout() {
 
   return (
     <>
+      <StatusBar backgroundColor="white" barStyle="dark-content" />
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
