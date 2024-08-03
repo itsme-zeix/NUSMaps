@@ -4,6 +4,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import RootLayout from "@/app/_layout";
 
+jest.mock("expo-location", () => ({
+  requestForegroundPermissionsAsync: jest.fn(),
+  getCurrentPositionAsync: jest.fn(),
+  Accuracy: {
+    High: "true",
+  },
+}));
+
 const mockBusStops = [
   { id: 1, name: "Stop 1" },
   { id: 2, name: "Stop 2" },
