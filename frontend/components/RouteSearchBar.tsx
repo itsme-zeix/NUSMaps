@@ -62,6 +62,7 @@ export const RouteSearchBar: React.FC<
         placeholder="Where to?"
         textInputProps={{
           enterKeyHint: "search",
+          placeholderTextColor: "#484848"
         }}
         onPress={(data) => {
           // 'details' is provided when fetchDetails = true
@@ -80,10 +81,6 @@ export const RouteSearchBar: React.FC<
 
 //stylesheet
 const styles = StyleSheet.create({
-  text: {
-    fontSize: 14,
-    color: "#828282",
-  },
   wrapperCustom: {
     borderRadius: 12,
     padding: 13,
