@@ -109,7 +109,9 @@ const App = forwardRef((props, ref) => {
   
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
-      toValue: 0.85,
+      toValue: 0.9,
+      speed: 25,
+      bounciness: 0,
       useNativeDriver: true,
     }).start();
   };
@@ -118,6 +120,8 @@ const App = forwardRef((props, ref) => {
     getLocation();
     Animated.spring(scaleAnim, {
       toValue: 1,
+      speed: 25,
+      bounciness: 0,
       useNativeDriver: true,
     }).start();
   };
