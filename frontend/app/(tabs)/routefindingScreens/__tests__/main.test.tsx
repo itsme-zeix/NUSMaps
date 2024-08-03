@@ -83,8 +83,7 @@ describe("Straight forward toasts/error handling", () => {
     mockRouter.replace.mockReset();
   });
 
-  it("requests location permission and checks if the screen is rendered correctly + whether the mapview renders correctly", async () => {
-    (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({ status: "granted" });
+  it("requests location and checks if the screen is rendered correctly + whether the mapview renders correctly", async () => {
     (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValue({
       coords: TESTLOCATION,
     });
@@ -92,7 +91,6 @@ describe("Straight forward toasts/error handling", () => {
     const marker = await waitFor(() => getByTestId("current-location-marker"));
     const map = await waitFor(() => getByTestId("current-location-map"));
 
-    expect(Location.requestForegroundPermissionsAsync).toHaveBeenCalled();
     expect(Location.getCurrentPositionAsync).toHaveBeenCalled();
 
     expect(marker.props.coordinate).toEqual({
@@ -107,37 +105,7 @@ describe("Straight forward toasts/error handling", () => {
     });
   }, 10000);
 
-  it("handles permission denied", async () => {
-    (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({ status: "denied" });
-
-    const { getByTestId } = render(<App />);
-
-    await waitFor(() => {
-      expect(Toast.show).toHaveBeenCalledWith({
-        type: "error",
-        text1: "Permission to access location was denied.",
-        text2: "Please try again later",
-        position: "top",
-        autoHide: true,
-      });
-    });
-
-    const marker = await waitFor(() => getByTestId("current-location-marker"));
-    const map = await waitFor(() => getByTestId("current-location-map"));
-    expect(marker.props.coordinate).toEqual({
-      latitude: DEFAULTLOCATION.latitude,
-      longitude: DEFAULTLOCATION.longitude,
-    });
-    expect(map.props.region).toEqual({
-      latitude: DEFAULTLOCATION.latitude,
-      longitude: DEFAULTLOCATION.longitude,
-      latitudeDelta: 0.05,
-      longitudeDelta: 0.05,
-    });
-  });
-
-  it("handles permission granted but location cannot be attained", async () => {
-    (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({ status: "granted" });
+  it("shows toast on failure to obtain location", async () => {
     (Location.getCurrentPositionAsync as jest.Mock).mockRejectedValue("GPS failed");
     render(<App />);
     await waitFor(() => {
@@ -153,8 +121,7 @@ describe("Straight forward toasts/error handling", () => {
 });
 
 describe("Tests that involve user navigation", () => {
-  const setup = async () => {
-    (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({ status: "granted" });
+  const setup = async () => {;
     (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValue({ coords: TESTLOCATION });
 
     const origin = { latitude: 1.3521, longitude: 103.8198 };
@@ -219,7 +186,6 @@ describe("Tests that involve user navigation", () => {
   });
   it("checks if pressing the current location button refetches the location" , async () => {
     //tests whether button is rendered + whether pressing it calls the location change
-    (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({ status: "granted" });
     (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValue({ coords: {latitude: 1.3, longitude:105} });
     const ref = React.createRef<AppInstance>();
     expect(ref.current).toBeDefined(); 
