@@ -302,7 +302,7 @@ const App = forwardRef((props, ref) => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <MapView style={styles.map} provider={PROVIDER_GOOGLE} region={region} testID="current-location-map">
+        <MapView style={styles.map} region={region} testID="current-location-map">
           {currentLocation && (
             <Marker
               testID="current-location-marker"
