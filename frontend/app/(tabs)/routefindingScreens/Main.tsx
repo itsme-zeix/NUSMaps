@@ -1,11 +1,6 @@
-import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef  } from "react";
-import { StyleSheet, View, Text, Pressable, Animated  } from "react-native";
-import MapView, {
-  PROVIDER_GOOGLE,
-  Marker,
-  Region,
-  LatLng,
-} from "react-native-maps";
+import React, { useEffect, useState, useRef, useImperativeHandle, forwardRef } from "react";
+import { StyleSheet, View, Text, Pressable, Animated } from "react-native";
+import MapView, { PROVIDER_GOOGLE, Marker, Region, LatLng } from "react-native-maps";
 import * as Location from "expo-location";
 import { RouteSearchBar } from "@/components/RouteSearchBar";
 import Toast from "react-native-toast-message";
@@ -13,29 +8,28 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { GooglePlaceData } from "react-native-google-places-autocomplete";
 import { useRouter } from "expo-router";
 import Constants from "expo-constants";
-import axios from 'axios';
+import axios from "axios";
 import { baseResultsCardType, destinationType } from "@/types";
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import CurrentLocationIcon from "@/components/CurrentLocationIcon";
 
 //constants and variables
-const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY == undefined ? Constants.expoConfig.extra.EXPO_PUBLIC_GOOGLEMAPS_API_KEY : process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY ;
-const oneMapsAPIToken = process.env.EXPO_PUBLIC_ONEMAPAPITOKEN == undefined ?  Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN : process.env.EXPO_PUBLIC_ONEMAPAPITOKEN;
+const mapsApiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY == undefined ? Constants.expoConfig.extra.EXPO_PUBLIC_GOOGLEMAPS_API_KEY : process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
+const oneMapsAPIToken = process.env.EXPO_PUBLIC_ONEMAPAPITOKEN == undefined ? Constants.expoConfig.extra.EXPO_PUBLIC_ONEMAPAPITOKEN : process.env.EXPO_PUBLIC_ONEMAPAPITOKEN;
 const INTERVALFORLOCATIONREFRESH = 3 * 1000; //in ms
 const App = forwardRef((props, ref) => {
   //hooks
   const router = useRouter();
   const scaleAnim = useRef(new Animated.Value(1)).current;
-  const [currentLocation, setCurrentLocation] =
-    useState<Location.LocationObjectCoords>({
-      latitude: 1.3521,
-      longitude: 103.8198,
-      altitude: null,
-      accuracy: null,
-      altitudeAccuracy: null,
-      heading: null,
-      speed: null,
-    });
+  const [currentLocation, setCurrentLocation] = useState<Location.LocationObjectCoords>({
+    latitude: 1.3521,
+    longitude: 103.8198,
+    altitude: null,
+    accuracy: null,
+    altitudeAccuracy: null,
+    heading: null,
+    speed: null,
+  });
   const [region, setRegion] = useState<Region>({
     latitude: 1.3521, // Default to Singapore's latitude
     longitude: 103.8198, // Default to Singapore's longitude
@@ -52,9 +46,7 @@ const App = forwardRef((props, ref) => {
     address: "DEFAULT",
     placeId: "DEFAULT",
   };
-  const [destination, setDestination] = useState<destinationType>(
-    DEFAULTDESTINATIONLatLng
-  );
+  const [destination, setDestination] = useState<destinationType>(DEFAULTDESTINATIONLatLng);
   const isNotInitialExec = useRef(false);
 
   //effects arranged in execution order
@@ -66,25 +58,24 @@ const App = forwardRef((props, ref) => {
 
   const showLoadingScreen = () => {
     router.push({
-      pathname:"../routefindingScreens/loadingScreen",
+      pathname: "../routefindingScreens/loadingScreen",
     });
   };
   // const showResultsScreenAfterLoading = (originCoords, destCoords, ) => {
 
   // }
-  useEffect(()=> {
+  useEffect(() => {
     // if (!isNotInitialExec.current) {
-      //not the initial load
-      if (isLoading) {
-        showLoadingScreen();
-      } // nothing is done if set to false, as the other use effect will handle the replacement of the screen with the results screen
+    //not the initial load
+    if (isLoading) {
+      showLoadingScreen();
+    } // nothing is done if set to false, as the other use effect will handle the replacement of the screen with the results screen
     // }
-  }
-  , [isLoading]);
+  }, [isLoading]);
 
   const getLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync(); //could be slow for ios
-    
+
     if (status !== "granted") {
       console.log("Permission to access location was denied");
       setPermissionErrorMsg("Permission to access location was denied.");
@@ -108,7 +99,7 @@ const App = forwardRef((props, ref) => {
       console.error("Failed to obtain location.", error);
     }
   };
-  
+
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
       toValue: 0.9,
@@ -131,10 +122,10 @@ const App = forwardRef((props, ref) => {
   useEffect(() => {
     //to query for location permission
     getLocation(); //initial call
-    
+
     const intervalId = setInterval(() => {
       getLocation();
-    }, INTERVALFORLOCATIONREFRESH); 
+    }, INTERVALFORLOCATIONREFRESH);
 
     return () => clearInterval(intervalId);
   }, [INTERVALFORLOCATIONREFRESH]);
@@ -212,19 +203,17 @@ const App = forwardRef((props, ref) => {
         placeId: data.place_id,
       });
     }
-  };
+  }
 
   async function getLatLngFromId(placeId: string) {
     //reverses geocoding
     try {
-      const response = await axios.get(
-        `https://places.googleapis.com/v1/places/${placeId}?fields=location&key=${mapsApiKey}`
-      );
+      const response = await axios.get(`https://places.googleapis.com/v1/places/${placeId}?fields=location&key=${mapsApiKey}`);
       const jsonResultOject = response.data;
-      console.log('result object:', jsonResultOject);
+      console.log("result object:", jsonResultOject);
       const result = {
         latitude: jsonResultOject.location.latitude,
-        longitude: jsonResultOject.location.longitude
+        longitude: jsonResultOject.location.longitude,
       };
       return result;
     } catch (error) {
@@ -235,28 +224,25 @@ const App = forwardRef((props, ref) => {
           console.error("Request error: No response received");
         } else {
           console.error("Error:", error.message);
-        };
+        }
       } else {
         console.error("Non axios error:", error);
       }
     }
-  }; 
+  }
 
-  async function fetchRoutesFromServer(
-    origin: LatLng,
-    destination: LatLng
-  ): Promise<baseResultsCardType[]> {
+  async function fetchRoutesFromServer(origin: LatLng, destination: LatLng): Promise<baseResultsCardType[]> {
     if (oneMapsAPIToken) {
       try {
         console.log("Origin location:", origin);
         const response = await axios.post(
           "https://nusmaps.onrender.com/transportRoute",
-            {
-              origin: origin,
-              destination: destination,
-            },
-            {
-              headers: {
+          {
+            origin: origin,
+            destination: destination,
+          },
+          {
+            headers: {
               "Content-Type": "application/json",
               Authorization: oneMapsAPIToken,
             },
@@ -264,45 +250,41 @@ const App = forwardRef((props, ref) => {
         );
         return response.data;
       } catch (error) {
-        setRouteErrorMsg("Server issues, please try again later. SERVER ERROR");
-        console.error(
-          "Route could not be found. Please try again later: ",error
-        );
+        setRouteErrorMsg(`Unable to fetch route from server: ${error}`);
+        console.error("Unable to fetch route from server. Please try again later: ", error);
         setIsLoading(false);
-        throw new Error("Route could not be found. Please try again later");
+        throw new Error("Unable to fetch route from server. Please try again later: " + error);
       }
     } else {
       setRouteErrorMsg("Server issues, please try again later. API TOKEN ERROR");
-      console.error("api token for OneMap not declared. Check server settings");
+      console.error("API token for OneMap not declared. Check server settings");
       setIsLoading(false);
       throw new Error("API token could not be found. Please try again");
     }
   }
 
-  async function fetchBestRoute(
-    originCoords: LatLng,
-    destinationCoords: LatLng
-  ) {
+  async function fetchBestRoute(originCoords: LatLng, destinationCoords: LatLng) {
     //fetches best route between two points, can pass a check to see if
-      setIsLoading(true);
-      const result = await fetchRoutesFromServer(
-        originCoords,
-        destinationCoords
-      );
-      // console.log("finally", result);
-      setIsLoading(false);
-      router.replace({
-        pathname: "../routefindingScreens/ResultsScreen",
-        params: {
-          origin: JSON.stringify(originCoords),
-          destination: JSON.stringify(destination),
-          baseResultsData: JSON.stringify(result),
-        },
-      });
-    };
+    setIsLoading(true);
+    const result = await fetchRoutesFromServer(originCoords, destinationCoords);
+    // console.log("finally", result);
+    setIsLoading(false);
+    router.replace({
+      pathname: "../routefindingScreens/ResultsScreen",
+      params: {
+        origin: JSON.stringify(originCoords),
+        destination: JSON.stringify(destination),
+        baseResultsData: JSON.stringify(result),
+      },
+    });
+  }
 
   useImperativeHandle(ref, () => ({
-    fetchRoutesFromServer, fetchBestRoute, getDestinationResult, getLatLngFromId, setDestination
+    fetchRoutesFromServer,
+    fetchBestRoute,
+    getDestinationResult,
+    getLatLngFromId,
+    setDestination,
   }));
 
   return (
@@ -319,23 +301,19 @@ const App = forwardRef((props, ref) => {
               title="Your Location"
             >
               <View>
-                <CurrentLocationIcon></CurrentLocationIcon>
+                <CurrentLocationIcon />
               </View>
             </Marker>
           )}
         </MapView>
         <View style={styles.overlay}>
           <View style={{ paddingTop: "5%" }}>
-            <RouteSearchBar
-              location={currentLocation}
-              getDestinationResult={getDestinationResult}
-              testID="dest-search-bar"
-            />
+            <RouteSearchBar location={currentLocation} getDestinationResult={getDestinationResult} testID="dest-search-bar" />
           </View>
         </View>
         <View style={styles.floatingButtonContainer}>
-          <Pressable onPressIn={handlePressIn} onPressOut={handlePressOut} testID = "current-location-button">
-            <Animated.View style={[styles.floatingButton, { transform: [{ scale: scaleAnim }]}]}>
+          <Pressable onPressIn={handlePressIn} onPressOut={handlePressOut} testID="current-location-button">
+            <Animated.View style={[styles.floatingButton, { transform: [{ scale: scaleAnim }] }]}>
               <FontAwesome6 name="location-crosshairs" size={24} color="black" />
             </Animated.View>
           </Pressable>
@@ -344,8 +322,6 @@ const App = forwardRef((props, ref) => {
     </GestureHandlerRootView>
   );
 });
-
-
 
 //stylesheet
 const styles = StyleSheet.create({
@@ -373,10 +349,10 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 2,
