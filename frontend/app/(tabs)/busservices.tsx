@@ -714,7 +714,7 @@ const NUSBusServices = forwardRef((props, ref) => {
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <View style={styles.mapContainer}>
-        <MapView style={styles.map} provider={PROVIDER_GOOGLE} region={routeSelected == "BTC" ? NUS_BTC : routeSelected == "L" ? BUKITTIMAHCAMPUS : NUS} rotateEnabled={false}>
+        <MapView style={styles.map} region={routeSelected == "BTC" ? NUS_BTC : routeSelected == "L" ? BUKITTIMAHCAMPUS : NUS} rotateEnabled={false}>
           <Polyline coordinates={routeDataShown.checkPointCoordsArray} strokeColor="#27f" strokeWidth={5} tappable={false} />
           {routeDataShown.busStopsCoordsArray.map((busStopMarker, index) => (
             <Marker

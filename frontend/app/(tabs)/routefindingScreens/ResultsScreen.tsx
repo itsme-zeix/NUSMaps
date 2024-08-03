@@ -134,7 +134,6 @@ const RefactoredResultsScreen: React.FC = () => {
         <View style={{ flex: 1 }}>
           <View style={{ width: "100%", height: "50%" }}>
             <MapView
-              provider={PROVIDER_GOOGLE}
               style={{ width: "100%", height: "100%" }}
               initialRegion={{
                 latitude: (parsedOrigin.latitude + parsedDestination.latitude) / 2,
