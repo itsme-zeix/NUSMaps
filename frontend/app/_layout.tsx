@@ -82,12 +82,11 @@ export default async function RootLayout() {
   }
 
   useEffect(() => {
-    // Toast to display error from denial of gps permission
-    if (permissionErrorMsg != "") {
+    if (permissionErrorMsg) {
       Toast.show({
         type: "error",
         text1: permissionErrorMsg,
-        text2: "Please enable the permission.",
+        text2: "Please enable location permissions for NUSMaps.",
         position: "top",
         autoHide: true,
       });
