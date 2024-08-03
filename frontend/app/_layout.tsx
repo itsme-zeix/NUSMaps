@@ -7,7 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "react-native";
 import axios from "axios";
 import * as SplashScreen from "expo-splash-screen";
-import Location from "expo-location"
+import Location from "expo-location";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
