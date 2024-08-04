@@ -17,10 +17,21 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ busService, busStops, display
   let stops = displayedStops.flatMap((stop: string) => [stop, "rightArrow"]);
   stops.pop(); //removes the last arrow
   return (
-    <Pressable 
-      onPressIn={() => setIsPressed(true)} 
-      onPressOut={() => setIsPressed(false)} 
-      onPress={onPress} style={({ pressed }) => [styles.cardContainer, { backgroundColor: pressed || isPressed ? "#e0e0e0" : selected ? "#c0c0c0" : "#fff" }]}
+    <Pressable
+      onPressIn={() => setIsPressed(true)}
+      onPressOut={() => setIsPressed(false)}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.cardContainer,
+        {
+          backgroundColor: pressed || isPressed ? "#ced9e5" : selected ? "#e5f2ff" : "#fff",
+          borderColor: selected ? "#007bff" : "#ccc",
+          borderWidth: selected ? 2 : 0.5,
+          padding: selected ? 0: 1.5,
+          shadowOffset: { width: 0, height: pressed || isPressed || selected ? 1 : 3 },
+          shadowOpacity: pressed || isPressed || selected ? 0.1 : 0.2,
+        },
+      ]}
     >
       <View style={styles.cardContentContainer}>
         <ColouredCircle color={mapBusServiceColour(busService)} size={15} />
