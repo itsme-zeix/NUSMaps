@@ -26,7 +26,6 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ busService, busStops, display
         {
           backgroundColor: pressed || isPressed ? "#ced9e5" : selected ? "#e5f2ff" : "#fff",
           borderColor: selected ? "#007bff" : "#ccc",
-          borderWidth: selected ? 0.5 : 0.5,
           shadowOffset: { width: 0, height: pressed || isPressed ? 1 : selected ? 2 : 3 },
           shadowOpacity: pressed || isPressed ? 0.1 : selected ? 0.1 : 0.2,
         },
