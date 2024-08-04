@@ -122,7 +122,6 @@ const App = forwardRef((props, ref) => {
       latitudeDelta: 0.005,
       longitudeDelta: 0.005,
     });
-    console.log(region)
     Animated.spring(scaleAnim, {
       toValue: 1,
       speed: 25,
@@ -231,7 +230,6 @@ const App = forwardRef((props, ref) => {
 
   async function fetchRoutesFromServer(origin: LatLng, destination: LatLng): Promise<baseResultsCardType[]> {
     if (oneMapsAPIToken) {
-      console.log(oneMapsAPIToken);
       try {
         const response = await axios.post(
           "https://nusmaps.onrender.com/transportRoute",
