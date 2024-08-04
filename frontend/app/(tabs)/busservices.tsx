@@ -268,7 +268,7 @@ const NUSBusServices = forwardRef((props, ref) => {
   }, [routeSelected]);
 
   const NUS = {
-    latitude: 1.2959,
+    latitude: 1.2950,
     longitude: 103.7771,
     latitudeDelta: 0.015,
     longitudeDelta: 0.015,
