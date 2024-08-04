@@ -280,10 +280,10 @@ const NUSBusServices = forwardRef((props, ref) => {
     longitudeDelta: 0.05,
   };
   const BUKITTIMAHCAMPUS = {
-    latitude: 1.320833615554101,
-    longitude: 103.81686475132896,
-    latitudeDelta: 0.01,
-    longitudeDelta: 0.01,
+    latitude: 1.3215,
+    longitude: 103.8165,
+    latitudeDelta: 0.007,
+    longitudeDelta: 0.007,
   };
   const MARKERDIRECTIONS: { [key in NUSBusServices]: DirectionMarker[] } = {
     A1: [
