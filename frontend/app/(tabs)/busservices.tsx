@@ -7,7 +7,7 @@ import MapView, {
   Polyline,
 } from "react-native-maps";
 import axios from "axios";
-import { ServiceCard } from "@/components/busServicesLive/busServiceCard";
+import ServiceCard from "@/components/busServicesLive/busServiceCard";
 import CustomMarker from "@/components/busServicesLive/busStopMarker";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import ActiveBusMarker from "@/components/busServicesLive/activeBusMarker";
@@ -754,10 +754,15 @@ const NUSBusServices = forwardRef((props, ref) => {
         </MapView>
       </View>
       <ScrollView style={{marginTop: 10}}>
-        {NUS_BUS_SERVICES.map((busService, index) => (
-          <Pressable key={index} onPress={() => setRouteSelected(busService)}>
-            <ServiceCard busService={busService} busStops={fetchDetailedStopNames(busService)} displayedStops={fetchBaseCardData(busService)} />
-          </Pressable>
+      {NUS_BUS_SERVICES.map((busService, index) => (
+          <ServiceCard
+            key={index}
+            busService={busService}
+            busStops={fetchDetailedStopNames(busService)}
+            displayedStops={fetchBaseCardData(busService)}
+            onPress={() => setRouteSelected(busService)}
+            selected={routeSelected === busService}
+          />
         ))}
       </ScrollView>
     </View>

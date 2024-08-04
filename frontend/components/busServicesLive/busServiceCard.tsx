@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import ColouredCircle from "@/components/ColouredCircle";
 import mapBusServiceColour from "@/utils/mapBusServiceColor";
@@ -8,13 +8,20 @@ interface ServiceCardProps {
   busService: string;
   busStops: string[]; // the stops shown in the detailed screen
   displayedStops: string[]; // the stops that are shown in the card
+  onPress: () => void; // Function to handle press events
+  selected: boolean; // Indicate if this card is selected
 }
 
-export const ServiceCard: React.FC<ServiceCardProps> = ({ busService, busStops, displayedStops }) => {
+const ServiceCard: React.FC<ServiceCardProps> = ({ busService, busStops, displayedStops, onPress, selected }) => {
+  const [isPressed, setIsPressed] = useState(false);
   let stops = displayedStops.flatMap((stop: string) => [stop, "rightArrow"]);
   stops.pop(); //removes the last arrow
   return (
-    <View style={styles.cardContainer}>
+    <Pressable 
+      onPressIn={() => setIsPressed(true)} 
+      onPressOut={() => setIsPressed(false)} 
+      onPress={onPress} style={({ pressed }) => [styles.cardContainer, { backgroundColor: pressed || isPressed ? "#e0e0e0" : selected ? "#c0c0c0" : "#fff" }]}
+    >
       <View style={styles.cardContentContainer}>
         <ColouredCircle color={mapBusServiceColour(busService)} size={15} />
         <View style={styles.textContainer}>
@@ -34,7 +41,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ busService, busStops, 
           </View>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 };
 
