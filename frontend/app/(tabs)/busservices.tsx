@@ -268,10 +268,10 @@ const NUSBusServices = forwardRef((props, ref) => {
   }, [routeSelected]);
 
   const NUS = {
-    latitude: 1.2966,
-    longitude: 103.7764,
-    latitudeDelta: 0.02,
-    longitudeDelta: 0.02,
+    latitude: 1.2959,
+    longitude: 103.7771,
+    latitudeDelta: 0.015,
+    longitudeDelta: 0.015,
   };
   const NUS_BTC = {
     latitude: 1.301243123663655,
