@@ -21,6 +21,7 @@ const App = forwardRef((props, ref) => {
   //hooks
   const router = useRouter();
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const mapRef = useRef<MapView>(null); 
   const [currentLocation, setCurrentLocation] = useState<Location.LocationObjectCoords>({
     latitude: 1.3521,
     longitude: 103.8198,
@@ -75,8 +76,8 @@ const App = forwardRef((props, ref) => {
   const getLocation = async () => {
     try {
       let location;
-      // Because getCurrentPositionAsync() is awfully slow in IOS (~9seconds), expo-location documentation
-      // recommends using getLastKnownPositionAsync() instead. 
+      // Because getCurrentPositionAsync() is awfully slow in IOS (~9seconds),
+      // expo-location documentation recommends using getLastKnownPositionAsync() instead.
       if (Platform.OS === "ios") {
         const last = await Location.getLastKnownPositionAsync();
         if (last) {
@@ -115,6 +116,13 @@ const App = forwardRef((props, ref) => {
 
   const handlePressOut = () => {
     getLocation();
+    mapRef.current!.animateToRegion({
+      latitude: currentLocation.latitude,
+      longitude: currentLocation.longitude,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
+    });
+    console.log(region)
     Animated.spring(scaleAnim, {
       toValue: 1,
       speed: 25,
@@ -280,7 +288,7 @@ const App = forwardRef((props, ref) => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <MapView style={styles.map} region={region} testID="current-location-map" userInterfaceStyle="light">
+        <MapView ref={mapRef} style={styles.map} region={region} testID="current-location-map" userInterfaceStyle="light" >
           {currentLocation && (
             <Marker
               testID="current-location-marker"
