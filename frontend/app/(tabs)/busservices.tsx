@@ -274,8 +274,8 @@ const NUSBusServices = forwardRef((props, ref) => {
     longitudeDelta: 0.015,
   };
   const NUS_BTC = {
-    latitude: 1.301243123663655,
-    longitude: 103.80083642680974,
+    latitude: 1.3030,
+    longitude: 103.7955,
     latitudeDelta: 0.05,
     longitudeDelta: 0.05,
   };
