@@ -28,22 +28,19 @@
 [![LinkedIn][sr-linkedin-shield]][sr-linkedin-url]
 
 <!-- PROJECT LOGO -->
-<br />
 <div align="center">
   <!-- <a href="https://github.com/othneildrew/Best-README-Template">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a> -->
 
-  <h3 align="center">NUSMaps (Orbital 2024)</h3>
+  <h3 align="center">NUSMaps (Orbital 2024 Apollo 11)</h3>
 
   <p align="center">
     Effortlessly find routes and check bus arrival times, integrating NUS and public transport.
     <br />
     <a href="https://docs.google.com/document/d/1OixiEyLXQwfd-JoF3s_XRjfoQGEu8IjpKqIKieb5gWw/edit"><strong>Check out our docs! »</strong></a>
     <br />
-    <br />
-    <a href="#expo-go-section">Try the app in Expo Go!</a>
-    ·
+    <a href="#expo-go-section"><strong>Try the app in Expo Go! »<strong></a>
   </p>
 </div>
 
