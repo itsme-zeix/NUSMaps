@@ -79,10 +79,10 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-<div align="center">
-  <img src="./README-assets/busStopsDemo.gif" alt="Bus Stops Demo" style="width: 32%; height: auto; display: inline-block;">
-  <img src="./README-assets/routeFindingDemo.gif" alt="Route Finding Demo" style="width: 32%; height: auto; display: inline-block;">
-  <img src="./README-assets/busServicesDemo.gif" alt="Bus Services Demo" style="width: 32%; height: auto; display: inline-block;">
+<div align="middle">
+  <img src="./README-assets/busStopsDemo.gif" alt="Bus Stops Demo" style="width: 30%; height: auto; display: inline-block;">
+  <img src="./README-assets/routeFindingDemo.gif" alt="Route Finding Demo" style="width: 30%; height: auto; display: inline-block;">
+  <img src="./README-assets/busServicesDemo.gif" alt="Bus Services Demo" style="width: 30%; height: auto; display: inline-block;">
 </div>
 <br>
 
