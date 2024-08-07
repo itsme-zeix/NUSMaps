@@ -33,7 +33,7 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a> -->
 
-  <h3 align="center">NUSMaps (Orbital 2024)</h3>
+  <h1 align="center">NUSMaps (Orbital 2024)</h1>
 
   <p align="center">
     Effortlessly find routes and check bus arrival times, integrating NUS and public transport.
@@ -45,7 +45,7 @@
   </p>
 </div>
 
-<!-- TABLE OF CONTENTS -->
+<!-- TABLE OF CONTENTS
 <details>
   <summary>Table of Contents</summary>
   <ol>
@@ -63,16 +63,16 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
-    <!-- <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li> -->
+    <li><a href="#contact">Contact</a></li> 
     <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
+-->
 
 <!-- ABOUT THE PROJECT -->
-
 ## About The Project
 
 |![](./README-assets/busStopsDemo.gif)|![](./README-assets/routeFindingDemo.gif)|![](./README-assets/busServicesDemo.gif)|
