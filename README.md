@@ -115,7 +115,6 @@ For more information about our considerations and implementation details, check 
 1. **Download Expo Go** on your iOS/Android device.
 
 2. **Scan the following QR code:** <br>
-
 <img src="./README-assets/expogo-qrcode.png" alt="Expo Go QR Code" width="200" height="200">
 
 3. This will redirect you to NUSMaps in Expo Go. Enjoy! 🎉
