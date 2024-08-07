@@ -89,8 +89,6 @@ The route finding algorithm in NUSMaps uses a weighted mix of LTA OneMap and NUS
 
 For more information about our considerations and implementation details, check out our [Orbital writeup](https://docs.google.com/document/d/1OixiEyLXQwfd-JoF3s_XRjfoQGEu8IjpKqIKieb5gWw/edit)!
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 ### Built With
 
 [![React Native][ReactNative.js]][ReactNative-url]
