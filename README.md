@@ -33,14 +33,15 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a> -->
 
-  <h3 align="center">NUSMaps (Orbital 2024 Apollo 11)</h3>
+  <h3 align="center">NUSMaps (Orbital 2024)</h3>
 
   <p align="center">
     Effortlessly find routes and check bus arrival times, integrating NUS and public transport.
     <br />
     <a href="https://docs.google.com/document/d/1OixiEyLXQwfd-JoF3s_XRjfoQGEu8IjpKqIKieb5gWw/edit"><strong>Check out our docs! »</strong></a>
     <br />
-    <a href="#expo-go-section"><strong>Try the app in Expo Go! »<strong></a>
+    <a href="#expo-go-section"><strong>Try the app in Expo Go!</strong></a>
+    ·
   </p>
 </div>
 
@@ -115,6 +116,7 @@ For more information about our considerations and implementation details, check 
 1. **Download Expo Go** on your iOS/Android device.
 
 2. **Scan the following QR code:** <br>
+
 <img src="./README-assets/expogo-qrcode.png" alt="Expo Go QR Code" width="200" height="200">
 
 3. This will redirect you to NUSMaps in Expo Go. Enjoy! 🎉
