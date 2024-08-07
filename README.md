@@ -1,5 +1,7 @@
 <!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
+
 <a id="readme-top"></a>
+
 <!--
 *** Thanks for checking out the Best-README-Template. If you have a suggestion
 *** that would make this better, please fork the repo and create a pull request
@@ -7,8 +9,6 @@
 *** Don't forget to give the project a star!
 *** Thanks again! Now go create something AMAZING! :D
 -->
-
-
 
 <!-- PROJECT SHIELDS -->
 <!--
@@ -23,8 +23,9 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url] -->
-[![LinkedIn][ly-linkedin-shield]][ly-linkedin-url] 
-[![LinkedIn][sr-linkedin-shield]][sr-linkedin-url] 
+
+[![LinkedIn][ly-linkedin-shield]][ly-linkedin-url]
+[![LinkedIn][sr-linkedin-shield]][sr-linkedin-url]
 
 <!-- PROJECT LOGO -->
 <br />
@@ -45,8 +46,6 @@
     ·
   </p>
 </div>
-
-
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -74,22 +73,27 @@
   </ol>
 </details>
 
-
-
 <!-- ABOUT THE PROJECT -->
+
 ## About The Project
 
-<div style="display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 10px;">
-  <img src="./README-assets/busStopsDemo.gif" alt="Bus Stops Demo" style="width: 25%; height: auto;">
-  <img src="./README-assets/routeFindingDemo.gif" alt="Route Finding Demo" style="width: 25%; height: auto;">
-  <img src="./README-assets/busServicesDemo.gif" alt="Bus Services Demo" style="width: 25%; height: auto;">
-</div>
+|![](./README-assets/busStopsDemo.gif)|![](./README-assets/routeFindingDemo.gif)|![](./README-assets/busServicesDemo.gif)|
+|:-:|:-:|:-:|
+
+
+<p align="center">
+  <img alt="busStopsDemo" src="./README-assets/busStopsDemo.gif" width="30%">
+  <img alt="routeFindingDemo" src="./README-assets/routeFindingDemo.gif" width="30%">
+  <img alt="busServicesDemo" src="./README-assets/busServicesDemo.gif" width="30%">
+</p>
+
 <br>
 
-NUSMaps was developed to address a common problem faced by NUS students: 
-* Finding optimal routes to and from NUS often involves a combination of NUS buses and public transport.
-* The NUSNextBus app only provides routing within NUS using NUS buses.
-* Google Maps only provides routing with public transport, excluding NUS bus routes.
+NUSMaps was developed to address a common problem faced by NUS students:
+
+- Finding optimal routes to and from NUS often involves a combination of NUS buses and public transport.
+- The NUSNextBus app only provides routing within NUS using NUS buses.
+- Google Maps only provides routing with public transport, excluding NUS bus routes.
 
 The route finding algorithm in NUSMaps uses a weighted mix of LTA OneMap and NUS internal bus routes to provide comprehensive and efficient routing solutions.
 
@@ -97,9 +101,7 @@ For more information about our considerations and implementation details, check 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
-### Built With 
+### Built With
 
 [![React Native][ReactNative.js]][ReactNative-url]
 [![Expo][Expo.js]][Expo-url]
@@ -111,38 +113,43 @@ For more information about our considerations and implementation details, check 
 [![Docker][Docker]][Docker-url]
 [![GitHub Actions][GitHubActions]][GitHubActions-url]
 
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 <!-- GETTING STARTED -->
+
 ## Getting Started
+
 <a id="expo-go-section"></a>
+
 ### Try out the app with minimal setup
-1) **Download Expo Go** on your iOS/Android device.
 
-2) **Scan the following QR code:**  <br>
+1. **Download Expo Go** on your iOS/Android device.
 
-    <img src="./README-assets/expogo-qrcode.png" alt="Expo Go QR Code" width="200" height="200">
+2. **Scan the following QR code:** <br>
 
-3) This will redirect you to NUSMaps in Expo Go. Enjoy! 🎉
+<img src="./README-assets/expogo-qrcode.png" alt="Expo Go QR Code" width="200" height="200">
+
+3. This will redirect you to NUSMaps in Expo Go. Enjoy! 🎉
 
 ### Setting up NUSMaps Application to run locally
-### Prerequisites
-* **API Authentication Key**: You will need to contact us to obtain the API authentication key required by our REST API.
 
-* **npm**: Ensure you have the latest version of npm installed.
+### Prerequisites
+
+- **API Authentication Key**: You will need to contact us to obtain the API authentication key required by our REST API.
+
+- **npm**: Ensure you have the latest version of npm installed.
   ```sh
   npm install npm@latest -g
-* **API Keys**
-  * Request the API authentication key from one of the collaborators and enter it in the `.env` file.
-  * Follow the setup instructions to enable the Places API and get your free Google Maps Platform API Key at [Google Maps Platform API](https://developers.google.com/maps/documentation/places/web-service/overview).
-* **Device/Simulator**
-  * **iOS**: Requires an iOS device or iOS Simulator installed on a macOS device.
-  * **Android**: Requires an Android device or an [Android Emulator](https://developer.android.com/studio/run/emulator) installed.
+  ```
+- **API Keys**
+  - Request the API authentication key from one of the collaborators and enter it in the `.env` file.
+  - Follow the setup instructions to enable the Places API and get your free Google Maps Platform API Key at [Google Maps Platform API](https://developers.google.com/maps/documentation/places/web-service/overview).
+- **Device/Simulator**
+  - **iOS**: Requires an iOS device or iOS Simulator installed on a macOS device.
+  - **Android**: Requires an Android device or an [Android Emulator](https://developer.android.com/studio/run/emulator) installed.
 
 ### Installation
+
 1. **Clone the repository:**
    ```sh
    git clone https://github.com/itsme-zeix/NUSMaps.git
@@ -170,7 +177,7 @@ For more information about our considerations and implementation details, check 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- USAGE EXAMPLES 
+<!-- USAGE EXAMPLES
 ## Usage
 
 Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
@@ -180,9 +187,8 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 -->
 
-
 <!-- ROADMAP
-## Roadmap2 
+## Roadmap2
 
 - [x] Add Changelog
 - [x] Add back to top links
@@ -197,8 +203,7 @@ See the [open issues](https://github.com/othneildrew/Best-README-Template/issues
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 -->
 
-
-<!-- CONTRIBUTING 
+<!-- CONTRIBUTING
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
@@ -215,7 +220,6 @@ Don't forget to give the project a star! Thanks again!
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 -->
 
-
 <!-- LICENSE
 ## License
 
@@ -224,8 +228,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 -->
 
-
-<!-- CONTACT 
+<!-- CONTACT
 ## Contact
 
 Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
@@ -235,25 +238,24 @@ Project Link: [https://github.com/your_username/repo_name](https://github.com/yo
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 -->
 
-
 <!-- ACKNOWLEDGMENTS -->
+
 ## Acknowledgments
 
 These free resources have helped tremendously in making NUSMaps possible.
 
-* NUSNextBus API
-* [Reverse Engineering of NUSNextBus API by Hu Jialun](https://github.com/SuibianP/nus-nextbus-new-api)
-* [LTA OneMap API](https://www.onemap.gov.sg/)
-* [LTA DataMall API](https://datamall.lta.gov.sg/content/datamall/en.html)
-* [react-native-google-places-autocomplete](https://github.com/FaridSafi/react-native-google-places-autocomplete)
-* [react-native-maps](https://github.com/react-native-maps/react-native-maps)
+- NUSNextBus API
+- [Reverse Engineering of NUSNextBus API by Hu Jialun](https://github.com/SuibianP/nus-nextbus-new-api)
+- [LTA OneMap API](https://www.onemap.gov.sg/)
+- [LTA DataMall API](https://datamall.lta.gov.sg/content/datamall/en.html)
+- [react-native-google-places-autocomplete](https://github.com/FaridSafi/react-native-google-places-autocomplete)
+- [react-native-maps](https://github.com/react-native-maps/react-native-maps)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+
 [contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
 [contributors-url]: https://github.com/ZShunRen
 [forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
