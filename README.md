@@ -81,14 +81,6 @@
 |:-:|:-:|:-:|
 
 
-<p align="center">
-  <img alt="busStopsDemo" src="./README-assets/busStopsDemo.gif" width="30%">
-  <img alt="routeFindingDemo" src="./README-assets/routeFindingDemo.gif" width="30%">
-  <img alt="busServicesDemo" src="./README-assets/busServicesDemo.gif" width="30%">
-</p>
-
-<br>
-
 NUSMaps was developed to address a common problem faced by NUS students:
 
 - Finding optimal routes to and from NUS often involves a combination of NUS buses and public transport.
