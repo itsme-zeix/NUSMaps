@@ -79,7 +79,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-<div style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+<div style="display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 10px;">
   <img src="./README-assets/busStopsDemo.gif" alt="Bus Stops Demo" style="width: 30%; height: auto;">
   <img src="./README-assets/routeFindingDemo.gif" alt="Route Finding Demo" style="width: 30%; height: auto;">
   <img src="./README-assets/busServicesDemo.gif" alt="Bus Services Demo" style="width: 30%; height: auto;">
