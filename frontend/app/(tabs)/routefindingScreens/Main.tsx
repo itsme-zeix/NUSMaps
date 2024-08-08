@@ -21,7 +21,7 @@ const App = forwardRef((props, ref) => {
   //hooks
   const router = useRouter();
   const scaleAnim = useRef(new Animated.Value(1)).current;
-  const mapRef = useRef<MapView>(null); 
+  const mapRef = useRef<MapView>(null);
   const [currentLocation, setCurrentLocation] = useState<Location.LocationObjectCoords>({
     latitude: 1.3521,
     longitude: 103.8198,
@@ -116,12 +116,14 @@ const App = forwardRef((props, ref) => {
 
   const handlePressOut = () => {
     getLocation();
-    mapRef.current!.animateToRegion({
-      latitude: currentLocation.latitude,
-      longitude: currentLocation.longitude,
-      latitudeDelta: 0.005,
-      longitudeDelta: 0.005,
-    });
+    if (mapRef.current) {
+      mapRef.current!.animateToRegion({
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      });
+    }
     Animated.spring(scaleAnim, {
       toValue: 1,
       speed: 25,
@@ -286,7 +288,7 @@ const App = forwardRef((props, ref) => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <MapView ref={mapRef} style={styles.map} region={region} testID="current-location-map" userInterfaceStyle="light" >
+        <MapView ref={mapRef} style={styles.map} region={region} testID="current-location-map" userInterfaceStyle="light">
           {currentLocation && (
             <Marker
               testID="current-location-marker"
