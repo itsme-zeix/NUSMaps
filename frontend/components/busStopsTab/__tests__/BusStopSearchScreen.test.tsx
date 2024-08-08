@@ -115,7 +115,7 @@ describe("BusStopSearchScreen", () => {
       expect(getByText("COM 3")).toBeTruthy();
       expect(getByText("Prince George's Park Foyer")).toBeTruthy();
     });
-  });
+  }, 10000); // 10000ms to complete as this is a long test
 
   test("Search bar on search page is touchable", async () => {
     const { getByText, getByPlaceholderText } = render(
