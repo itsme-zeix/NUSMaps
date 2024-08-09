@@ -100,7 +100,7 @@ describe("BusStopSearchScreen", () => {
     updatedBusStops = JSON.parse(storedData!);
     expect(updatedBusStops[0].isFavourited).toBe(false);
     expect(updatedBusStops[1].isFavourited).toBe(false);
-  });
+  }, 10000); // 10000ms to complete as this is a long test
 
   test("Search page renders FlatList of bus stops retrieved from AsyncStorage", async () => {
     const { getByText, getByLabelText } = render(

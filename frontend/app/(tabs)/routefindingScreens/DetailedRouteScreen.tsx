@@ -352,6 +352,7 @@ const DetailedRouteScreen: React.FC = () => {
     <View style={stylesheet.SafeAreaView} testID="test">
       <MapView
         style={stylesheet.MapView}
+        userInterfaceStyle="light"
         initialRegion={{
           latitude: (origin.latitude + destination.latitude) / 2,
           longitude: (origin.longitude + destination.longitude) / 2,

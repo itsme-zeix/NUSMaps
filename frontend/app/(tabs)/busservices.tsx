@@ -7,7 +7,7 @@ import MapView, {
   Polyline,
 } from "react-native-maps";
 import axios from "axios";
-import { ServiceCard } from "@/components/busServicesLive/busServiceCard";
+import ServiceCard from "@/components/busServicesLive/busServiceCard";
 import CustomMarker from "@/components/busServicesLive/busStopMarker";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import ActiveBusMarker from "@/components/busServicesLive/activeBusMarker";
@@ -268,29 +268,29 @@ const NUSBusServices = forwardRef((props, ref) => {
   }, [routeSelected]);
 
   const NUS = {
-    latitude: 1.2966,
-    longitude: 103.7764,
-    latitudeDelta: 0.02,
-    longitudeDelta: 0.02,
+    latitude: 1.2950,
+    longitude: 103.7771,
+    latitudeDelta: 0.015,
+    longitudeDelta: 0.015,
   };
   const NUS_BTC = {
-    latitude: 1.301243123663655,
-    longitude: 103.80083642680974,
+    latitude: 1.3030,
+    longitude: 103.7955,
     latitudeDelta: 0.05,
     longitudeDelta: 0.05,
   };
   const BUKITTIMAHCAMPUS = {
-    latitude: 1.320833615554101,
-    longitude: 103.81686475132896,
-    latitudeDelta: 0.01,
-    longitudeDelta: 0.01,
+    latitude: 1.3215,
+    longitude: 103.8165,
+    latitudeDelta: 0.007,
+    longitudeDelta: 0.007,
   };
   const MARKERDIRECTIONS: { [key in NUSBusServices]: DirectionMarker[] } = {
     A1: [
       {
         latitude: 1.29405,
         longitude: 103.76973,
-        angle: "180deg",
+        angle: "150deg",
       },
       {
         latitude: 1.2955070908079434,
@@ -300,7 +300,7 @@ const NUSBusServices = forwardRef((props, ref) => {
       {
         latitude: 1.2923086387008367,
         longitude: 103.77409145023913,
-        angle: "20deg",
+        angle: "60deg",
       },
       {
         latitude: 1.2915679763491539,
@@ -315,17 +315,17 @@ const NUSBusServices = forwardRef((props, ref) => {
       {
         latitude: 1.2974016052916018,
         longitude: 103.78052888927002,
-        angle: "230deg",
+        angle: "215deg",
       },
       {
         latitude: 1.2988500475970672,
         longitude: 103.77579967302323,
-        angle: "220deg",
+        angle: "230deg",
       },
       {
         latitude: 1.2963940606392585,
         longitude: 103.7722840249133,
-        angle: "180deg",
+        angle: "200deg",
       },
     ],
     A2: [
@@ -357,7 +357,7 @@ const NUSBusServices = forwardRef((props, ref) => {
       {
         latitude: 1.2974154593493992,
         longitude: 103.7802721054462,
-        angle: "60deg",
+        angle: "30deg",
       },
       {
         latitude: 1.29493,
@@ -367,12 +367,12 @@ const NUSBusServices = forwardRef((props, ref) => {
       {
         latitude: 1.29172907463164,
         longitude: 103.78270417195186,
-        angle: "180deg",
+        angle: "200deg",
       },
       {
         latitude: 1.29297,
         longitude: 103.77849,
-        angle: "220deg",
+        angle: "230deg",
       },
       {
         latitude: 1.29316,
@@ -382,7 +382,7 @@ const NUSBusServices = forwardRef((props, ref) => {
       {
         latitude: 1.29373,
         longitude: 103.7711,
-        angle: "220deg",
+        angle: "260deg",
       },
       {
         latitude: 1.2947863120276193,
@@ -411,7 +411,6 @@ const NUSBusServices = forwardRef((props, ref) => {
         longitude: 103.80445443936672,
         angle: "150deg",
       },
-
       {
         latitude: 1.29252,
         longitude: 1.29252,
@@ -445,22 +444,22 @@ const NUSBusServices = forwardRef((props, ref) => {
       {
         latitude: 1.30099,
         longitude: 103.77217,
-        angle: "200deg",
+        angle: "230deg",
       },
       {
         latitude: 1.30206,
         longitude: 103.76916,
-        angle: "200deg",
+        angle: "220deg",
       },
       {
         latitude: 1.29646,
         longitude: 103.77235,
-        angle: "150deg",
+        angle: "190deg",
       },
       {
         latitude: 1.29362,
         longitude: 103.77708,
-        angle: "60deg",
+        angle: "80deg",
       },
       {
         latitude: 1.29094,
@@ -714,8 +713,8 @@ const NUSBusServices = forwardRef((props, ref) => {
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
       <View style={styles.mapContainer}>
-        <MapView style={styles.map} region={routeSelected == "BTC" ? NUS_BTC : routeSelected == "L" ? BUKITTIMAHCAMPUS : NUS} rotateEnabled={false}>
-          <Polyline coordinates={routeDataShown.checkPointCoordsArray} strokeColor="#27f" strokeWidth={5} tappable={false} />
+        <MapView style={styles.map} userInterfaceStyle="light" region={routeSelected == "BTC" ? NUS_BTC : routeSelected == "L" ? BUKITTIMAHCAMPUS : NUS} rotateEnabled={false}>
+          <Polyline coordinates={routeDataShown.checkPointCoordsArray} strokeColor="#27f" strokeWidth={4} tappable={false} />
           {routeDataShown.busStopsCoordsArray.map((busStopMarker, index) => (
             <Marker
               key={index}
@@ -749,16 +748,21 @@ const NUSBusServices = forwardRef((props, ref) => {
                 }}
                 anchor={{ x: 0.5, y: 0.5 }}
               >
-                <FontAwesome name="location-arrow" size={18} color="orange" style={{ transform: [{ rotate: `${directionMarker.angle}` }] }} />
+                <FontAwesome name="location-arrow" size={25} color="#27f" style={{ transform: [{ rotate: `${directionMarker.angle}` }] }} />
               </Marker>
             ))}
         </MapView>
       </View>
-      <ScrollView>
-        {NUS_BUS_SERVICES.map((busService, index) => (
-          <Pressable key={index} onPress={() => setRouteSelected(busService)}>
-            <ServiceCard busService={busService} busStops={fetchDetailedStopNames(busService)} displayedStops={fetchBaseCardData(busService)} />
-          </Pressable>
+      <ScrollView style={{marginTop: 10}}>
+      {NUS_BUS_SERVICES.map((busService, index) => (
+          <ServiceCard
+            key={index}
+            busService={busService}
+            busStops={fetchDetailedStopNames(busService)}
+            displayedStops={fetchBaseCardData(busService)}
+            onPress={() => setRouteSelected(busService)}
+            selected={routeSelected === busService}
+          />
         ))}
       </ScrollView>
     </View>
