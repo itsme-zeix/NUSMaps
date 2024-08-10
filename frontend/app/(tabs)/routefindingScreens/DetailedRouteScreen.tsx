@@ -266,7 +266,7 @@ const DetailedRouteScreen: React.FC = () => {
           latitudeDelta: Math.abs(origin.latitude - destination.latitude) * 2,
           longitudeDelta: Math.abs(origin.longitude - destination.longitude) * 2,
         }}
-        testID="current-location-map"
+        testID="mapview"
       >
         <Marker
           title="Origin"
@@ -274,7 +274,7 @@ const DetailedRouteScreen: React.FC = () => {
             latitude: origin.latitude,
             longitude: origin.longitude,
           }}
-          testID="current-location-marker"
+          testID="origin-marker"
         />
         {stopsCoordsArray.map((stop, index) => {
           if (stop.name != "Origin" && stop.name != "Destination") {
@@ -298,9 +298,9 @@ const DetailedRouteScreen: React.FC = () => {
             longitude: destination.longitude,
           }}
         />
-        {polylineArray.length > 0 && <Polyline coordinates={formatted_array} strokeWidth={4} strokeColor="purple" zIndex={1} testID="current-location-polyline" />}
+        {polylineArray.length > 0 && <Polyline coordinates={formatted_array} strokeWidth={4} strokeColor="purple" zIndex={1} testID="mapview-polyline" />}
       </MapView>
-      <ScrollView style={{ flex: 1, backgroundColor: "white" }} testID="ok">
+      <ScrollView style={{ flex: 1, backgroundColor: "white" }} >
         <View style={{ marginVertical: 15, marginHorizontal: 20 }}>
           <View style={{ flexDirection: "row" }}>
             <OriginRectangle />

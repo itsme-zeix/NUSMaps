@@ -94,8 +94,8 @@ describe("DetailedRouteScreen tests", () => {
     const { getByTestId } = render(<DetailedRouteScreen />);
     await waitFor(() => {
       expect(getByTestId("SafeAreaView")).toBeTruthy();
-      expect(getByTestId("current-location-map")).toBeTruthy();
-      expect(getByTestId("current-location-marker")).toBeTruthy();
+      expect(getByTestId("mapview")).toBeTruthy();
+      expect(getByTestId("origin-marker")).toBeTruthy();
     });
   });
 
@@ -103,7 +103,7 @@ describe("DetailedRouteScreen tests", () => {
     const { getByTestId } = render(<DetailedRouteScreen />);
     await waitFor(() => {
       expect(getByTestId("SafeAreaView")).toBeTruthy();
-      expect(getByTestId("current-location-map")).toBeTruthy();
+      expect(getByTestId("mapview")).toBeTruthy();
       expect(getByTestId("current-location-polyline")).toBeTruthy();
     });
   });
