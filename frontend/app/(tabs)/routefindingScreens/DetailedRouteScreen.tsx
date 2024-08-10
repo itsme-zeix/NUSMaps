@@ -152,8 +152,9 @@ const LegRectangle: React.FC<LegRectangleProps> = ({ height, legType, expanded, 
 const formatIntoMinutesAndSeconds = (timingInSeconds: number) => {
   const seconds = (timingInSeconds % 60).toFixed(0);
   const minutes = Math.floor(timingInSeconds / 60).toFixed(0);
+  const minutesRoundedUp = minutes + 1;
   if (minutes !== "0") {
-    return `${minutes} minutes, ${seconds} seconds`;
+    return `${minutesRoundedUp} minutes`;
   }
   return `${seconds} seconds`;
 };
@@ -183,7 +184,6 @@ const PublicTransportLegPart: React.FC<PublicTransportLegProps> = ({ ptLeg, expa
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <MaterialIcons name={expanded ? "expand-less" : "expand-more"} size={20} color="#434343" />
                 <Text>
-                  {" "}
                   Ride {ptLeg.intermediateStopCount} stops ({Math.ceil(ptLeg.duration / 60)} min)
                 </Text>
               </View>
@@ -300,7 +300,7 @@ const DetailedRouteScreen: React.FC = () => {
         />
         {polylineArray.length > 0 && <Polyline coordinates={formatted_array} strokeWidth={4} strokeColor="purple" zIndex={1} testID="mapview-polyline" />}
       </MapView>
-      <ScrollView style={{ flex: 1, backgroundColor: "white" }} >
+      <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
         <View style={{ marginVertical: 15, marginHorizontal: 20 }}>
           <View style={{ flexDirection: "row" }}>
             <OriginRectangle />
