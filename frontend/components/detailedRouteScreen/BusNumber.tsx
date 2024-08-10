@@ -2,6 +2,7 @@ import React from "react";
 import { View, StyleSheet, Text } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { determineFontColor } from "./determineFontColor";
+import { getColorForPublicTransport } from "@/utils/getColorForPublicTransport";
 
 interface BusNumberType {
   busNumber: string;
@@ -9,29 +10,8 @@ interface BusNumberType {
   testID: string;
 }
 
-const determineBusBG = (busNumber: string) => {
-  switch (busNumber) {
-    case "A1":
-      return "#FF0000";
-    case "A2":
-      return "#E4CE0C";
-    case "D1":
-      return "#CD82E2";
-    case "D2":
-      return "#6F1B6F";
-    case "BTC":
-      return "#EE8136";
-    case "K":
-      return "#345A9B";
-    case "L":
-      return "#BFBFBF";
-    default:
-      return "#4ABF50"; // Default to PUBLICBUSBG color
-  }
-};
-
 export const BusNumberCard: React.FC<BusNumberType> = ({ busNumber, busType, testID }) => {
-  const backgroundColor = busType === "NUS_BUS" ? determineBusBG(busNumber) : "#4ABF50";
+  const backgroundColor = getColorForPublicTransport(busType, busNumber);
   const fontColor = determineFontColor(backgroundColor);
 
   return (

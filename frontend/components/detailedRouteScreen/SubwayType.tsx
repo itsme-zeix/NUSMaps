@@ -2,33 +2,16 @@ import React from "react";
 import { View, StyleSheet, Text } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { determineFontColor } from "./determineFontColor";
+import { getColorForPublicTransport } from "@/utils/getColorForPublicTransport";
 
 interface MRTServiceType {
   serviceType: string;
+  legType: string;
+  testID: string;
 }
 
-const determineBG = (input: string) => {
-  //input is based on routeId
-  if (input === "NS") {
-    return "#E1241D";
-  } else if (input === "DT") {
-    return "#0056B8";
-  } else if (input === "EW" || input === "CG") {
-    return "#00953B";
-  } else if (input === "NE") {
-    return "#9E27B5";
-  } else if (input === "CC") {
-    return "#FF9E17";
-  } else if (input === "TE") {
-    return "#9D5A18";
-  } else {
-    //error
-    return "black";
-  }
-};
-
-export const SubwayTypeCard: React.FC<MRTServiceType & { testID: string }> = ({ serviceType, testID }) => {
-  const bgColor = determineBG(serviceType);
+export const SubwayTypeCard: React.FC<MRTServiceType> = ({ serviceType, legType, testID }) => {
+  const bgColor = getColorForPublicTransport(legType, serviceType);
   const fontColor = determineFontColor(bgColor);
 
   return (
