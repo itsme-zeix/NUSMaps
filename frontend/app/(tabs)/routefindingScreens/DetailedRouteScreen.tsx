@@ -256,7 +256,7 @@ const DetailedRouteScreen: React.FC = () => {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <View style={stylesheet.SafeAreaView} testID="MapView">
+    <View style={stylesheet.SafeAreaView} testID="SafeAreaView">
       <MapView
         style={stylesheet.MapView}
         userInterfaceStyle="light"
