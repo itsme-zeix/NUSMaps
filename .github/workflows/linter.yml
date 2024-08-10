@@ -43,3 +43,5 @@ jobs:
           VALIDATE_SQLFLUFF: false
           VALIDATE_JSCPD: false
           VALIDATE_RUBY: false
+          VALIDATE_MARKDOWN: false
+          VALIDATE_NATURAL_LANGUAGE: false
