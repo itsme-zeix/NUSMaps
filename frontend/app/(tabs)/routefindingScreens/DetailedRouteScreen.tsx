@@ -416,7 +416,9 @@ const DetailedRouteScreen: React.FC = () => {
             // console.log("leg type", leg.type);
             // Calculate the height based on the content of each leg
             let legHeight = leg.type === "WALK" ? 20 : 40; // Adjust these values as needed
+            let legDistanceDefined = leg.type === "WALK" ? (leg as WalkLeg).distance === undefined ? false : true : true;
             return (
+              legDistanceDefined &&
               <React.Fragment key={index}>
                 <View style={{ flexDirection: "row" }}>
                   <LegRectangle
