@@ -133,9 +133,9 @@ const PublicTransportLegContainer: React.FC<PublicTransportLegContainerProps> = 
   return (
     <View style={stylesheet.legContainer}>
       {/* Graphics on the left of the stop information */}
-      <View style={stylesheet.barContainer}>
-        <View style={{ justifyContent: "center", alignItems: "center" }}>
-          <View style={stylesheet.circleIcon}>
+      <View style={[{position: "relative"}, stylesheet.barContainer]}>
+        <View style={{ justifyContent: "flex-start", alignItems: "center"}}>
+          <View style={[{position: "absolute", zIndex: 1}, stylesheet.circleIcon]}>
             {legType === "BUS" || legType === "NUS_BUS" ? (
               <MaterialIcons name="directions-bus" size={17} color="#3D3F43" />
             ) : legType === "TRAM" ? (
@@ -146,18 +146,18 @@ const PublicTransportLegContainer: React.FC<PublicTransportLegContainerProps> = 
               <MaterialIcons name="train" size={17} color="#3D3F43" />
             ) : null}
           </View>
-          <View style={[stylesheet.solidRectangle, { height: adjustedHeight, backgroundColor: legColor }]} />
-          <View style={[stylesheet.miniCircleIcon, { position: "absolute", bottom: 5.5 }]} />
+          <View style={[stylesheet.solidRectangle, { position: "relative", top: 10, height: adjustedHeight + 15, backgroundColor: legColor }]} />
+          <View style={[stylesheet.miniCircleIcon, { position: "relative", bottom: 4.5 }]} />
         </View>
       </View>
 
       {/* Stop information */}
       <View style={stylesheet.legDetails}>
         <Pressable onPress={() => console.log("route pressed!")}>
-          <Text style={{ fontFamily: "Inter-SemiBold", marginBottom: 8 }}>{ptLeg.startingStopName}</Text>
+          <Text style={{ fontFamily: "Inter-SemiBold", marginTop: 4, marginBottom: 8 }}>{ptLeg.startingStopName}</Text>
 
           {/* Logo that shows icon and bus/train service number below the starting stop's name */}
-          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 1 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 3 }}>
             {ptLeg.type === "SUBWAY" && <SubwayTypeCard serviceType={ptLeg.serviceType} testID={""} />}
             {(ptLeg.type === "BUS" || ptLeg.type === "NUS_BUS") && (
               <BusNumberCard busNumber={ptLeg.serviceType} busType={ptLeg.type} testID={""} />
@@ -173,15 +173,15 @@ const PublicTransportLegContainer: React.FC<PublicTransportLegContainerProps> = 
 
           {/* Expandable view of intermediate stops */}
           <View style={{ flexDirection: "column" }}>
-            <View style={{ marginBottom: 7 }}>
-              <TouchableOpacity onPress={() => setExpanded(!expanded)}>
+            <View style={{ marginBottom: 5 }}>
+              <Pressable onPress={() => setExpanded(!expanded)}>
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                   <MaterialIcons name={expanded ? "expand-less" : "expand-more"} size={20} color="#434343" />
                   <Text style={{ fontFamily: "Inter-Regular" }}>
                     Ride {ptLeg.intermediateStopCount} stops ({Math.ceil(ptLeg.duration / 60)} min)
                   </Text>
                 </View>
-              </TouchableOpacity>
+              </Pressable>
               {expanded && (
                 <View>
                   {ptLeg.intermediateStopNames.map((stop, index) => (
