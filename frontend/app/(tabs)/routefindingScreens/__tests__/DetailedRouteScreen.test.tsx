@@ -94,7 +94,7 @@ describe('DetailedRouteScreen tests', () => {
     test('renders mapview component', async ()=> {
         const { getByTestId } = render(<DetailedRouteScreen/>);
         await waitFor( () => {
-          expect(getByTestId('test')).toBeTruthy();
+          expect(getByTestId('MapView')).toBeTruthy();
           expect(getByTestId('current-location-map')).toBeTruthy();
           expect(getByTestId('current-location-marker')).toBeTruthy();
     });
@@ -103,9 +103,10 @@ describe('DetailedRouteScreen tests', () => {
   test('renders polyline component', async ()=> {
       const { getByTestId } = render(<DetailedRouteScreen/>);
       await waitFor( () => {
-        expect(getByTestId('test')).toBeTruthy();
+        expect(getByTestId('MapView')).toBeTruthy();
         expect(getByTestId('current-location-map')).toBeTruthy();
-        expect(getByTestId('current-location-polyline')).toBeTruthy();
+        expect(getBy
+          ('current-location-polyline')).toBeTruthy();
       });
     });
   

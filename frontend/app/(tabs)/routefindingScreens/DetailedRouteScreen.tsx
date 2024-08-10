@@ -1,22 +1,8 @@
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  ScrollView,
-  Text,
-  View,
-  Image,
-  Pressable,
-  ImageURISource,
-} from "react-native";
+import { StyleSheet, ScrollView, Text, View, Image, Pressable, ImageURISource } from "react-native";
 import { ImageSourcePropType } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import MapView, {
-  PROVIDER_GOOGLE,
-  Marker,
-  Polyline,
-  LatLng,
-  Callout,
-} from "react-native-maps";
+import MapView, { PROVIDER_GOOGLE, Marker, Polyline, LatLng, Callout } from "react-native-maps";
 import { SubwayTypeCard } from "@/components/detailedRouteScreen/SubwayType";
 import { BusNumberCard } from "@/components/detailedRouteScreen/BusNumber";
 import { TramTypeCard } from "@/components/detailedRouteScreen/TramNumber";
@@ -73,24 +59,12 @@ interface baseResultsCardType {
 }
 
 interface IconCatalog {
-  WALK: ImageSourcePropType;
-  SUBWAY: ImageSourcePropType;
-  BUS: ImageSourcePropType;
-  TRAM: ImageSourcePropType;
-  RCHEVRON: ImageSourcePropType;
   MARKER: ImageSourcePropType;
-  FLAG: ImageSourcePropType;
   STOPCIRCULARMARKER: ImageURISource;
 }
 
 const iconList: IconCatalog = {
-  WALK: require("@/assets/images/walk-icon.png"),
-  SUBWAY: require("@/assets/images/subway-icon.png"),
-  BUS: require("@/assets/images/bus-icon.png"),
-  TRAM: require("@/assets/images/tram-icon.png"),
-  RCHEVRON: require(`@/assets/images/chevron_right-icon.png`),
   MARKER: require("@/assets/images/location-icon.png"),
-  FLAG: require("@/assets/images/finishFlag-icon.png"),
   STOPCIRCULARMARKER: require("@/assets/images/mapCircle-icon.png"),
 };
 
@@ -138,12 +112,7 @@ interface LegRectangleProps {
   leg: Leg;
 }
 
-const LegRectangle: React.FC<LegRectangleProps> = ({
-  height,
-  legType,
-  expanded,
-  leg,
-}) => {
+const LegRectangle: React.FC<LegRectangleProps> = ({ height, legType, expanded, leg }) => {
   const isWalk = legType === "WALK";
 
   // Type guard to allow for intermediateStopCount to be called.
@@ -152,11 +121,7 @@ const LegRectangle: React.FC<LegRectangleProps> = ({
   }
 
   // Use the type guard to assert leg type
-  const adjustedHeight = isWalk
-    ? height
-    : isPublicTransportLeg(leg) && expanded
-    ? height + (leg.intermediateStopCount - 1) * 16
-    : height; // lineHeight = 16 set in publicTransportLegPart
+  const adjustedHeight = isWalk ? height : isPublicTransportLeg(leg) && expanded ? height + (leg.intermediateStopCount - 1) * 16 : height; // lineHeight = 16 set in publicTransportLegPart
 
   return (
     <View style={stylesheet.barContainer}>
@@ -168,23 +133,7 @@ const LegRectangle: React.FC<LegRectangleProps> = ({
             ))}
           </View>
         )}
-        <View style={stylesheet.circleIconWrapper}>
-          {isWalk ? (
-            <MaterialIcons name="directions-walk" size={20} />
-          ) : legType === "BUS" ? (
-            <MaterialIcons name="directions-bus" size={20} />
-          ) : legType === "NUS_BUS" ? (
-            <MaterialIcons name="directions-bus" size={20} />
-          ) : legType === "TRAM" ? (
-            <MaterialIcons name="tram" size={20} />
-          ) : legType === "SUBWAY" ? (
-            <MaterialIcons name="subway" size={20} />
-          ) : legType === "TRAIN" ? (
-            <MaterialIcons name="train" size={20} />
-          ) : (
-            <View style={stylesheet.circleIconWrapper} />
-          )}
-        </View>
+        <View style={stylesheet.circleIconWrapper}>{isWalk ? <MaterialIcons name="directions-walk" size={20} /> : legType === "BUS" ? <MaterialIcons name="directions-bus" size={20} /> : legType === "NUS_BUS" ? <MaterialIcons name="directions-bus" size={20} /> : legType === "TRAM" ? <MaterialIcons name="tram" size={20} /> : legType === "SUBWAY" ? <MaterialIcons name="subway" size={20} /> : legType === "TRAIN" ? <MaterialIcons name="train" size={20} /> : <View style={stylesheet.circleIconWrapper} />}</View>
         {isWalk ? (
           <View style={[{ height }, stylesheet.dotContainer]}>
             {Array.from({ length: Math.ceil(height / 10) }).map((_, i) => (
@@ -192,9 +141,7 @@ const LegRectangle: React.FC<LegRectangleProps> = ({
             ))}
           </View>
         ) : (
-          <View
-            style={[stylesheet.solidRectangle, { height: adjustedHeight }]}
-          />
+          <View style={[stylesheet.solidRectangle, { height: adjustedHeight }]} />
         )}
         {!isWalk && <View style={stylesheet.circleIconWrapper} />}
       </View>
@@ -211,31 +158,15 @@ const formatIntoMinutesAndSeconds = (timingInSeconds: number) => {
   return `${seconds} seconds`;
 };
 
-const PublicTransportLegPart: React.FC<PublicTransportLegProps> = ({
-  ptLeg,
-  expanded,
-  setExpanded,
-}) => {
-
+const PublicTransportLegPart: React.FC<PublicTransportLegProps> = ({ ptLeg, expanded, setExpanded }) => {
   return (
     <View style={stylesheet.legDetails}>
       <Pressable onPress={() => console.log("route pressed!")}>
-        <Text style={{ fontFamily: "Inter-SemiBold" }}>
-          {ptLeg.startingStopName}
-        </Text>
+        <Text style={{ fontFamily: "Inter-SemiBold" }}>{ptLeg.startingStopName}</Text>
         <View style={{ flexDirection: "row" }}>
-          {ptLeg.type === "SUBWAY" && (
-            <SubwayTypeCard serviceType={ptLeg.serviceType} />
-          )}
-          {(ptLeg.type === "BUS" || ptLeg.type === "NUS_BUS") && (
-            <BusNumberCard busNumber={ptLeg.serviceType} busType={ptLeg.type} />
-          )}
-          {ptLeg.type === "NUS_BUS" && (
-            <Text>
-              Wait for {formatIntoMinutesAndSeconds(ptLeg.startingStopETA)} for
-              the next bus
-            </Text>
-          )}
+          {ptLeg.type === "SUBWAY" && <SubwayTypeCard serviceType={ptLeg.serviceType} testID={""} />}
+          {(ptLeg.type === "BUS" || ptLeg.type === "NUS_BUS") && <BusNumberCard busNumber={ptLeg.serviceType} busType={ptLeg.type} testID={""} />}
+          {ptLeg.type === "NUS_BUS" && <Text>Wait for {formatIntoMinutesAndSeconds(ptLeg.startingStopETA)} for the next bus</Text>}
           {ptLeg.type === "WALK" && (
             <View>
               <Image source={iconList[ptLeg.type as keyof IconCatalog]} />
@@ -243,22 +174,17 @@ const PublicTransportLegPart: React.FC<PublicTransportLegProps> = ({
           )}
           {ptLeg.type === "TRAM" && (
             // <Image source={iconList[ptLeg.type as keyof IconCatalog]} />
-            <TramTypeCard serviceType={ptLeg.serviceType} />
+            <TramTypeCard serviceType={ptLeg.serviceType} testID={""} />
           )}
         </View>
         <View style={{ flexDirection: "column" }}>
           <View>
             <TouchableOpacity onPress={() => setExpanded(!expanded)}>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <MaterialIcons
-                  name={expanded ? "expand-less" : "expand-more"}
-                  size={20}
-                  color="#434343"
-                />
+                <MaterialIcons name={expanded ? "expand-less" : "expand-more"} size={20} color="#434343" />
                 <Text>
                   {" "}
-                  Ride {ptLeg.intermediateStopCount} stops (
-                  {Math.ceil(ptLeg.duration / 60)} min)
+                  Ride {ptLeg.intermediateStopCount} stops ({Math.ceil(ptLeg.duration / 60)} min)
                 </Text>
               </View>
             </TouchableOpacity>
@@ -273,9 +199,7 @@ const PublicTransportLegPart: React.FC<PublicTransportLegProps> = ({
             )}
           </View>
 
-          <Text style={{ fontFamily: "Inter-SemiBold" }}>
-            {ptLeg.destinationStopName}
-          </Text>
+          <Text style={{ fontFamily: "Inter-SemiBold" }}>{ptLeg.destinationStopName}</Text>
         </View>
       </Pressable>
     </View>
@@ -288,8 +212,7 @@ const WalkLegPart: React.FC<WalkLegProps> = ({ walkLeg, legHeight }) => {
     <View style={stylesheet.legDetails}>
       <Pressable onPress={() => console.log("Route pressed!")}>
         <Text style={{ marginTop: legHeight }}>
-          Walk for {Math.round(walkLeg.distance)}m (
-          {formatIntoMinutesAndSeconds(walkLeg.duration)})
+          Walk for {Math.round(walkLeg.distance)}m ({formatIntoMinutesAndSeconds(walkLeg.duration)})
         </Text>
       </Pressable>
     </View>
@@ -299,32 +222,17 @@ const WalkLegPart: React.FC<WalkLegProps> = ({ walkLeg, legHeight }) => {
 const DetailedRouteScreen: React.FC = () => {
   //add a base current location and end flag
   const params = useLocalSearchParams();
-  // console.log("destination type:", params.destination);
+
   let destination: destinationType = JSON.parse(params.destination as string);
-  // console.log("dest:", destination);
   let origin: LatLng = JSON.parse(params.origin as string);
-  // console.log("origin:", origin);
   if (params.baseResultsCardData == undefined) {
     console.error("no base results received");
     return;
   }
-  const baseResultsCardData: baseResultsCardType = JSON.parse(
-    params.baseResultsCardData as string
-  );
+  const baseResultsCardData: baseResultsCardType = JSON.parse(params.baseResultsCardData as string);
   let polylineArray: string[] = [];
-  if (
-    baseResultsCardData.polylineArray == undefined &&
-    origin.latitude != destination.latitude &&
-    origin.longitude != destination.longitude
-  ) {
-    // console.log(
-    //   "base results card data: ",
-    //   JSON.stringify(baseResultsCardData)
-    // );
-    // console.log("stop coords array as str: ", JSON.stringify(baseResultsCardData).)
-    console.error(
-      "no routing received despite differing origins and destination"
-    );
+  if (baseResultsCardData.polylineArray == undefined && origin.latitude != destination.latitude && origin.longitude != destination.longitude) {
+    console.error("no routing received despite differing origins and destination");
   } else {
     polylineArray = baseResultsCardData.polylineArray;
   }
@@ -342,14 +250,13 @@ const DetailedRouteScreen: React.FC = () => {
       longitude: arr[1],
     });
   }
-  const stopsCoordsArray: stopCoords[] =
-    baseResultsCardData.stopsCoordsArray.map((str) => {
-      return JSON.parse(str);
-    });
+  const stopsCoordsArray: stopCoords[] = baseResultsCardData.stopsCoordsArray.map((str) => {
+    return JSON.parse(str);
+  });
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <View style={stylesheet.SafeAreaView} testID="test">
+    <View style={stylesheet.SafeAreaView} testID="MapView">
       <MapView
         style={stylesheet.MapView}
         userInterfaceStyle="light"
@@ -357,11 +264,10 @@ const DetailedRouteScreen: React.FC = () => {
           latitude: (origin.latitude + destination.latitude) / 2,
           longitude: (origin.longitude + destination.longitude) / 2,
           latitudeDelta: Math.abs(origin.latitude - destination.latitude) * 2,
-          longitudeDelta:
-            Math.abs(origin.longitude - destination.longitude) * 2,
+          longitudeDelta: Math.abs(origin.longitude - destination.longitude) * 2,
         }}
         testID="current-location-map"
-      > 
+      >
         <Marker
           title="Origin"
           coordinate={{
@@ -392,24 +298,14 @@ const DetailedRouteScreen: React.FC = () => {
             longitude: destination.longitude,
           }}
         />
-        {polylineArray.length > 0 && (
-          <Polyline
-            coordinates={formatted_array}
-            strokeWidth={4}
-            strokeColor="purple"
-            zIndex={1}
-            testID="current-location-polyline"
-          />
-        )}
+        {polylineArray.length > 0 && <Polyline coordinates={formatted_array} strokeWidth={4} strokeColor="purple" zIndex={1} testID="current-location-polyline" />}
       </MapView>
       <ScrollView style={{ flex: 1, backgroundColor: "white" }} testID="ok">
         <View style={{ marginVertical: 15, marginHorizontal: 20 }}>
           <View style={{ flexDirection: "row" }}>
             <OriginRectangle />
             <View style={stylesheet.legDetails}>
-              <Text style={{ fontFamily: "Inter-SemiBold" }}>
-                Current Location
-              </Text>
+              <Text style={{ fontFamily: "Inter-SemiBold" }}>Current Location</Text>
             </View>
           </View>
           {baseResultsCardData.journeyLegs.map((leg, index) => {
@@ -419,28 +315,9 @@ const DetailedRouteScreen: React.FC = () => {
             return (
               <React.Fragment key={index}>
                 <View style={{ flexDirection: "row" }}>
-                  <LegRectangle
-                    height={legHeight}
-                    legType={leg.type}
-                    expanded={expanded}
-                    leg={leg}
-                  />
-                  {(leg.type === "BUS" ||
-                    leg.type === "SUBWAY" ||
-                    leg.type === "NUS_BUS" ||
-                    leg.type === "TRAM") && (
-                    <PublicTransportLegPart
-                      ptLeg={leg as PublicTransportLeg}
-                      expanded={expanded}
-                      setExpanded={setExpanded}
-                    />
-                  )}
-                  {leg.type === "WALK" && (
-                    <WalkLegPart
-                      walkLeg={leg as WalkLeg}
-                      legHeight={legHeight}
-                    />
-                  )}
+                  <LegRectangle height={legHeight} legType={leg.type} expanded={expanded} leg={leg} />
+                  {(leg.type === "BUS" || leg.type === "SUBWAY" || leg.type === "NUS_BUS" || leg.type === "TRAM") && <PublicTransportLegPart ptLeg={leg as PublicTransportLeg} expanded={expanded} setExpanded={setExpanded} />}
+                  {leg.type === "WALK" && <WalkLegPart walkLeg={leg as WalkLeg} legHeight={legHeight} />}
                 </View>
               </React.Fragment>
             );
@@ -461,7 +338,7 @@ const stylesheet = StyleSheet.create({
   MapView: {
     flex: 1,
     height: "30%",
-    width: "100%"
+    width: "100%",
   },
   ResultContainer: {
     flex: 1,
