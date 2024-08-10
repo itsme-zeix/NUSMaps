@@ -6,12 +6,11 @@ import { getColorForPublicTransport } from "@/utils/getColorForPublicTransport";
 
 interface TramServiceType {
   serviceType: string;
-  legType: string;
   testID: string;
 }
 
-export const TramTypeCard: React.FC<TramServiceType> = ({ serviceType, legType, testID }) => {
-  const backgroundColor = getColorForPublicTransport(legType, serviceType);
+export const TramTypeCard: React.FC<TramServiceType> = ({ serviceType, testID }) => {
+  const backgroundColor = getColorForPublicTransport("TRAM", serviceType);
   const fontColor = determineFontColor(backgroundColor);
 
   return (

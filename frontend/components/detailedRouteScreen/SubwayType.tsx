@@ -6,12 +6,11 @@ import { getColorForPublicTransport } from "@/utils/getColorForPublicTransport";
 
 interface MRTServiceType {
   serviceType: string;
-  legType: string;
   testID: string;
 }
 
-export const SubwayTypeCard: React.FC<MRTServiceType> = ({ serviceType, legType, testID }) => {
-  const bgColor = getColorForPublicTransport(legType, serviceType);
+export const SubwayTypeCard: React.FC<MRTServiceType> = ({ serviceType, testID }) => {
+  const bgColor = getColorForPublicTransport("SUBWAY", serviceType);
   const fontColor = determineFontColor(bgColor);
 
   return (

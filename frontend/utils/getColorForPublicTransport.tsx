@@ -1,6 +1,7 @@
 export const getColorForPublicTransport = (legType: string, serviceName: string): string => {
   switch (legType) {
     case "BUS":
+      return "#4ABF50";
     case "NUS_BUS":
       switch (serviceName) {
         case "D1":
