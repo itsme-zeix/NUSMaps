@@ -20,6 +20,12 @@ jest.mock("expo-location", () => ({
       longitude: 103.8198,
     },
   })),
+  getLastKnownPositionAsync: jest.fn(async () => ({
+    coords: {
+      latitude: 1.3521,
+      longitude: 103.8198,
+    },
+  })),
 }));
 
 // Mock Vector Icons

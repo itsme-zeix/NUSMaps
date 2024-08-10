@@ -104,7 +104,7 @@ describe("DetailedRouteScreen tests", () => {
     await waitFor(() => {
       expect(getByTestId("SafeAreaView")).toBeTruthy();
       expect(getByTestId("mapview")).toBeTruthy();
-      expect(getByTestId("current-location-polyline")).toBeTruthy();
+      expect(getByTestId("mapview-polyline")).toBeTruthy();
     });
   });
 });

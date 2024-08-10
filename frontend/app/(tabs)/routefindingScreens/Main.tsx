@@ -313,6 +313,7 @@ const App = forwardRef((props, ref) => {
     getLatLngFromId,
     setDestination,
   }));
+  
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

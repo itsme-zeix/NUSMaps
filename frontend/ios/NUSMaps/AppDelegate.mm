@@ -8,7 +8,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  [GMSServices provideAPIKey:@"GOOGLEMAPSAPIKEY HERE!!!!!"]; // add this line using the api key obtained from Google Console
+  [GMSServices provideAPIKey:@"***REMOVED***"]; // add this line using the api key obtained from Google Console
   self.moduleName = @"main";
 
   // You can add your custom initial props in the dictionary below.

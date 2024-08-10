@@ -379,7 +379,6 @@ const DetailedRouteScreen: React.FC = () => {
           {baseResultsCardData.journeyLegs.map((leg, index) => {
             let legHeight = leg.type === "WALK" ? 28 : 80; // Adjust these values as needed
             return (
-              legDistanceDefined &&
               <React.Fragment key={index}>
                 <View style={{ flexDirection: "row" }}>
                   {(leg.type === "BUS" || leg.type === "SUBWAY" || leg.type === "NUS_BUS" || leg.type === "TRAM") && (
