@@ -8,7 +8,7 @@ import { BusNumberCard } from "@/components/detailedRouteScreen/BusNumber";
 import { TramTypeCard } from "@/components/detailedRouteScreen/TramNumber";
 import { useLocalSearchParams } from "expo-router";
 import { TouchableOpacity } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 interface LegBase {
   //base template for the info that is displayed in the leg
@@ -57,16 +57,6 @@ interface baseResultsCardType {
   polylineArray: string[]; //each leg's polyline is a string
   stopsCoordsArray: string[];
 }
-
-interface IconCatalog {
-  MARKER: ImageSourcePropType;
-  STOPCIRCULARMARKER: ImageURISource;
-}
-
-const iconList: IconCatalog = {
-  MARKER: require("@/assets/images/location-icon.png"),
-  STOPCIRCULARMARKER: require("@/assets/images/mapCircle-icon.png"),
-};
 
 interface PublicTransportLegProps {
   ptLeg: PublicTransportLeg;
@@ -164,19 +154,12 @@ const PublicTransportLegPart: React.FC<PublicTransportLegProps> = ({ ptLeg, expa
     <View style={stylesheet.legDetails}>
       <Pressable onPress={() => console.log("route pressed!")}>
         <Text style={{ fontFamily: "Inter-SemiBold" }}>{ptLeg.startingStopName}</Text>
-        <View style={{ flexDirection: "row" }}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
           {ptLeg.type === "SUBWAY" && <SubwayTypeCard serviceType={ptLeg.serviceType} testID={""} />}
           {(ptLeg.type === "BUS" || ptLeg.type === "NUS_BUS") && <BusNumberCard busNumber={ptLeg.serviceType} busType={ptLeg.type} testID={""} />}
           {ptLeg.type === "NUS_BUS" && <Text>Wait for {formatIntoMinutesAndSeconds(ptLeg.startingStopETA)} for the next bus</Text>}
-          {ptLeg.type === "WALK" && (
-            <View>
-              <Image source={iconList[ptLeg.type as keyof IconCatalog]} />
-            </View>
-          )}
-          {ptLeg.type === "TRAM" && (
-            // <Image source={iconList[ptLeg.type as keyof IconCatalog]} />
-            <TramTypeCard serviceType={ptLeg.serviceType} testID={""} />
-          )}
+          {ptLeg.type === "WALK" && <View />}
+          {ptLeg.type === "TRAM" && <TramTypeCard serviceType={ptLeg.serviceType} testID={""} />}
         </View>
         <View style={{ flexDirection: "column" }}>
           <View>
@@ -268,14 +251,28 @@ const DetailedRouteScreen: React.FC = () => {
         }}
         testID="mapview"
       >
-        <Marker
-          title="Origin"
-          coordinate={{
-            latitude: origin.latitude,
-            longitude: origin.longitude,
-          }}
-          testID="origin-marker"
-        />
+        {polylineArray.length > 0 && (
+          <>
+            {/* Outline Polyline */}
+            <Polyline
+              coordinates={formatted_array}
+              strokeWidth={8} // Slightly thicker to act as the outline
+              strokeColor="#368E20" // Outline color
+              lineJoin="bevel"
+              zIndex={1} // Lower zIndex
+            />
+            {/* Main Polyline */}
+            <Polyline
+              coordinates={formatted_array}
+              strokeWidth={6.5} // Main polyline width
+              strokeColor="#53D733" // Main polyline color
+              lineJoin="bevel"
+              zIndex={2} // Slightly higher zIndex to be on top of the outline
+              testID="mapview-polyline"
+            />
+          </>
+        )}
+
         {stopsCoordsArray.map((stop, index) => {
           if (stop.name != "Origin" && stop.name != "Destination") {
             return (
@@ -286,20 +283,49 @@ const DetailedRouteScreen: React.FC = () => {
                   latitude: stop.latitude,
                   longitude: stop.longitude,
                 }}
-                image={iconList.STOPCIRCULARMARKER}
-              />
+                zIndex={3} // higher zIndex for circles but lower than origin/dest markers
+              >
+                <View
+                  style={{
+                    position: "relative",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: 40,
+                    height: 40,
+                  }}
+                >
+                  <MaterialIcons name="circle" size={10} color="#black" />
+                  <MaterialIcons name="circle" size={7} color="white" style={{ position: "absolute", zIndex: 2, elevation: 2 }} />
+                </View>
+              </Marker>
             );
           }
         })}
+
+        <Marker
+          title="Origin"
+          coordinate={{
+            latitude: origin.latitude,
+            longitude: origin.longitude,
+          }}
+          testID="origin-marker"
+          zIndex={4} // Highest zIndex for origin and destination markers
+        >
+          <MaterialIcons name="location-pin" size={30} color="crimson" />
+        </Marker>
+
         <Marker
           title="Destination"
           coordinate={{
             latitude: destination.latitude,
             longitude: destination.longitude,
           }}
-        />
-        {polylineArray.length > 0 && <Polyline coordinates={formatted_array} strokeWidth={4} strokeColor="purple" zIndex={1} testID="mapview-polyline" />}
+          zIndex={4} // Highest zIndex for origin and destination markers
+        >
+          <MaterialIcons name="location-pin" size={30} color="crimson" />
+        </Marker>
       </MapView>
+
       <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
         <View style={{ marginVertical: 15, marginHorizontal: 20 }}>
           <View style={{ flexDirection: "row" }}>
@@ -308,9 +334,8 @@ const DetailedRouteScreen: React.FC = () => {
               <Text style={{ fontFamily: "Inter-SemiBold" }}>Current Location</Text>
             </View>
           </View>
+
           {baseResultsCardData.journeyLegs.map((leg, index) => {
-            // console.log("leg type", leg.type);
-            // Calculate the height based on the content of each leg
             let legHeight = leg.type === "WALK" ? 20 : 40; // Adjust these values as needed
             return (
               <React.Fragment key={index}>
