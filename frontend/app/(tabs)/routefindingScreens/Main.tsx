@@ -75,7 +75,7 @@ const App = forwardRef((props, ref) => {
       const subscription = await Location.watchPositionAsync(
         {
           accuracy: Location.Accuracy.High,
-          distanceInterval: 10,
+          distanceInterval: 1,
         },
         (newLocation) => {
           console.log('new location:', newLocation.coords);
