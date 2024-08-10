@@ -79,7 +79,6 @@ const App = forwardRef((props, ref) => {
           distanceInterval: 1,
         },
         (newLocation) => {
-          console.log('new location:', newLocation.coords);
           setCurrentLocation(newLocation.coords);
           setRegion({
             latitude: newLocation.coords.latitude,
