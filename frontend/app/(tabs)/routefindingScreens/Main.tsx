@@ -30,6 +30,7 @@ const App = forwardRef((props, ref) => {
     heading: null,
     speed: null,
   });
+  
   const [region, setRegion] = useState<Region>({
     latitude: 1.3521, // Default to Singapore's latitude
     longitude: 103.8198, // Default to Singapore's longitude
@@ -47,7 +48,7 @@ const App = forwardRef((props, ref) => {
   };
   const [destination, setDestination] = useState<destinationType>(DEFAULTDESTINATIONLatLng);
   const isNotInitialExec = useRef(false);
-
+  
   //effects arranged in execution order
   //flow goes as follows: (1) Location Permissions + Denial error mesages
   //(2)Location error messages even when current permission is enabled
@@ -61,7 +62,36 @@ const App = forwardRef((props, ref) => {
     });
   };
   // const showResultsScreenAfterLoading = (originCoords, destCoords, ) => {
+    
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setLocationErrorMsg('Permission to access location was denied');
+        return;
+      }
 
+      // Start watching the location
+      const subscription = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          distanceInterval: 10,
+        },
+        (newLocation) => {
+          console.log('new location:', newLocation.coords);
+          setCurrentLocation(newLocation.coords);
+          setRegion({
+            latitude: newLocation.coords.latitude,
+            longitude: newLocation.coords.longitude,
+            latitudeDelta: 0.005,
+            longitudeDelta: 0.005,
+          });
+        }
+      );
+
+      return () => subscription.remove(); // Clean up the subscription on unmount
+    })();
+  }, []);
   // }
   useEffect(() => {
     // if (!isNotInitialExec.current) {
@@ -114,12 +144,12 @@ const App = forwardRef((props, ref) => {
     //to query for location permission
     getLocation(); //initial call
 
-    const intervalId = setInterval(() => {
-      getLocation();
-    }, INTERVALFORLOCATIONREFRESH);
+    // const intervalId = setInterval(() => {
+    //   getLocation();
+    // }, INTERVALFORLOCATIONREFRESH);
 
-    return () => clearInterval(intervalId);
-  }, [INTERVALFORLOCATIONREFRESH]);
+    // return () => clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     //Toast to display error from inability to fetch location even with gps permission
