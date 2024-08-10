@@ -144,6 +144,8 @@ const RefactoredResultsScreen: React.FC = () => {
                   latitude: parsedOrigin.latitude,
                   longitude: parsedOrigin.longitude,
                 }}
+                anchor={{ x: 0, y: -15}} // Google Maps
+                centerOffset={{x: 0, y:-15}} // Apple Maps
               >
                 <MaterialIcons name="location-pin" size={30} color="crimson" />
               </Marker>
@@ -153,6 +155,8 @@ const RefactoredResultsScreen: React.FC = () => {
                   latitude: parsedDestination.latitude,
                   longitude: parsedDestination.longitude,
                 }}
+                anchor={{ x: 0, y: -15}} // Google Maps
+                centerOffset={{x: 0, y:-15}} // Apple Maps
               >
                 <MaterialIcons name="location-pin" size={30} color="crimson" />
               </Marker>
