@@ -10,6 +10,11 @@ import { GooglePlaceData } from "react-native-google-places-autocomplete";
 
 jest.useFakeTimers();
 
+jest.mock('react-native/Libraries/Utilities/Platform', () => ({
+  OS: 'android', // or 'ios'
+  select: () => null
+}));
+
 jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn(),
   getCurrentPositionAsync: jest.fn(),

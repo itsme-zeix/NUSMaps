@@ -17,6 +17,7 @@ import useUserLocation from "@/hooks/useUserLocation";
 import { NUSTag } from "@/components/busStopsTab/NUSTag";
 import mapBusServiceColour from "@/utils/mapBusServiceColor";
 import { mapNUSCodeNametoFullName } from "@/utils/mapNUSCodeNametoFullName";
+import { StatusBar } from "expo-status-bar";
 
 // Stack navigator to redirect from bus stop screen to bus stop search screen (vice-versa)
 const Stack = createStackNavigator();
@@ -58,9 +59,14 @@ const calculateMinutesDifference = (isoTime: string): string => {
 
   const differenceInMilliseconds = busTime.getTime() - now.getTime();
   const differenceInMinutes = Math.round(differenceInMilliseconds / 1000 / 60);
-  return differenceInMinutes >= 0 ? `${differenceInMinutes} min` : "N/A"; // Correctly format the minute output
-};
 
+  // Display Arr if less than 1 minute till arrival
+  if (differenceInMilliseconds <= 60000) {
+    return "Arr.";
+  }
+
+  return differenceInMinutes > 0 ? `${differenceInMinutes} min` : "N/A"; // Correctly format the minute output
+};
 // This returns a React component of each bus stop that is expandable.
 export const ExpandableBusStop = ({ item }: { item: BusStop }) => {
   //Used to render details for 1 bus stop
@@ -88,22 +94,26 @@ export const ExpandableBusStop = ({ item }: { item: BusStop }) => {
 
       <CollapsibleContainer expanded={expanded}>
         <View style={styles.textContainer}>
-          {item.savedBuses.map((bus: BusService, index: number) => (
-            <View key={index} style={styles.detailRow}>
-              <View style={styles.leftContainer}>
-                <ColouredCircle color={mapBusServiceColour(bus.busNumber)} size={15} />
-                <Text style={[styles.details, styles.busNumber]}>{bus.busNumber.startsWith("PUB:") ? bus.busNumber.slice(4) : bus.busNumber}</Text>
+          {item.savedBuses.map((bus: BusService, index: number) => {
+            const firstArrivalTime = calculateMinutesDifference(bus.timings[0]);
+            const secondArrivalTime = calculateMinutesDifference(bus.timings[1]);
+            return (
+              <View key={index} style={styles.detailRow}>
+                <View style={styles.leftContainer}>
+                  <ColouredCircle color={mapBusServiceColour(bus.busNumber)} size={15} />
+                  <Text style={[styles.details, styles.busNumber]}>{bus.busNumber.startsWith("PUB:") ? bus.busNumber.slice(4) : bus.busNumber}</Text>
+                </View>
+                <View style={styles.rightContainer}>
+                  <Text style={[styles.details, firstArrivalTime === "Arr." ? styles.urgentTimingText : styles.timingText]} numberOfLines={1}>
+                    {firstArrivalTime}
+                  </Text>
+                  <Text style={[styles.details, secondArrivalTime === "Arr." ? styles.urgentTimingText : styles.timingText]} numberOfLines={1}>
+                    {secondArrivalTime}
+                  </Text>
+                </View>
               </View>
-              <View style={styles.rightContainer}>
-                <Text style={[styles.details, styles.timingText]} numberOfLines={1}>
-                  {calculateMinutesDifference(bus.timings[0])}
-                </Text>
-                <Text style={[styles.details, styles.timingText]} numberOfLines={1}>
-                  {calculateMinutesDifference(bus.timings[1])}
-                </Text>
-              </View>
-            </View>
-          ))}
+            );
+          })}
         </View>
       </CollapsibleContainer>
     </View>
@@ -226,6 +236,7 @@ function NearbyBusStops({ refreshLocation, refreshUserLocation }: { refreshLocat
       axios.get(`https://nusmaps.onrender.com/busStopsByLocation?latitude=${location!.coords.latitude}&longitude=${location!.coords.longitude}`).then((res) => {
         return res.data;
       }),
+    enabled: !!location,
   });
 
   if (isPending) return <ActivityIndicator size="large" style={{ margin: 20 }} />;
@@ -362,6 +373,11 @@ const styles = StyleSheet.create({
   timingText: {
     fontSize: 13,
     fontFamily: "Inter-Medium",
+    width: 50,
+  },
+  urgentTimingText: {
+    fontSize: 13,
+    fontFamily: "Inter-Bold",
     width: 50,
   },
   details: {

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import * as Location from "expo-location";
 import { LocationObject } from "expo-location";
 import Toast from "react-native-toast-message";
+import { Platform } from "react-native";
 
 const useUserLocation = (refreshLocation: number) => {
   const [location, setLocation] = useState<LocationObject | null>(null);
@@ -10,7 +11,20 @@ const useUserLocation = (refreshLocation: number) => {
 
   const getLocation = async () => {
     try {
-      let location = await Location.getCurrentPositionAsync({});
+      let location;
+      // Because getCurrentPositionAsync() is awfully slow in IOS,
+      // expo-location documentation recommends using getLastKnownPositionAsync() instead. 
+      if (Platform.OS === "ios") {
+        const last = await Location.getLastKnownPositionAsync();
+        if (last) {
+          location = last;
+        } else {
+          const current = await Location.getCurrentPositionAsync();
+          location = current;
+        }
+      } else {
+        location = await Location.getCurrentPositionAsync();
+      }
       setLocation(location);
       setLocationReady(true);
     } catch (error) {

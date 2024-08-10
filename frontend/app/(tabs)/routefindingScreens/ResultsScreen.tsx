@@ -135,6 +135,7 @@ const RefactoredResultsScreen: React.FC = () => {
           <View style={{ width: "100%", height: "50%" }}>
             <MapView
               style={{ width: "100%", height: "100%" }}
+              userInterfaceStyle="light"
               initialRegion={{
                 latitude: (parsedOrigin.latitude + parsedDestination.latitude) / 2,
                 longitude: (parsedOrigin.longitude + parsedDestination.longitude) / 2,
