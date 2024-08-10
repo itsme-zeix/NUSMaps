@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     MRTNumber: {
-        fontFamily: "Inter-Bold",
+        fontFamily: "Inter-SemiBold",
         fontSize: 15,
     },
 });

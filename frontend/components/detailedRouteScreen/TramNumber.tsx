@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#728473",
     },
     LRTNumber: {
-        fontFamily: "Inter-Bold",
+        fontFamily: "Inter-SemiBold",
         fontSize: 15,
     },
 });

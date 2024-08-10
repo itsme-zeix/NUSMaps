@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   busNumber: {
-    fontFamily: "Inter-Bold",
+    fontFamily: "Inter-SemiBold",
     fontSize: 15,
   },
   PUBLICBUSBG: {
