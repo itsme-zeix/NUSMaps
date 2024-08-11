@@ -10,9 +10,9 @@ import { GooglePlaceData } from "react-native-google-places-autocomplete";
 
 jest.useFakeTimers();
 
-jest.mock('react-native/Libraries/Utilities/Platform', () => ({
-  OS: 'android', // or 'ios'
-  select: () => null
+jest.mock("react-native/Libraries/Utilities/Platform", () => ({
+  OS: "android", // or 'ios'
+  select: () => null,
 }));
 
 jest.mock("expo-location", () => ({
@@ -21,6 +21,7 @@ jest.mock("expo-location", () => ({
   Accuracy: {
     High: "true",
   },
+  watchPositionAsync: jest.fn(),
 }));
 
 jest.mock("react-native-toast-message", () => ({
@@ -35,8 +36,12 @@ jest.mock("@expo/vector-icons", () => {
 
 jest.mock("react-native-maps", () => {
   const React = require("react");
-  const MockMapView = (props: React.JSX.IntrinsicAttributes & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>) => <div {...props} />;
-  const MockMarker = (props: React.JSX.IntrinsicAttributes & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>) => <div {...props} />;
+  const MockMapView = (
+    props: React.JSX.IntrinsicAttributes & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>
+  ) => <div {...props} />;
+  const MockMarker = (
+    props: React.JSX.IntrinsicAttributes & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>
+  ) => <div {...props} />;
   return {
     __esModule: true,
     default: MockMapView,
@@ -126,7 +131,6 @@ describe("Straight forward toasts/error handling", () => {
 });
 
 describe("Tests that involve user navigation", () => {
-
   const setup = async () => {
     (Location.getCurrentPositionAsync as jest.Mock).mockResolvedValue({ coords: TESTLOCATION });
 
@@ -161,10 +165,28 @@ describe("Tests that involve user navigation", () => {
     const routerReplaceSpy = jest.spyOn(mockRouter, "replace");
     const routerPushSpy = jest.spyOn(mockRouter, "push");
 
-    return { ref, fetchBestRouteSpy, routerReplaceSpy, routerPushSpy, origin, mockDestination, mockBaseResultsCard, DEFAULTDESTINATIONLatLng };
+    return {
+      ref,
+      fetchBestRouteSpy,
+      routerReplaceSpy,
+      routerPushSpy,
+      origin,
+      mockDestination,
+      mockBaseResultsCard,
+      DEFAULTDESTINATIONLatLng,
+    };
   };
   it("checks if the router.push and router.replace function is called when a successful result is attained from backend.", async () => {
-    const { ref, fetchBestRouteSpy, routerReplaceSpy, routerPushSpy, origin, mockDestination, mockBaseResultsCard, DEFAULTDESTINATIONLatLng } = await setup();
+    const {
+      ref,
+      fetchBestRouteSpy,
+      routerReplaceSpy,
+      routerPushSpy,
+      origin,
+      mockDestination,
+      mockBaseResultsCard,
+      DEFAULTDESTINATIONLatLng,
+    } = await setup();
     await act(async () => {
       ref.current!.setDestination({
         latitude: mockDestination.latitude,
@@ -182,7 +204,12 @@ describe("Tests that involve user navigation", () => {
         pathname: "../routefindingScreens/ResultsScreen", // COULD BREAK WITH REFACTORING
         params: {
           origin: JSON.stringify(origin),
-          destination: JSON.stringify({ latitude: mockDestination.latitude, longitude: mockDestination.longitude, address: DEFAULTDESTINATIONLatLng.address, placeId: DEFAULTDESTINATIONLatLng.placeId }),
+          destination: JSON.stringify({
+            latitude: mockDestination.latitude,
+            longitude: mockDestination.longitude,
+            address: DEFAULTDESTINATIONLatLng.address,
+            placeId: DEFAULTDESTINATIONLatLng.placeId,
+          }),
           baseResultsData: JSON.stringify(mockBaseResultsCard),
         },
       });
