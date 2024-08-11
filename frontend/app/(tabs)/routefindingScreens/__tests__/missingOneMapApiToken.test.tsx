@@ -16,6 +16,10 @@ jest.useFakeTimers();
 jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn(),
   getCurrentPositionAsync: jest.fn(),
+  watchPositionAsync: jest.fn(),
+  Accuracy: {
+    High: jest.fn(),  // Mock the High accuracy level
+  },
 }));
 
 jest.mock("react-native-toast-message", () => ({
