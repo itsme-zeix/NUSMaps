@@ -16,6 +16,10 @@ jest.useFakeTimers();
 jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn(),
   getCurrentPositionAsync: jest.fn(),
+  watchPositionAsync: jest.fn(),
+  Accuracy: {
+    High: jest.fn(),  // Mock the High accuracy level
+  },
 }));
 
 jest.mock("react-native-toast-message", () => ({
@@ -43,6 +47,7 @@ jest.mock("expo-constants", () => ({
     },
   },
 }));
+  // Mock implementation of watchPositionAsync
 interface AppInstance {
   fetchRoutesFromServer: (origin: LatLng, destination: LatLng) => Promise<baseResultsCardType[]>;
 }

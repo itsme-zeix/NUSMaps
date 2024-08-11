@@ -18,6 +18,7 @@ jest.mock('react-native/Libraries/Utilities/Platform', () => ({
 jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn(),
   getCurrentPositionAsync: jest.fn(),
+  watchPositionAsync: jest.fn(),
   Accuracy: {
     High: "true",
   },
