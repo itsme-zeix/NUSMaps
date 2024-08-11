@@ -16,6 +16,10 @@ jest.useFakeTimers();
 jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn(),
   getCurrentPositionAsync: jest.fn(),
+  Accuracy: {
+    High: "true",
+  },
+  watchPositionAsync: jest.fn(),
 }));
 
 jest.mock("react-native-toast-message", () => ({
@@ -23,8 +27,12 @@ jest.mock("react-native-toast-message", () => ({
 }));
 jest.mock("react-native-maps", () => {
   const React = require("react");
-  const MockMapView = (props: React.JSX.IntrinsicAttributes & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>) => <div {...props} />;
-  const MockMarker = (props: React.JSX.IntrinsicAttributes & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>) => <div {...props} />;
+  const MockMapView = (
+    props: React.JSX.IntrinsicAttributes & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>
+  ) => <div {...props} />;
+  const MockMarker = (
+    props: React.JSX.IntrinsicAttributes & React.ClassAttributes<HTMLDivElement> & React.HTMLAttributes<HTMLDivElement>
+  ) => <div {...props} />;
   return {
     __esModule: true,
     default: MockMapView,
@@ -68,7 +76,9 @@ describe("error handling for valid onemap token but invalid server response", ()
     const origin = { latitude: 1.3521, longitude: 103.8198 };
     const destination = { latitude: 1.3521, longitude: 103.8198 };
     await act(async () => {
-      await expect(ref.current!.fetchRoutesFromServer(origin, destination)).rejects.toThrow("API token could not be found. Please try again");
+      await expect(ref.current!.fetchRoutesFromServer(origin, destination)).rejects.toThrow(
+        "API token could not be found. Please try again"
+      );
       // await expect(fetchRoutesFromServer(origin, destination)).rejects.toThrow(
       //     "API token could not be found. Please try again"
       // );
