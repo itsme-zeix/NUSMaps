@@ -66,11 +66,12 @@ const App = forwardRef((props, ref) => {
     
   useEffect(() => {
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setLocationErrorMsg('Permission to access location was denied');
-        return;
-      }
+      // Commented out permissions request as it has already been done on app launch in _layout.tsx
+      // let { status } = await Location.requestForegroundPermissionsAsync();
+      // if (status !== 'granted') {
+      //   setLocationErrorMsg('Permission to access location was denied');
+      //   return;
+      // }
 
       // Start watching the location
       const subscription = await Location.watchPositionAsync(
@@ -313,6 +314,7 @@ const App = forwardRef((props, ref) => {
     getLatLngFromId,
     setDestination,
   }));
+  
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
