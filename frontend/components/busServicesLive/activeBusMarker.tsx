@@ -30,7 +30,7 @@ const ActiveBusMarker: React.FC<ActiveBusMarkerProps> = ({ coordinate, vehicleLi
           <View style={styles.textContainer}>
             <Text style={styles.markerText}>{vehicleLicensePlate}</Text>
           </View>
-        </View>
+        </View> 
         <View style={styles.busIconContainer}>
           <FontAwesome5 name="bus" size={16} color="white" style={styles.iconStyle} />
         </View>

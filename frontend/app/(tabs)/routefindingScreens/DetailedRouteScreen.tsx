@@ -1,28 +1,14 @@
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  ScrollView,
-  Text,
-  View,
-  Image,
-  Pressable,
-  ImageURISource,
-} from "react-native";
-import { ImageSourcePropType } from "react-native";
+import { StyleSheet, ScrollView, Text, View, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import MapView, {
-  PROVIDER_GOOGLE,
-  Marker,
-  Polyline,
-  LatLng,
-  Callout,
-} from "react-native-maps";
+import MapView, { PROVIDER_GOOGLE, Marker, Polyline, LatLng, Callout } from "react-native-maps";
 import { SubwayTypeCard } from "@/components/detailedRouteScreen/SubwayType";
 import { BusNumberCard } from "@/components/detailedRouteScreen/BusNumber";
 import { TramTypeCard } from "@/components/detailedRouteScreen/TramNumber";
 import { useLocalSearchParams } from "expo-router";
 import { TouchableOpacity } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { getColorForPublicTransport } from "@/utils/getColorForPublicTransport";
 
 interface LegBase {
   //base template for the info that is displayed in the leg
@@ -72,259 +58,200 @@ interface baseResultsCardType {
   stopsCoordsArray: string[];
 }
 
-interface IconCatalog {
-  WALK: ImageSourcePropType;
-  SUBWAY: ImageSourcePropType;
-  BUS: ImageSourcePropType;
-  TRAM: ImageSourcePropType;
-  RCHEVRON: ImageSourcePropType;
-  MARKER: ImageSourcePropType;
-  FLAG: ImageSourcePropType;
-  STOPCIRCULARMARKER: ImageURISource;
-}
-
-const iconList: IconCatalog = {
-  WALK: require("@/assets/images/walk-icon.png"),
-  SUBWAY: require("@/assets/images/subway-icon.png"),
-  BUS: require("@/assets/images/bus-icon.png"),
-  TRAM: require("@/assets/images/tram-icon.png"),
-  RCHEVRON: require(`@/assets/images/chevron_right-icon.png`),
-  MARKER: require("@/assets/images/location-icon.png"),
-  FLAG: require("@/assets/images/finishFlag-icon.png"),
-  STOPCIRCULARMARKER: require("@/assets/images/mapCircle-icon.png"),
-};
-
-interface PublicTransportLegProps {
+interface PublicTransportLegContainerProps {
   ptLeg: PublicTransportLeg;
-  expanded: boolean;
-  setExpanded: React.Dispatch<React.SetStateAction<boolean>>;
+  legType: string;
+  legHeight: number;
 }
 
-interface WalkLegProps {
+interface WalkLegContainerProps {
   walkLeg: WalkLeg;
   legHeight: number;
 }
 
 const polyline = require("@mapbox/polyline");
 
-const OriginRectangle: React.FC = () => {
+const OriginContainer: React.FC = () => {
   return (
-    <View style={stylesheet.barContainer}>
-      <View style={{ justifyContent: "center", alignItems: "center" }}>
-        <View style={stylesheet.circleIconWrapper}>
+    <View style={stylesheet.legContainer}>
+      <View style={stylesheet.barContainer}>
+        <View style={{ alignItems: "center" }}>
           <MaterialIcons name="my-location" size={20} color="#1B73E9" />
         </View>
       </View>
-    </View>
-  );
-};
-
-const DestinationRectangle: React.FC = () => {
-  return (
-    <View style={stylesheet.barContainer}>
-      <View style={{ justifyContent: "center", alignItems: "center" }}>
-        <View style={stylesheet.circleIconWrapper}>
-          <MaterialIcons name="location-pin" size={20} color="crimson" />
-        </View>
+      <View style={stylesheet.legDetails}>
+        <Text style={{ fontFamily: "Inter-SemiBold" }}>Current Location</Text>
       </View>
     </View>
   );
 };
 
-interface LegRectangleProps {
-  height: number;
-  legType: string;
-  expanded: boolean;
-  leg: Leg;
-}
-
-const LegRectangle: React.FC<LegRectangleProps> = ({
-  height,
-  legType,
-  expanded,
-  leg,
-}) => {
-  const isWalk = legType === "WALK";
-
-  // Type guard to allow for intermediateStopCount to be called.
-  function isPublicTransportLeg(leg: any): leg is PublicTransportLeg {
-    return leg && typeof leg.intermediateStopCount === "number";
-  }
-
-  // Use the type guard to assert leg type
-  const adjustedHeight = isWalk
-    ? height
-    : isPublicTransportLeg(leg) && expanded
-    ? height + (leg.intermediateStopCount - 1) * 16
-    : height; // lineHeight = 16 set in publicTransportLegPart
-
+const DestinationContainer = ({ destination }: { destination: destinationType }) => {
   return (
-    <View style={stylesheet.barContainer}>
-      <View style={{ justifyContent: "center", alignItems: "center" }}>
-        {isWalk && (
-          <View style={[{ height }, stylesheet.dotContainer]}>
-            {Array.from({ length: Math.ceil(height / 15) }).map((_, i) => (
-              <View key={i} style={stylesheet.dot} />
-            ))}
-          </View>
-        )}
-        <View style={stylesheet.circleIconWrapper}>
-          {isWalk ? (
-            <MaterialIcons name="directions-walk" size={20} />
-          ) : legType === "BUS" ? (
-            <MaterialIcons name="directions-bus" size={20} />
-          ) : legType === "NUS_BUS" ? (
-            <MaterialIcons name="directions-bus" size={20} />
-          ) : legType === "TRAM" ? (
-            <MaterialIcons name="tram" size={20} />
-          ) : legType === "SUBWAY" ? (
-            <MaterialIcons name="subway" size={20} />
-          ) : legType === "TRAIN" ? (
-            <MaterialIcons name="train" size={20} />
-          ) : (
-            <View style={stylesheet.circleIconWrapper} />
-          )}
+    <View style={stylesheet.legContainer}>
+      <View style={stylesheet.barContainer}>
+        <View style={{ alignItems: "center" }}>
+          <MaterialIcons name="location-pin" size={20} color="crimson" />
         </View>
-        {isWalk ? (
-          <View style={[{ height }, stylesheet.dotContainer]}>
-            {Array.from({ length: Math.ceil(height / 10) }).map((_, i) => (
-              <View key={i} style={stylesheet.dot} />
-            ))}
-          </View>
-        ) : (
-          <View
-            style={[stylesheet.solidRectangle, { height: adjustedHeight }]}
-          />
-        )}
-        {!isWalk && <View style={stylesheet.circleIconWrapper} />}
+      </View>
+      <View style={stylesheet.legDetails}>
+        <Text style={{fontFamily: "Inter-SemiBold"}}>{destination.address}</Text>
       </View>
     </View>
   );
 };
 
 const formatIntoMinutesAndSeconds = (timingInSeconds: number) => {
-  const seconds = (timingInSeconds % 60).toFixed(0);
-  const minutes = Math.floor(timingInSeconds / 60).toFixed(0);
-  if (minutes !== "0") {
-    return `${minutes} minutes, ${seconds} seconds`;
+  const seconds = Math.round(timingInSeconds % 60);
+  const minutes = Math.floor(timingInSeconds / 60);
+  const minutesRoundedUp = minutes + 1;
+
+  if (minutes !== 0) {
+    return `${minutesRoundedUp} min`;
   }
-  return `${seconds} seconds`;
+  return `${seconds} second`;
 };
 
-const PublicTransportLegPart: React.FC<PublicTransportLegProps> = ({
-  ptLeg,
-  expanded,
-  setExpanded,
-}) => {
+const formatDistance = (distance: number): string => {
+  if (distance < 100) {
+    return `${Math.round(distance)}m`;
+  } else if (distance < 1000) {
+    return `${Math.round(distance / 10) * 10}m`;
+  } else {
+    return `${(Math.round(distance / 100) / 10).toFixed(1)}km`;
+  }
+};
+
+const PublicTransportLegContainer: React.FC<PublicTransportLegContainerProps> = ({ ptLeg, legType, legHeight }) => {
+  const [expanded, setExpanded] = useState(false);
+
+  const lineHeight = 18; // Adjusts the distance between each bus stop when bus route is expanded
+  const adjustedHeight = expanded ? legHeight + (ptLeg.intermediateStopCount - 1) * lineHeight : legHeight;
+
+  const legColor = getColorForPublicTransport(legType, ptLeg.serviceType);
 
   return (
-    <View style={stylesheet.legDetails}>
-      <Pressable onPress={() => console.log("route pressed!")}>
-        <Text style={{ fontFamily: "Inter-SemiBold" }}>
-          {ptLeg.startingStopName}
-        </Text>
-        <View style={{ flexDirection: "row" }}>
-          {ptLeg.type === "SUBWAY" && (
-            <SubwayTypeCard serviceType={ptLeg.serviceType} />
-          )}
-          {(ptLeg.type === "BUS" || ptLeg.type === "NUS_BUS") && (
-            <BusNumberCard busNumber={ptLeg.serviceType} busType={ptLeg.type} />
-          )}
-          {ptLeg.type === "NUS_BUS" && (
-            <Text>
-              Wait for {formatIntoMinutesAndSeconds(ptLeg.startingStopETA)} for
-              the next bus
-            </Text>
-          )}
-          {ptLeg.type === "WALK" && (
-            <View>
-              <Image source={iconList[ptLeg.type as keyof IconCatalog]} />
-            </View>
-          )}
-          {ptLeg.type === "TRAM" && (
-            // <Image source={iconList[ptLeg.type as keyof IconCatalog]} />
-            <TramTypeCard serviceType={ptLeg.serviceType} />
-          )}
+    <View style={stylesheet.legContainer}>
+      {/* Graphics on the left of the stop information */}
+      <View style={[{position: "relative"}, stylesheet.barContainer]}>
+        <View style={{ justifyContent: "flex-start", alignItems: "center"}}>
+          <View style={[{position: "absolute", zIndex: 1}, stylesheet.circleIcon]}>
+            {legType === "BUS" || legType === "NUS_BUS" ? (
+              <MaterialIcons name="directions-bus" size={17} color="#3D3F43" />
+            ) : legType === "TRAM" ? (
+              <MaterialIcons name="tram" size={17} color="#3D3F43" />
+            ) : legType === "SUBWAY" ? (
+              <MaterialIcons name="subway" size={17} color="#3D3F43" />
+            ) : legType === "TRAIN" ? (
+              <MaterialIcons name="train" size={17} color="#3D3F43" />
+            ) : null}
+          </View>
+          <View style={[stylesheet.solidRectangle, { position: "relative", top: 10, height: adjustedHeight + 15, backgroundColor: legColor }]} />
+          <View style={[stylesheet.miniCircleIcon, { position: "relative", bottom: 4.5 }]} />
         </View>
-        <View style={{ flexDirection: "column" }}>
-          <View>
-            <TouchableOpacity onPress={() => setExpanded(!expanded)}>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <MaterialIcons
-                  name={expanded ? "expand-less" : "expand-more"}
-                  size={20}
-                  color="#434343"
-                />
-                <Text>
-                  {" "}
-                  Ride {ptLeg.intermediateStopCount} stops (
-                  {Math.ceil(ptLeg.duration / 60)} min)
-                </Text>
-              </View>
-            </TouchableOpacity>
-            {expanded && (
-              <View>
-                {ptLeg.intermediateStopNames.map((stop, index) => (
-                  <Text key={index} style={{ lineHeight: 16 }}>
-                    {stop}
-                  </Text>
-                ))}
-              </View>
+      </View>
+
+      {/* Stop information */}
+      <View style={stylesheet.legDetails}>
+        <Pressable onPress={() => console.log("route pressed!")}>
+          <Text style={{ fontFamily: "Inter-SemiBold", marginTop: 4, marginBottom: 8 }}>{ptLeg.startingStopName}</Text>
+
+          {/* Logo that shows icon and bus/train service number below the starting stop's name */}
+          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 3 }}>
+            {ptLeg.type === "SUBWAY" && <SubwayTypeCard serviceType={ptLeg.serviceType} testID={""} />}
+            {(ptLeg.type === "BUS" || ptLeg.type === "NUS_BUS") && (
+              <BusNumberCard busNumber={ptLeg.serviceType} busType={ptLeg.type} testID={""} />
             )}
+            {ptLeg.type === "NUS_BUS" && (
+              <Text style={{ marginHorizontal: 4, fontFamily: "Inter-Regular" }}>
+                Next bus: {formatIntoMinutesAndSeconds(ptLeg.startingStopETA)}
+              </Text>
+            )}
+            {ptLeg.type === "WALK" && <View />}
+            {ptLeg.type === "TRAM" && <TramTypeCard serviceType={ptLeg.serviceType} testID={""} />}
           </View>
 
-          <Text style={{ fontFamily: "Inter-SemiBold" }}>
-            {ptLeg.destinationStopName}
-          </Text>
-        </View>
-      </Pressable>
+          {/* Expandable view of intermediate stops */}
+          <View style={{ flexDirection: "column" }}>
+            <View style={{ marginBottom: 5 }}>
+              <Pressable onPress={() => setExpanded(!expanded)}>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <MaterialIcons name={expanded ? "expand-less" : "expand-more"} size={20} color="#434343" />
+                  <Text style={{ fontFamily: "Inter-Regular" }}>
+                    Ride {ptLeg.intermediateStopCount} stops ({Math.ceil(ptLeg.duration / 60)} min)
+                  </Text>
+                </View>
+              </Pressable>
+              {expanded && (
+                <View>
+                  {ptLeg.intermediateStopNames.map((stop, index) => (
+                    <Text key={index} style={{ fontFamily: "Inter-Regular", lineHeight: lineHeight }}>
+                      {stop}
+                    </Text>
+                  ))}
+                </View>
+              )}
+            </View>
+            <Text style={{ fontFamily: "Inter-SemiBold" }}>{ptLeg.destinationStopName}</Text>
+          </View>
+        </Pressable>
+      </View>
     </View>
   );
 };
 
-const WalkLegPart: React.FC<WalkLegProps> = ({ walkLeg, legHeight }) => {
+const WalkLegContainer: React.FC<WalkLegContainerProps> = ({ walkLeg, legHeight }) => {
   //TO-DO: Add details on turns
+  let legDistanceDefined = walkLeg.distance !== undefined;
+
   return (
-    <View style={stylesheet.legDetails}>
-      <Pressable onPress={() => console.log("Route pressed!")}>
-        <Text style={{ marginTop: legHeight }}>
-          Walk for {Math.round(walkLeg.distance)}m (
-          {formatIntoMinutesAndSeconds(walkLeg.duration)})
-        </Text>
-      </Pressable>
-    </View>
+    legDistanceDefined && (
+      <View style={stylesheet.legContainer}>
+        <View style={stylesheet.barContainer}>
+          <View style={{ justifyContent: "center", alignItems: "center" }}>
+            <View style={[{ height: legHeight }, stylesheet.dotContainer]}>
+              {Array.from({ length: Math.ceil(legHeight / 14) }).map((_, i) => (
+                <View key={i} style={stylesheet.dot} />
+              ))}
+            </View>
+            <MaterialIcons name="directions-walk" size={17} />
+            <View style={[{ height: legHeight }, stylesheet.dotContainer]}>
+              {Array.from({ length: Math.ceil(legHeight / 14) }).map((_, i) => (
+                <View key={i} style={stylesheet.dot} />
+              ))}
+            </View>
+          </View>
+        </View>
+        <View style={[stylesheet.legDetails]}>
+          <Pressable onPress={() => console.log("Route pressed!")}>
+            <Text style={{ fontFamily: "Inter-Regular" }}>
+              Walk for {formatDistance(walkLeg.distance)} ({formatIntoMinutesAndSeconds(walkLeg.duration)})
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+    )
   );
 };
 
 const DetailedRouteScreen: React.FC = () => {
   //add a base current location and end flag
   const params = useLocalSearchParams();
-  // console.log("destination type:", params.destination);
+
   let destination: destinationType = JSON.parse(params.destination as string);
-  // console.log("dest:", destination);
   let origin: LatLng = JSON.parse(params.origin as string);
-  // console.log("origin:", origin);
   if (params.baseResultsCardData == undefined) {
     console.error("no base results received");
     return;
   }
-  const baseResultsCardData: baseResultsCardType = JSON.parse(
-    params.baseResultsCardData as string
-  );
+  const baseResultsCardData: baseResultsCardType = JSON.parse(params.baseResultsCardData as string);
   let polylineArray: string[] = [];
   if (
     baseResultsCardData.polylineArray == undefined &&
     origin.latitude != destination.latitude &&
     origin.longitude != destination.longitude
   ) {
-    // console.log(
-    //   "base results card data: ",
-    //   JSON.stringify(baseResultsCardData)
-    // );
-    // console.log("stop coords array as str: ", JSON.stringify(baseResultsCardData).)
-    console.error(
-      "no routing received despite differing origins and destination"
-    );
+    console.error("no routing received despite differing origins and destination");
   } else {
     polylineArray = baseResultsCardData.polylineArray;
   }
@@ -342,14 +269,12 @@ const DetailedRouteScreen: React.FC = () => {
       longitude: arr[1],
     });
   }
-  const stopsCoordsArray: stopCoords[] =
-    baseResultsCardData.stopsCoordsArray.map((str) => {
-      return JSON.parse(str);
-    });
-  const [expanded, setExpanded] = useState(false);
+  const stopsCoordsArray: stopCoords[] = baseResultsCardData.stopsCoordsArray.map((str) => {
+    return JSON.parse(str);
+  });
 
   return (
-    <View style={stylesheet.SafeAreaView} testID="test">
+    <View style={stylesheet.SafeAreaView} testID="SafeAreaView">
       <MapView
         style={stylesheet.MapView}
         userInterfaceStyle="light"
@@ -357,19 +282,32 @@ const DetailedRouteScreen: React.FC = () => {
           latitude: (origin.latitude + destination.latitude) / 2,
           longitude: (origin.longitude + destination.longitude) / 2,
           latitudeDelta: Math.abs(origin.latitude - destination.latitude) * 2,
-          longitudeDelta:
-            Math.abs(origin.longitude - destination.longitude) * 2,
+          longitudeDelta: Math.abs(origin.longitude - destination.longitude) * 2,
         }}
-        testID="current-location-map"
-      > 
-        <Marker
-          title="Origin"
-          coordinate={{
-            latitude: origin.latitude,
-            longitude: origin.longitude,
-          }}
-          testID="current-location-marker"
-        />
+        testID="mapview"
+      >
+        {polylineArray.length > 0 && (
+          <>
+            {/* Outline Polyline */}
+            <Polyline
+              coordinates={formatted_array}
+              strokeWidth={8} // Slightly thicker to act as the outline
+              strokeColor="#368E20" // Outline color
+              lineJoin="bevel"
+              zIndex={1} // Lower zIndex
+            />
+            {/* Main Polyline */}
+            <Polyline
+              coordinates={formatted_array}
+              strokeWidth={6.5} // Main polyline width
+              strokeColor="#53D733" // Main polyline color
+              lineJoin="bevel"
+              zIndex={2} // Slightly higher zIndex to be on top of the outline
+              testID="mapview-polyline"
+            />
+          </>
+        )}
+
         {stopsCoordsArray.map((stop, index) => {
           if (stop.name != "Origin" && stop.name != "Destination") {
             return (
@@ -380,73 +318,88 @@ const DetailedRouteScreen: React.FC = () => {
                   latitude: stop.latitude,
                   longitude: stop.longitude,
                 }}
-                image={iconList.STOPCIRCULARMARKER}
-              />
+                zIndex={3} // higher zIndex for circles but lower than origin/dest markers
+              >
+                <View
+                  style={{
+                    position: "relative",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: 40,
+                    height: 40,
+                  }}
+                >
+                  <MaterialIcons name="circle" size={10} color="#black" />
+                  <MaterialIcons
+                    name="circle"
+                    size={7}
+                    color="white"
+                    style={{ position: "absolute", zIndex: 2, elevation: 2 }}
+                  />
+                </View>
+              </Marker>
             );
           }
         })}
+
+        <Marker
+          title="Origin"
+          coordinate={{
+            latitude: origin.latitude,
+            longitude: origin.longitude,
+          }}
+          testID="origin-marker"
+          zIndex={4} // Highest zIndex for origin and destination markers
+          anchor={{ x: 0, y: -15 }} // Google Maps
+          centerOffset={{ x: 0, y: -15 }} // Apple Maps
+        >
+          <MaterialIcons name="location-pin" size={30} color="crimson" />
+        </Marker>
+
         <Marker
           title="Destination"
           coordinate={{
             latitude: destination.latitude,
             longitude: destination.longitude,
           }}
-        />
-        {polylineArray.length > 0 && (
-          <Polyline
-            coordinates={formatted_array}
-            strokeWidth={4}
-            strokeColor="purple"
-            zIndex={1}
-            testID="current-location-polyline"
-          />
-        )}
+          zIndex={4} // Highest zIndex for origin and destination markers
+          anchor={{ x: 0, y: -15 }} // Google Maps
+          centerOffset={{ x: 0, y: -15 }} // Apple Maps
+        >
+          <MaterialIcons name="location-pin" size={30} color="crimson" />
+        </Marker>
       </MapView>
-      <ScrollView style={{ flex: 1, backgroundColor: "white" }} testID="ok">
+
+      <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
         <View style={{ marginVertical: 15, marginHorizontal: 20 }}>
           <View style={{ flexDirection: "row" }}>
-            <OriginRectangle />
-            <View style={stylesheet.legDetails}>
-              <Text style={{ fontFamily: "Inter-SemiBold" }}>
-                Current Location
-              </Text>
-            </View>
+            <OriginContainer />
           </View>
+
           {baseResultsCardData.journeyLegs.map((leg, index) => {
-            // console.log("leg type", leg.type);
-            // Calculate the height based on the content of each leg
-            let legHeight = leg.type === "WALK" ? 20 : 40; // Adjust these values as needed
+            let legHeight = leg.type === "WALK" ? 28 : 80; // Adjust these values as needed
+            let legDistanceDefined = leg.type === "WALK" 
+                                    ? (leg as WalkLeg).distance === undefined 
+                                    ? false 
+                                    : true 
+                                    : true;
             return (
+              legDistanceDefined && 
               <React.Fragment key={index}>
                 <View style={{ flexDirection: "row" }}>
-                  <LegRectangle
-                    height={legHeight}
-                    legType={leg.type}
-                    expanded={expanded}
-                    leg={leg}
-                  />
-                  {(leg.type === "BUS" ||
-                    leg.type === "SUBWAY" ||
-                    leg.type === "NUS_BUS" ||
-                    leg.type === "TRAM") && (
-                    <PublicTransportLegPart
+                  {(leg.type === "BUS" || leg.type === "SUBWAY" || leg.type === "NUS_BUS" || leg.type === "TRAM") && (
+                    <PublicTransportLegContainer
                       ptLeg={leg as PublicTransportLeg}
-                      expanded={expanded}
-                      setExpanded={setExpanded}
-                    />
-                  )}
-                  {leg.type === "WALK" && (
-                    <WalkLegPart
-                      walkLeg={leg as WalkLeg}
                       legHeight={legHeight}
+                      legType={leg.type}
                     />
                   )}
+                  {leg.type === "WALK" && <WalkLegContainer walkLeg={leg as WalkLeg} legHeight={legHeight} />}
                 </View>
               </React.Fragment>
             );
           })}
-          <DestinationRectangle />
-          <Text>Destination: {destination.address}</Text>
+          <DestinationContainer destination={destination} />
         </View>
       </ScrollView>
     </View>
@@ -461,16 +414,15 @@ const stylesheet = StyleSheet.create({
   MapView: {
     flex: 1,
     height: "30%",
-    width: "100%"
+    width: "100%",
   },
-  ResultContainer: {
+  resultContainer: {
     flex: 1,
     flexDirection: "column",
   },
-  LegContainer: {
-    flex: 1,
-    height: 150,
+  legContainer: {
     flexDirection: "row",
+    alignItems: "center",
   },
   barContainer: {
     justifyContent: "flex-start",
@@ -485,37 +437,43 @@ const stylesheet = StyleSheet.create({
     backgroundColor: "grey",
   },
   solidRectangle: {
-    width: 18,
-    height: 30, // Adjust as needed
-    backgroundColor: "green",
+    width: 17,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
   },
   dotContainer: {
     justifyContent: "space-around",
     alignItems: "center",
   },
   dot: {
-    width: 8,
-    height: 8,
+    width: 7,
+    height: 7,
     borderRadius: 4,
-    backgroundColor: "grey",
-    opacity: 0.5,
-    marginVertical: 8,
+    backgroundColor: "#DADBE1",
   },
-  circleIconWrapper: {
-    width: 30,
-    height: 30,
+  circleIcon: {
+    width: 25,
+    height: 25,
     borderRadius: 15,
     backgroundColor: "white",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#00000",
+    shadowColor: "#000",
     shadowOpacity: 0.4,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 1, // Add elevation for Android
+  },
+  miniCircleIcon: {
+    width: 9,
+    height: 9,
+    borderRadius: 15,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
   },
   legDetails: {
     justifyContent: "flex-start",
-    marginLeft: 10,
-    marginTop: 7,
+    marginHorizontal: 10,
   },
 });
 

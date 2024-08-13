@@ -1,4 +1,4 @@
-import React, {forwardRef, useImperativeHandle } from "react";
+import React, { forwardRef, useImperativeHandle } from "react";
 import { StyleSheet, ScrollView, Text, View, Image, StatusBar, Platform, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
@@ -32,83 +32,78 @@ const iconList: IconCatalog = {
 const apiKey = process.env.EXPO_PUBLIC_GOOGLEMAPS_API_KEY || Constants.expoConfig.extra.EXPO_PUBLIC_GOOGLEMAPS_API_KEY;
 
 //result card(singular card)
-export const ResultCard = forwardRef((
-  { origin, destination, resultData, testID }: SingleResultCardData & { testID: string },
-  ref // Add ref parameter
-) => {
-  //Put in a pressable that when expanded, will
-  // console.log("destination received in resultcard", destination);
-  const types = resultData.types.flatMap((icon) => [icon, "RCHEVRON"]);
-  types.splice(types.length - 1, 1); // remove the last chevron
-  const router = useRouter();
-  // const segments = useSegments();
-  const nextScreenFunc = () => {
-    router.push({
-      pathname: "../routefindingScreens/DetailedRouteScreen",
-      params: {
-        origin: JSON.stringify(origin),
-        destination: JSON.stringify(destination),
-        baseResultsCardData: JSON.stringify(resultData),
-      },
-    });
-  };
-  useImperativeHandle(ref, () => ({
-    nextScreenFunc,
-  }));
-  return (
-    <Pressable style={[{ backgroundColor: "white" }, styles.resultCard]} onPress={nextScreenFunc} testID={testID}>
-      <View style={{ flexDirection: "column" }}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <View style={styles.iconsContainer}>
-            {types.map((icon, index) => {
-              if (icon === "BUS" || icon === "NUS_BUS") {
-                const ptLeg = resultData.journeyLegs[Math.floor(index / 2)] as PublicTransportLeg;
-                return (
-                  <View key={`bus-${index}`} style={styles.iconWrapper}>
-                    <BusNumberCard busNumber={ptLeg.serviceType} busType={ptLeg.type} testID= {`${testID}-BusNumberCard-${index}`}/>
-                  </View>
-                ) 
-              } else if (icon === "SUBWAY") {
-                const ptLeg = resultData.journeyLegs[Math.floor(index / 2)] as PublicTransportLeg;
-                return (
-                  <View key={`subway-${index}`} style={styles.iconWrapper}>
-                    <SubwayTypeCard serviceType={ptLeg.serviceType} testID= {`${testID}-SubwayTypeCard-${index}`} />
-                  </View>
-                );
-              } else if (icon === "TRAM") {
-                const ptLeg = resultData.journeyLegs[Math.floor(index / 2)] as PublicTransportLeg;
-                return (
-                  <View key={`tram-${index}`} style={styles.iconWrapper}>
-                    <TramTypeCard serviceType={ptLeg.serviceType} testID= {`${testID}-TramTypeCard-${index}`}/>
-                  </View>
-                );
-              } else {
-                return (
-                  <View key={`icon-${index}`} style={styles.iconWrapper} testID= {`${testID}-WalkOrChevronCard-${index}`}>
-                    <MaterialIcons
-                      key={`icon-${index}`}
-                      size={22}
-                      name={iconList[icon as keyof IconCatalog]}
-                      color="#434343"
-                      style={{ flexDirection: "row", alignItems: "center" }}
-                    />
-                  </View>
-                );
-              }
-            })}
-          </View>
-          <View style={styles.travelDurationContainer}>
-            <Text style={styles.travelDuration}>{resultData.journeyTiming}</Text>
+export const ResultCard = forwardRef(
+  (
+    { origin, destination, resultData, testID }: SingleResultCardData & { testID: string },
+    ref // Add ref parameter
+  ) => {
+    //Put in a pressable that when expanded, will
+    // console.log("destination received in resultcard", destination);
+    const types = resultData.types.flatMap((icon) => [icon, "RCHEVRON"]);
+    types.splice(types.length - 1, 1); // remove the last chevron
+    const router = useRouter();
+    // const segments = useSegments();
+    const nextScreenFunc = () => {
+      router.push({
+        pathname: "../routefindingScreens/DetailedRouteScreen",
+        params: {
+          origin: JSON.stringify(origin),
+          destination: JSON.stringify(destination),
+          baseResultsCardData: JSON.stringify(resultData),
+        },
+      });
+    };
+    useImperativeHandle(ref, () => ({
+      nextScreenFunc,
+    }));
+    return (
+      <Pressable style={[{ backgroundColor: "white" }, styles.resultCard]} onPress={nextScreenFunc} testID={testID}>
+        <View style={{ flexDirection: "column" }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+            <View style={styles.iconsContainer}>
+              {types.map((icon, index) => {
+                if (icon === "BUS" || icon === "NUS_BUS") {
+                  const ptLeg = resultData.journeyLegs[Math.floor(index / 2)] as PublicTransportLeg;
+                  return (
+                    <View key={`bus-${index}`} style={styles.iconWrapper}>
+                      <BusNumberCard busNumber={ptLeg.serviceType} busType={ptLeg.type} testID={`${testID}-BusNumberCard-${index}`} />
+                    </View>
+                  );
+                } else if (icon === "SUBWAY") {
+                  const ptLeg = resultData.journeyLegs[Math.floor(index / 2)] as PublicTransportLeg;
+                  return (
+                    <View key={`subway-${index}`} style={styles.iconWrapper}>
+                      <SubwayTypeCard serviceType={ptLeg.serviceType} testID={`${testID}-SubwayTypeCard-${index}`} />
+                    </View>
+                  );
+                } else if (icon === "TRAM") {
+                  const ptLeg = resultData.journeyLegs[Math.floor(index / 2)] as PublicTransportLeg;
+                  return (
+                    <View key={`tram-${index}`} style={styles.iconWrapper}>
+                      <TramTypeCard serviceType={ptLeg.serviceType} testID={`${testID}-TramTypeCard-${index}`} />
+                    </View>
+                  );
+                } else {
+                  return (
+                    <View key={`icon-${index}`} style={styles.iconWrapper} testID={`${testID}-WalkOrChevronCard-${index}`}>
+                      <MaterialIcons key={`icon-${index}`} size={22} name={iconList[icon as keyof IconCatalog]} color="#434343" style={{ flexDirection: "row", alignItems: "center" }} />
+                    </View>
+                  );
+                }
+              })}
+            </View>
+            <View style={styles.travelDurationContainer}>
+              <Text style={styles.travelDuration}>{resultData.journeyTiming}</Text>
+            </View>
           </View>
         </View>
-      </View>
-      <View style={styles.startAndEndTimeContainer}>
-        <Text>{resultData.wholeJourneyTiming}</Text>
-      </View>
-    </Pressable>
-  );
-});
-
+        <View style={styles.startAndEndTimeContainer}>
+          <Text>{resultData.wholeJourneyTiming}</Text>
+        </View>
+      </Pressable>
+    );
+  }
+);
 
 const _parseParams = (result: string | string[] | undefined) => {
   return typeof result === "string" ? JSON.parse(result) : undefined;
@@ -149,14 +144,22 @@ const RefactoredResultsScreen: React.FC = () => {
                   latitude: parsedOrigin.latitude,
                   longitude: parsedOrigin.longitude,
                 }}
-              />
+                anchor={{ x: 0, y: -15}} // Google Maps
+                centerOffset={{x: 0, y:-15}} // Apple Maps
+              >
+                <MaterialIcons name="location-pin" size={30} color="crimson" />
+              </Marker>
               <Marker
                 title="Destination"
                 coordinate={{
                   latitude: parsedDestination.latitude,
                   longitude: parsedDestination.longitude,
                 }}
-              />
+                anchor={{ x: 0, y: -15}} // Google Maps
+                centerOffset={{x: 0, y:-15}} // Apple Maps
+              >
+                <MaterialIcons name="location-pin" size={30} color="crimson" />
+              </Marker>
             </MapView>
           </View>
           <SafeAreaView style={styles.doubleSearchBarsContainer}>
@@ -192,7 +195,7 @@ const RefactoredResultsScreen: React.FC = () => {
           <ScrollView>
             <View style={styles.resultContainer}>
               {typeCastedBaseResultsCard.map((data, index) => (
-                <ResultCard key={`result-${index}`} origin={parsedOrigin} resultData={data} destination={parsedDestination} testID={`result-card-${index}`}/>
+                <ResultCard key={`result-${index}`} origin={parsedOrigin} resultData={data} destination={parsedDestination} testID={`result-card-${index}`} />
               ))}
             </View>
           </ScrollView>
