@@ -349,11 +349,7 @@ const DetailedRouteScreen: React.FC = () => {
             longitude: origin.longitude,
           }}
           testID="origin-marker"
-          zIndex={4} // Highest zIndex for origin and destination markers
-          anchor={{ x: 0, y: -15 }} // Google Maps
-          centerOffset={{ x: 0, y: -15 }} // Apple Maps
         >
-          <MaterialIcons name="location-pin" size={30} color="crimson" />
         </Marker>
 
         <Marker
@@ -362,16 +358,12 @@ const DetailedRouteScreen: React.FC = () => {
             latitude: destination.latitude,
             longitude: destination.longitude,
           }}
-          zIndex={4} // Highest zIndex for origin and destination markers
-          anchor={{ x: 0, y: -15 }} // Google Maps
-          centerOffset={{ x: 0, y: -15 }} // Apple Maps
         >
-          <MaterialIcons name="location-pin" size={30} color="crimson" />
         </Marker>
       </MapView>
 
-      <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
-        <View style={{ marginVertical: 15, marginHorizontal: 20 }}>
+      <ScrollView style={{ flex: 1, backgroundColor: "white", marginHorizontal: 20 }}>
+        <View style={{ marginVertical: 15 }}>
           <View style={{ flexDirection: "row" }}>
             <OriginContainer />
           </View>
