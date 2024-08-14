@@ -95,7 +95,7 @@ const DestinationContainer = ({ destination }: { destination: destinationType })
         </View>
       </View>
       <View style={stylesheet.legDetails}>
-        <Text style={{fontFamily: "Inter-SemiBold"}}>{destination.address}</Text>
+        <Text style={{ fontFamily: "Inter-SemiBold" }}>{destination.address}</Text>
       </View>
     </View>
   );
@@ -133,9 +133,9 @@ const PublicTransportLegContainer: React.FC<PublicTransportLegContainerProps> = 
   return (
     <View style={stylesheet.legContainer}>
       {/* Graphics on the left of the stop information */}
-      <View style={[{position: "relative"}, stylesheet.barContainer]}>
-        <View style={{ justifyContent: "flex-start", alignItems: "center"}}>
-          <View style={[{position: "absolute", zIndex: 1}, stylesheet.circleIcon]}>
+      <View style={[{ position: "relative" }, stylesheet.barContainer]}>
+        <View style={{ justifyContent: "flex-start", alignItems: "center" }}>
+          <View style={[{ position: "absolute", zIndex: 1 }, stylesheet.circleIcon]}>
             {legType === "BUS" || legType === "NUS_BUS" ? (
               <MaterialIcons name="directions-bus" size={17} color="#3D3F43" />
             ) : legType === "TRAM" ? (
@@ -146,7 +146,12 @@ const PublicTransportLegContainer: React.FC<PublicTransportLegContainerProps> = 
               <MaterialIcons name="train" size={17} color="#3D3F43" />
             ) : null}
           </View>
-          <View style={[stylesheet.solidRectangle, { position: "relative", top: 10, height: adjustedHeight + 15, backgroundColor: legColor }]} />
+          <View
+            style={[
+              stylesheet.solidRectangle,
+              { position: "relative", top: 10, height: adjustedHeight + 15, backgroundColor: legColor },
+            ]}
+          />
           <View style={[stylesheet.miniCircleIcon, { position: "relative", bottom: 4.5 }]} />
         </View>
       </View>
@@ -349,8 +354,8 @@ const DetailedRouteScreen: React.FC = () => {
             longitude: origin.longitude,
           }}
           testID="origin-marker"
-        >
-        </Marker>
+          opacity={1}
+        ></Marker>
 
         <Marker
           title="Destination"
@@ -358,8 +363,8 @@ const DetailedRouteScreen: React.FC = () => {
             latitude: destination.latitude,
             longitude: destination.longitude,
           }}
-        >
-        </Marker>
+          opacity={1}
+        ></Marker>
       </MapView>
 
       <ScrollView style={{ flex: 1, backgroundColor: "white", marginHorizontal: 20 }}>
@@ -396,6 +401,7 @@ const stylesheet = StyleSheet.create({
   SafeAreaView: {
     flex: 1,
     width: "100%",
+    backgroundColor: "white",
   },
   MapView: {
     flex: 1,
