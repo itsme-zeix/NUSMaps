@@ -63,3 +63,18 @@ export interface activeBusType extends LatLng {
   crowdLevel:string,
   licensePlate:string
 };
+
+export interface BusService {
+    busNumber: string;
+    timings: string[]; // ISO format
+  }
+  
+export interface BusStop {
+    busStopName: string;
+    busStopId: string;
+    distanceAway: string;
+    savedBuses: BusService[];
+    latitude: number;
+    longitude: number;
+    isFavourited: boolean;
+  }
