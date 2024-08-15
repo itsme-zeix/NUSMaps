@@ -353,8 +353,20 @@ const _populateNusStops = async () => {
   // console.log(NUS_STOPS);
 };
 
+<<<<<<< HEAD
 _populateNusStops().then(console.log("temp stops loaded in")); // can be elimintaed once backend postgresql db is implemented
 _populateShuttleRoutes().then(console.log('shuttle routes loaded in'));
+=======
+const _populateShuttleRoutes = () => {
+  //saves the results into a hashmap, which is faster
+  for (route of NUS_SHUTTLE_ROUTES) {
+    TEMP_NUS_SHUTTLES_ROUTES.set(route.shuttle, route);
+  }
+};
+_populateNusStops().then(console.log("temp stops loaded in")); // can be eliminated once backend postgresql db is implemented
+_populateShuttleRoutes();
+console.log('shuttle routes loaded in');
+>>>>>>> fa18e2dc5ed034e48429ac35f85224904399f983
 router.post("/", async (req, res) => {
   try {
     // console.log("origin received: ", req.body.origin);
@@ -407,6 +419,7 @@ router.post("/", async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 const _populateShuttleRoutes = () => {
   //saves the results into a hashmap, which is faster
   for (route of NUS_SHUTTLE_ROUTES) {
@@ -414,6 +427,8 @@ const _populateShuttleRoutes = () => {
   }
   
 };
+=======
+>>>>>>> fa18e2dc5ed034e48429ac35f85224904399f983
 
 const _extractBusServiceETA = (serviceETAs, timeTakenToWalkInSeconds) => {
   //extracts the best ETA time, based on how long it takes for a person to walk from the origin to the stop, returning the ETA - the time taken to walk
@@ -693,10 +708,19 @@ const formatIntoRoute = async (
 
 const checkViabilityOfRoute = (route) => {
   const service = route.service;
+<<<<<<< HEAD
   const route_info = TEMP_NUS_SHUTTLES_ROUTES.get(service).route;
   if (route_info == undefined) {
     return undefined;
   };
+=======
+  const route_intermediate = TEMP_NUS_SHUTTLES_ROUTES.get(service);
+  if (route_intermediate == undefined) {
+    return undefined;
+  };
+  const route_info = route_intermediate.route;
+  // console.log(`route service for ${service} attained: `, route_info);
+>>>>>>> fa18e2dc5ed034e48429ac35f85224904399f983
   let originIndexes = []; //size of at most 2 for both
   let destIndexes = [];
   // console.log("route info length: ", route_info.length);
