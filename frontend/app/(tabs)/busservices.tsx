@@ -49,7 +49,7 @@ type RouteDataShown = {
   activeBusesArray: ActiveBus[];
 };
 
-type NUSBusServices = "A1" | "A2" | "BTC" | "D1" | "D2" | "K" | "L";
+type NUSBusServices = "A1" | "A2" | "BTC" | "D1" | "D2" | "K" | "L" | "E";
 
 type DirectionMarker = {
   latitude: number;
@@ -67,6 +67,7 @@ const NUS_SHUTTLE_ROUTES: { [key: string]: string[] } = {
   D2: ["COM3", "TCOMS-OPP", "PGP", "KR-MRT", "LT27", "UHALL", "UHC-OPP", "MUSEUM", "UTOWN", "UHC", "UHALL-OPP", "S17", "KR-MRT-OPP", "PGPR", "TCOMS", "COM3"],
   K: ["PGP", "KR-MRT", "LT27", "UHALL", "UHC-OPP", "YIH", "CLB", "SDE3-OPP", "JP-SCH-16151", "KV", "MUSEUM", "UHC", "UHALL-OPP", "S17", "KR-MRT-OPP", "PGPR"],
   L: ["OTH", "BG-MRT", "CG", "OTH"],
+  E: ["UTOWN", "RAFFLES", "KV", "EA", "SDE3", "IT", "YIH-OPP", "UTOWN"]
 };
 
 const busStopsWithBaseNames: BusStopNames =
