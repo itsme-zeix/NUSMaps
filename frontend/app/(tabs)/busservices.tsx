@@ -175,8 +175,6 @@ function fetchDetailedStopNames(busService: string): string[] {
       const displayNameDetailed = busStopsWithDisplayNames[value];
       if (displayNameDetailed != undefined) return displayNameDetailed;
       else {
-        console.log("problematic value:", value);
-        console.log("name: ", displayNameDetailed);
         return "Unknown Stop";
       }
     });
