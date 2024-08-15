@@ -692,6 +692,7 @@ const formatIntoRoute = async (
 
 const checkViabilityOfRoute = (route) => {
   const service = route.service;
+  console.log("service number:", service);
   console.log("Service:", TEMP_NUS_SHUTTLES_ROUTES.get(service));
   const route_info = TEMP_NUS_SHUTTLES_ROUTES.get(service).route;
   // console.log(`route service for ${service} attained: `, route_info);
