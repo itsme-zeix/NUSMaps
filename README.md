@@ -66,19 +66,19 @@
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li> 
+    <li><a href="#contact">Contact</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 -->
 
 <!-- ABOUT THE PROJECT -->
+
 ## About The Project
 
-|![](./README-assets/busStopsDemo.gif)|![](./README-assets/searchScreenDemo.gif)|
-|:-:|:-:|
-|![](./README-assets/routeFindingDemo.gif)|![](./README-assets/busServicesDemo.gif)|
-
+|   ![](./README-assets/busStopsDemo.gif)   | ![](./README-assets/searchScreenDemo.gif) |
+| :---------------------------------------: | :---------------------------------------: |
+| ![](./README-assets/routeFindingDemo.gif) | ![](./README-assets/busServicesDemo.gif)  |
 
 NUSMaps was developed to address a common problem faced by NUS students:
 
@@ -88,7 +88,7 @@ NUSMaps was developed to address a common problem faced by NUS students:
 
 The route finding algorithm in NUSMaps uses a weighted mix of LTA OneMap and NUS internal bus routes to provide comprehensive and efficient routing solutions.
 
-For more information about our considerations and implementation details, check out our [Orbital writeup](https://docs.google.com/document/d/1OixiEyLXQwfd-JoF3s_XRjfoQGEu8IjpKqIKieb5gWw/edit)!
+For more information about our considerations and implementation details, check out our [Orbital writeup](https://docs.google.com/document/d/1oUNa5rmXFtwOky3VHceCEgf-qIQ0OIaNydj_oJvBQBA/)!
 
 ### Built With
 
@@ -114,7 +114,7 @@ For more information about our considerations and implementation details, check 
 
 1. **Download Expo Go** on your iOS/Android device.
 
-2. **Scan the following QR code:** <br> 
+2. **Scan the following QR code:** <br>
 <div align="center">
   <img src="./README-assets/expogo-qrcode.png" alt="Expo Go QR Code" width="200" height="200">
 </div>
