@@ -692,10 +692,6 @@ const formatIntoRoute = async (
 
 const checkViabilityOfRoute = (route) => {
   const service = route.service;
-  const route_info = TEMP_NUS_SHUTTLES_ROUTES.get(service).route;
-  if (route_info == undefined) {
-    return undefined;
-  };
   const route_intermediate = TEMP_NUS_SHUTTLES_ROUTES.get(service);
   if (route_intermediate == undefined) {
     return undefined;
