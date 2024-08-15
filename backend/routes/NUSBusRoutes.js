@@ -351,7 +351,8 @@ const _populateNusStops = async () => {
   // console.log(NUS_STOPS);
 };
 
-_populateNusStops().then(console.log("temp stops loaded in")); // can be elimintaed once backend postgresql db is implemented
+_populateNusStops().then(console.log("temp stops loaded in")); // can be eliminated once backend postgresql db is implemented
+_populateShuttleRoutes().then(console.log('shuttle routes loaded in'));
 router.post("/", async (req, res) => {
   try {
     // console.log("origin received: ", req.body.origin);
