@@ -8,7 +8,7 @@ const NUSNEXTBUSCREDENTIALS = btoa(
     `${process.env.NUSNEXTBUS_USER}:${process.env.NUSNEXTBUS_PASSWORD}`
   );
 
-const NUS_BUS_SERVICES = ["A1", "A2", "BTC", "D1", "D2", "K", "L"];
+const NUS_BUS_SERVICES = ["A1", "A2", "BTC", "D1", "D2", "K", "L", "E"];
 const CHECKPOINT_MAPPINGS = {}; // looks like {A1 : [{coords}, {coords}]}
 
 function _getCheckPointDataFilePath(service) {
