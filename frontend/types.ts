@@ -1,5 +1,4 @@
 import { LatLng } from "react-native-maps";
-import { MaterialIcons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 
 export type destinationType = {
