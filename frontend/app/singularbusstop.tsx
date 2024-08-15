@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  Pressable,
-  ScrollView,
-  TouchableWithoutFeedback,
-  ActivityIndicator,
-  RefreshControl,
-} from "react-native";
+import { StyleSheet, View, Text, Pressable, ScrollView, ActivityIndicator, RefreshControl } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BusStop, BusService } from "@/types";
 import { NUSTag } from "@/components/busStopsTab/NUSTag";
@@ -21,7 +12,7 @@ import { QueryClient, QueryClientProvider, useMutation } from "@tanstack/react-q
 import { mapNUSCodeNametoFullName } from "@/utils/mapNUSCodeNametoFullName";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
 const queryClient = new QueryClient();
 
@@ -63,7 +54,6 @@ const calculateMinutesDifference = (isoTime: string): string => {
 // This returns a React component of a bus stop and its timings. The card is originally collapsible (as used in bus stops tab), but is forced to be expanded now.
 const BusStopCard = ({ item }: { item: BusStop }) => {
   //Used to render details for 1 bus stop
-  const [expanded, setExpanded] = useState(false);
   const updatedBusStopName = mapNUSCodeNametoFullName(item.busStopName);
   const [updateAsyncStorageErrorMsg, setUpdateAsyncStorageErrorMsg] = useState("");
   const [data, setData] = useState<BusStop[]>([]);
@@ -104,39 +94,35 @@ const BusStopCard = ({ item }: { item: BusStop }) => {
       });
     }
   }, [updateAsyncStorageErrorMsg]);
-  const onItemPress = () => {
-    setExpanded(!expanded);
-  };
+
   return (
     <View style={styles.wrap}>
-      <TouchableWithoutFeedback onPress={onItemPress} testID="expandable-bus-stop">
-        <View style={styles.cardContainer}>
-          <View style={styles.textContainer}>
-            <Text style={styles.busStopName}>{updatedBusStopName}</Text>
-            <Text style={styles.distanceAwayText}>
-              {Number(item.distanceAway) < 1
-                ? `~${(Number(item.distanceAway) * 1000).toFixed(0)}m away`
-                : `~${Number(item.distanceAway).toFixed(2)}km away`}
-            </Text>
-          </View>
-          <View style={styles.nusTagAndChevronContainer}>
-            {item.busStopName.startsWith("NUSSTOP") && <NUSTag />}
-            <Pressable
-              onPress={() => {
-                toggleFavourite(item.busStopId);
-              }}
-              accessibilityLabel={`toggle-favourite-${item.busStopId}`}
-            >
-              <Ionicons
-                name={favouriteState ? "star" : "star-outline"}
-                size={24}
-                color={favouriteState ? "#FFD700" : "#000"}
-                style={{ marginHorizontal: 5 }}
-              />
-            </Pressable>
-          </View>
+      <View style={styles.cardContainer}>
+        <View style={styles.textContainer}>
+          <Text style={styles.busStopName}>{updatedBusStopName}</Text>
+          <Text style={styles.distanceAwayText}>
+            {Number(item.distanceAway) < 1
+              ? `~${(Number(item.distanceAway) * 1000).toFixed(0)}m away`
+              : `~${Number(item.distanceAway).toFixed(2)}km away`}
+          </Text>
         </View>
-      </TouchableWithoutFeedback>
+        <View style={styles.nusTagAndChevronContainer}>
+          {item.busStopName.startsWith("NUSSTOP") && <NUSTag />}
+          <Pressable
+            onPress={() => {
+              toggleFavourite(item.busStopId);
+            }}
+            accessibilityLabel={`toggle-favourite-${item.busStopId}`}
+          >
+            <Ionicons
+              name={favouriteState ? "star" : "star-outline"}
+              size={24}
+              color={favouriteState ? "#FFD700" : "#000"}
+              style={{ marginHorizontal: 5 }}
+            />
+          </Pressable>
+        </View>
+      </View>
 
       <View
         style={{
@@ -214,7 +200,7 @@ const CurrentBusStop = ({ currentBusStop, refreshLocation }: { currentBusStop: B
     setDataMutated(false); // Reset dataMutated to allow re-fetching
   };
 
-  if (isPending && !dataMutated) return <ActivityIndicator size="large" style={{ margin: 20 }} />;
+  if (isPending) return <ActivityIndicator size="large" style={{ margin: 20 }} />;
   if (error)
     return (
       <ScrollView refreshControl={<RefreshControl refreshing={isPending} onRefresh={handleRefresh} />}>
@@ -227,13 +213,9 @@ const CurrentBusStop = ({ currentBusStop, refreshLocation }: { currentBusStop: B
 
   return (
     <ScrollView
-      refreshControl={<RefreshControl refreshing={isPending} onRefresh={handleRefresh} />}
-      contentContainerStyle={{ flexGrow: 1 }}
+      refreshControl={<RefreshControl refreshing={isPending} onRefresh={handleRefresh} title="Pull down to refresh" />}
+      contentContainerStyle={{ paddingVertical: 10 }}
     >
-      <Text style={{ textAlign: "center", marginVertical: 5, fontFamily: "Inter-Regular" }}>
-        {" "}
-        Pull down to refresh{" "}
-      </Text>
       <BusStopCard item={busStop[0]} />
     </ScrollView>
   );
@@ -243,26 +225,17 @@ const SingularBusStop = () => {
   const [refreshLocation, setRefreshLocation] = useState(0); // State to handle the re-retrieval of user location.
 
   const { busStopItem }: { busStopItem: string } = useLocalSearchParams();
-  const currentBusStop = JSON.parse(busStopItem); // Deserialize the object
-
-  // const teststop = {
-  //   busStopName: "NUSSTOP_KR-MRT-OPP",
-  //   busStopId: 19,
-  //   latitude: 1.294923,
-  //   longitude: 103.784603,
-  //   savedBuses: [
-  //     { busNumber: "A2", timings: [] },
-  //     { busNumber: "D2", timings: [] },
-  //     { busNumber: "K", timings: [] },
-  //     { busNumber: "PUB:95", timings: [] },
-  //   ],
-  //   isFavourited: true,
-  // };
+  const currentBusStop = JSON.parse(busStopItem);
 
   return (
     <QueryClientProvider client={queryClient}>
       <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-        <CurrentBusStop currentBusStop={currentBusStop} refreshLocation={refreshLocation} />
+        <View style={{marginHorizontal: 10}}>
+          <Pressable onPress={() => router.dismiss(1)} style={styles.closeButton}>
+            <Ionicons name="arrow-back" color="848484" size={25} />
+          </Pressable>
+          <CurrentBusStop currentBusStop={currentBusStop} refreshLocation={refreshLocation} />
+        </View>
       </SafeAreaView>
     </QueryClientProvider>
   );
@@ -273,7 +246,7 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderWidth: 0.5,
     marginVertical: 5,
-    marginHorizontal: 14,
+    marginHorizontal: 10,
     borderRadius: 5,
     backgroundColor: "#fff",
     shadowColor: "#000",
@@ -340,6 +313,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingRight: 16,
     marginVertical: 20,
+  },
+  closeButton: {
+    alignSelf: "flex-start",
+    marginHorizontal: 10,
   },
 });
 
