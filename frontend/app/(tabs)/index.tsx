@@ -17,7 +17,7 @@ import useUserLocation from "@/hooks/useUserLocation";
 import { NUSTag } from "@/components/busStopsTab/NUSTag";
 import mapBusServiceColour from "@/utils/mapBusServiceColor";
 import { mapNUSCodeNametoFullName } from "@/utils/mapNUSCodeNametoFullName";
-import { StatusBar } from "expo-status-bar";
+import { BusStop, BusService } from "@/types";
 
 // Stack navigator to redirect from bus stop screen to bus stop search screen (vice-versa)
 const Stack = createStackNavigator();
@@ -30,21 +30,6 @@ export default function BusStopSearchNavigator(): React.JSX.Element {
       </Stack.Navigator>
     </QueryClientProvider>
   );
-}
-
-// INTERFACES
-interface BusService {
-  busNumber: string;
-  timings: string[]; // ISO format
-}
-interface BusStop {
-  busStopName: string;
-  busStopId: string;
-  distanceAway: string;
-  savedBuses: BusService[];
-  latitude: number;
-  longitude: number;
-  isFavourited: boolean;
 }
 
 // Logic to modify the timings in a BusService object from ISO time to minutes away from now.

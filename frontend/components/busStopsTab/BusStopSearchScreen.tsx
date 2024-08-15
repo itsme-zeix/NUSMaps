@@ -9,6 +9,7 @@ import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import Toast from "react-native-toast-message";
 import { mapNUSCodeNametoFullName } from "@/utils/mapNUSCodeNametoFullName";
+import { useRouter } from "expo-router";
 
 type RootStackParamList = {
   BusStopSearch: { initialQuery: string };
@@ -65,23 +66,37 @@ const BusStopSearchScreen: React.FC = () => {
     setSearch(search);
     const newData = data.filter((item) => {
       const busStopName = item.busStopName ? item.busStopName.toLowerCase() : "";
-      const fullBusStopName = busStopName.startsWith("nusstop_") ? mapNUSCodeNametoFullName(item.busStopName).toLowerCase() : "";
+      const fullBusStopName = busStopName.startsWith("nusstop_")
+        ? mapNUSCodeNametoFullName(item.busStopName).toLowerCase()
+        : "";
       const busStopId = item.busStopId ? item.busStopId.toString() : "";
-      return busStopName.includes(search.toLowerCase()) || busStopId.includes(search.toLowerCase()) || fullBusStopName.includes(search.toLowerCase());
+      return (
+        busStopName.includes(search.toLowerCase()) ||
+        busStopId.includes(search.toLowerCase()) ||
+        fullBusStopName.includes(search.toLowerCase())
+      );
     });
     setFilteredData(newData);
   };
 
   const toggleFavourite = async (busStopId: string) => {
-    const updatedData = data.map((item) => (item.busStopId === busStopId ? { ...item, isFavourited: !item.isFavourited } : item));
+    const updatedData = data.map((item) =>
+      item.busStopId === busStopId ? { ...item, isFavourited: !item.isFavourited } : item
+    );
 
     setData(updatedData);
 
     const newFilteredData = updatedData.filter((item) => {
       const busStopName = item.busStopName ? item.busStopName.toLowerCase() : "";
-      const fullBusStopName = busStopName.startsWith("nusstop_") ? mapNUSCodeNametoFullName(item.busStopName).toLowerCase() : "";
+      const fullBusStopName = busStopName.startsWith("nusstop_")
+        ? mapNUSCodeNametoFullName(item.busStopName).toLowerCase()
+        : "";
       const busStopId = item.busStopId ? item.busStopId.toString() : "";
-      return busStopName.includes(search.toLowerCase()) || busStopId.includes(search.toLowerCase()) || fullBusStopName.includes(search.toLowerCase());
+      return (
+        busStopName.includes(search.toLowerCase()) ||
+        busStopId.includes(search.toLowerCase()) ||
+        fullBusStopName.includes(search.toLowerCase())
+      );
     });
 
     setFilteredData(newFilteredData);
@@ -107,20 +122,40 @@ const BusStopSearchScreen: React.FC = () => {
     }
   }, [updateAsyncStorageErrorMsg]);
 
+  const router = useRouter();
+
+  const handleNavigation = (item: BusStopItem) => {
+    const serializedItem = JSON.stringify(item);
+    router.push({
+      pathname: "/singularbusstop",
+      params: { busStopItem: serializedItem },
+    });
+  };
+
   const renderItem = ({ item }: { item: BusStopItem }) => {
     const isNUSStop = item.busStopName.startsWith("NUSSTOP_");
     const busStopName = mapNUSCodeNametoFullName(item.busStopName);
 
     return (
-      <View style={styles.item}>
-        <Text style={styles.busStopText}>{isNUSStop ? busStopName : busStopName + " " + "(" + item.busStopId + ")"}</Text>
+      <Pressable onPress={() => handleNavigation(item)} style={styles.item}>
+        <Text style={styles.busStopText}>
+          {isNUSStop ? busStopName : busStopName + " " + "(" + item.busStopId + ")"}
+        </Text>
         <View style={styles.iconContainer}>
           {isNUSStop && <NUSTag />}
-          <Pressable onPress={() => toggleFavourite(item.busStopId)} accessibilityLabel={`toggle-favourite-${item.busStopId}`}>
-            <Icon name={item.isFavourited ? "star" : "star-outline"} type="ionicon" color={item.isFavourited ? "#FFD700" : "#000"} style={{ marginLeft: 5 }} />
+          <Pressable
+            onPress={() => toggleFavourite(item.busStopId)}
+            accessibilityLabel={`toggle-favourite-${item.busStopId}`}
+          >
+            <Icon
+              name={item.isFavourited ? "star" : "star-outline"}
+              type="ionicon"
+              color={item.isFavourited ? "#FFD700" : "#000"}
+              style={{ marginLeft: 5 }}
+            />
           </Pressable>
         </View>
-      </View>
+      </Pressable>
     );
   };
 
@@ -138,7 +173,17 @@ const BusStopSearchScreen: React.FC = () => {
         <Pressable onPress={() => navigation.goBack()} style={styles.closeButton}>
           <Ionicons name="arrow-back" color="848484" size={25} />
         </Pressable>
-        <SearchBar placeholder="Search" platform="ios" onChangeText={(text) => updateSearch(text)} value={search} searchIcon={{ name: "search" }} clearIcon={{ name: "close-circle" }} autoFocus={true} style={{height: 15}} ref={(ref: any) => setSearchBarRef(ref)} />
+        <SearchBar
+          placeholder="Search"
+          platform="ios"
+          onChangeText={(text) => updateSearch(text)}
+          value={search}
+          searchIcon={{ name: "search" }}
+          clearIcon={{ name: "close-circle" }}
+          autoFocus={true}
+          style={{ height: 15 }}
+          ref={(ref: any) => setSearchBarRef(ref)}
+        />
         <FlatList data={filteredData} keyExtractor={(item) => item.busStopId} renderItem={renderItem} />
       </View>
     </SafeAreaView>
