@@ -379,6 +379,7 @@ router.post("/", async (req, res) => {
       resultingBusStopFromOrigin,
       resultingBusStopFromDest
     ); //possible edgecase where origin === dest bus stop, in that case dont bother checking, just factor in walking time
+    console.log("possible routes: ", possibleRoutes);
     //no results
     // console.log("possible routes: ", possibleRoutes);
     let viableRoutes = possibleRoutes
