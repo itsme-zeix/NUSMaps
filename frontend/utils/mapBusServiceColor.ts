@@ -17,6 +17,8 @@ export default function mapBusServiceColour(busService: string) {
       return "#EE8136"; // Orange
     case "L":
       return "#BFBFBF"; // Gray
+    case "E":
+      return "#00B050"; // Green
     default:
       return "green"; // Default color for other bus stops
   }
