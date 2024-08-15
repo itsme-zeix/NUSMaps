@@ -358,7 +358,8 @@ const _populateShuttleRoutes = () => {
   }
 };
 _populateNusStops().then(console.log("temp stops loaded in")); // can be eliminated once backend postgresql db is implemented
-_populateShuttleRoutes().then(console.log('shuttle routes loaded in'));
+_populateShuttleRoutes();
+console.log('shuttle routes loaded in');
 router.post("/", async (req, res) => {
   try {
     // console.log("origin received: ", req.body.origin);
