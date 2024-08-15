@@ -1,4 +1,5 @@
 {
+    "CheckPointResult": {
         "CheckPoint": [
             {
                 "longitude": 103.77496,
@@ -2005,4 +2006,5 @@
                 "routeid": 90296
             }
         ]
+    }
 }
