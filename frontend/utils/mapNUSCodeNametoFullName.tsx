@@ -32,6 +32,7 @@ const codeNameFullNameDict: { [key: string]: string } = {
   "BG-MRT": "Botanic Gardens MRT (PUDO)",
   CG: "College Green",
   RAFFLES: "Raffles Hall",
+  EA: "Engineering Auditorium",
 };
 
 export const mapNUSCodeNametoFullName = (busStopName: string) => {
