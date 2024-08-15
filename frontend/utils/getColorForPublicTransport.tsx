@@ -18,6 +18,8 @@ export const getColorForPublicTransport = (legType: string, serviceName: string)
           return "#345A9B";
         case "L":
           return "#BFBFBF";
+        case "E":
+          return "#00B050";
         default:
           return "#4ABF50"; // PUBLIC BUSES
       }
