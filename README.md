@@ -75,8 +75,8 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-|![](./README-assets/busStopsDemo.gif)|![](./README-assets/routeFindingDemo.gif)|![](./README-assets/busServicesDemo.gif)|
-|:-:|:-:|:-:|
+|![](./README-assets/busStopsDemo.gif)|![](./README-assets/searchScreenDemo.gif)|![](./README-assets/routeFindingDemo.gif)|![](./README-assets/busServicesDemo.gif)|
+|:-:|:-:|:-:|:-:|
 
 
 NUSMaps was developed to address a common problem faced by NUS students:
