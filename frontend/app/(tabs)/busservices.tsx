@@ -184,7 +184,7 @@ function fetchDetailedStopNames(busService: string): string[] {
   }
 }
 
-const NUS_BUS_SERVICES: NUSBusServices[] = ["A1", "A2", "BTC", "D1", "D2", "K", "L"];
+const NUS_BUS_SERVICES: NUSBusServices[] = ["A1", "A2", "BTC", "D1", "D2", "K", "L", "E"];
 
 async function fetchBusRoute(serviceName: string) {
   //returns 5 things in 1 array,
