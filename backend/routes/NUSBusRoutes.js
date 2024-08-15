@@ -351,6 +351,12 @@ const _populateNusStops = async () => {
   // console.log(NUS_STOPS);
 };
 
+const _populateShuttleRoutes = () => {
+  //saves the results into a hashmap, which is faster
+  for (route of NUS_SHUTTLE_ROUTES) {
+    TEMP_NUS_SHUTTLES_ROUTES.set(route.shuttle, route);
+  }
+};
 _populateNusStops().then(console.log("temp stops loaded in")); // can be eliminated once backend postgresql db is implemented
 _populateShuttleRoutes().then(console.log('shuttle routes loaded in'));
 router.post("/", async (req, res) => {
@@ -372,7 +378,6 @@ router.post("/", async (req, res) => {
       resultingBusStopFromOrigin,
       resultingBusStopFromDest
     ); //possible edgecase where origin === dest bus stop, in that case dont bother checking, just factor in walking time
-    _populateShuttleRoutes();
     //no results
     // console.log("possible routes: ", possibleRoutes);
     let viableRoutes = possibleRoutes
@@ -407,12 +412,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-const _populateShuttleRoutes = () => {
-  //saves the results into a hashmap, which is faster
-  for (route of NUS_SHUTTLE_ROUTES) {
-    TEMP_NUS_SHUTTLES_ROUTES.set(route.shuttle, route);
-  }
-};
 
 const _extractBusServiceETA = (serviceETAs, timeTakenToWalkInSeconds) => {
   //extracts the best ETA time, based on how long it takes for a person to walk from the origin to the stop, returning the ETA - the time taken to walk
