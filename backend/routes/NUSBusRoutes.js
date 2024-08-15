@@ -144,6 +144,7 @@ const NUS_SHUTTLE_ROUTES = [
     ],
   },
   { shuttle: "L", route: ["OTH", "BG-MRT", "CG", "OTH"] },
+  { shuttle: "E", route: ["UTOWN", "RAFFLES", "KV", "EA", "SDE3", "IT", "YIH-OPP", "UTOWN"]}
 ];
 
 const TEMP_SERVICE_CHECKPOINT_BUS_STOP_MAP = {
@@ -161,6 +162,7 @@ const TEMP_SERVICE_CHECKPOINT_BUS_STOP_MAP = {
     1, 88, 140, 173, 206, 224, 257, 311, 344, 380, 429, 471, 499, 529, 584, 681,
   ],
   L: [1, 92, 166, 261],
+  E: [1, 82, 137, 161, 192, 250, 273, 334]
 };
 
 const AVERAGE_BUS_TIMINGS = {
@@ -352,6 +354,7 @@ const _populateNusStops = async () => {
 };
 
 _populateNusStops().then(console.log("temp stops loaded in")); // can be elimintaed once backend postgresql db is implemented
+_populateShuttleRoutes().then(console.log('shuttle routes loaded in'));
 router.post("/", async (req, res) => {
   try {
     // console.log("origin received: ", req.body.origin);
@@ -371,9 +374,7 @@ router.post("/", async (req, res) => {
       resultingBusStopFromOrigin,
       resultingBusStopFromDest
     ); //possible edgecase where origin === dest bus stop, in that case dont bother checking, just factor in walking time
-    _populateShuttleRoutes();
     //no results
-    // console.log("possible routes: ", possibleRoutes);
     let viableRoutes = possibleRoutes
       .map((route) => checkViabilityOfRoute(route))
       .filter((route) => route !== undefined);
@@ -411,6 +412,7 @@ const _populateShuttleRoutes = () => {
   for (route of NUS_SHUTTLE_ROUTES) {
     TEMP_NUS_SHUTTLES_ROUTES.set(route.shuttle, route);
   }
+  
 };
 
 const _extractBusServiceETA = (serviceETAs, timeTakenToWalkInSeconds) => {
@@ -692,7 +694,9 @@ const formatIntoRoute = async (
 const checkViabilityOfRoute = (route) => {
   const service = route.service;
   const route_info = TEMP_NUS_SHUTTLES_ROUTES.get(service).route;
-  // console.log(`route service for ${service} attained: `, route_info);
+  if (route_info == undefined) {
+    return undefined;
+  };
   let originIndexes = []; //size of at most 2 for both
   let destIndexes = [];
   // console.log("route info length: ", route_info.length);

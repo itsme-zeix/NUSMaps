@@ -1,0 +1,2008 @@
+{
+        "CheckPoint": [
+            {
+                "longitude": 103.77496,
+                "latitude": 1.303686,
+                "PointID": "1",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.775049,
+                "latitude": 1.303687,
+                "PointID": "2",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.775138,
+                "latitude": 1.303673,
+                "PointID": "3",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.775227,
+                "latitude": 1.303659,
+                "PointID": "4",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.775316,
+                "latitude": 1.303652,
+                "PointID": "5",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.775406,
+                "latitude": 1.303658,
+                "PointID": "6",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.775493,
+                "latitude": 1.303679,
+                "PointID": "7",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.775512,
+                "latitude": 1.303737,
+                "PointID": "8",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.775543,
+                "latitude": 1.303816,
+                "PointID": "9",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.775621,
+                "latitude": 1.30385,
+                "PointID": "10",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.775692,
+                "latitude": 1.303802,
+                "PointID": "11",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.775706,
+                "latitude": 1.303717,
+                "PointID": "12",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.775642,
+                "latitude": 1.303661,
+                "PointID": "13",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.775558,
+                "latitude": 1.303669,
+                "PointID": "14",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.775478,
+                "latitude": 1.303674,
+                "PointID": "15",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77539,
+                "latitude": 1.303657,
+                "PointID": "16",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.775301,
+                "latitude": 1.303651,
+                "PointID": "17",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.775211,
+                "latitude": 1.303639,
+                "PointID": "18",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.775125,
+                "latitude": 1.303618,
+                "PointID": "19",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.775045,
+                "latitude": 1.303577,
+                "PointID": "20",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774961,
+                "latitude": 1.303548,
+                "PointID": "21",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774876,
+                "latitude": 1.303523,
+                "PointID": "22",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774788,
+                "latitude": 1.303504,
+                "PointID": "23",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774699,
+                "latitude": 1.303492,
+                "PointID": "24",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774611,
+                "latitude": 1.303471,
+                "PointID": "25",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774524,
+                "latitude": 1.303449,
+                "PointID": "26",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774437,
+                "latitude": 1.303427,
+                "PointID": "27",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774353,
+                "latitude": 1.303395,
+                "PointID": "28",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774268,
+                "latitude": 1.303368,
+                "PointID": "29",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774194,
+                "latitude": 1.303324,
+                "PointID": "30",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77413,
+                "latitude": 1.30326,
+                "PointID": "31",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774073,
+                "latitude": 1.303192,
+                "PointID": "32",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774029,
+                "latitude": 1.303114,
+                "PointID": "33",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773991,
+                "latitude": 1.303032,
+                "PointID": "34",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773973,
+                "latitude": 1.302944,
+                "PointID": "35",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773958,
+                "latitude": 1.302856,
+                "PointID": "36",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773951,
+                "latitude": 1.302766,
+                "PointID": "37",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773964,
+                "latitude": 1.302677,
+                "PointID": "38",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773977,
+                "latitude": 1.302588,
+                "PointID": "39",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774002,
+                "latitude": 1.302502,
+                "PointID": "40",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774029,
+                "latitude": 1.302416,
+                "PointID": "41",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774057,
+                "latitude": 1.302331,
+                "PointID": "42",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774094,
+                "latitude": 1.302249,
+                "PointID": "43",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774133,
+                "latitude": 1.302168,
+                "PointID": "44",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774173,
+                "latitude": 1.302087,
+                "PointID": "45",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774212,
+                "latitude": 1.302006,
+                "PointID": "46",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774251,
+                "latitude": 1.301925,
+                "PointID": "47",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77429,
+                "latitude": 1.301844,
+                "PointID": "48",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774329,
+                "latitude": 1.301763,
+                "PointID": "49",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774369,
+                "latitude": 1.301683,
+                "PointID": "50",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774405,
+                "latitude": 1.3016,
+                "PointID": "51",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774436,
+                "latitude": 1.301516,
+                "PointID": "52",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774463,
+                "latitude": 1.301431,
+                "PointID": "53",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774477,
+                "latitude": 1.301342,
+                "PointID": "54",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774475,
+                "latitude": 1.301252,
+                "PointID": "55",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774467,
+                "latitude": 1.301163,
+                "PointID": "56",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77446,
+                "latitude": 1.301073,
+                "PointID": "57",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774435,
+                "latitude": 1.300987,
+                "PointID": "58",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774388,
+                "latitude": 1.300911,
+                "PointID": "59",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774365,
+                "latitude": 1.300827,
+                "PointID": "60",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77433,
+                "latitude": 1.300744,
+                "PointID": "61",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77432,
+                "latitude": 1.30066,
+                "PointID": "62",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77429,
+                "latitude": 1.30058,
+                "PointID": "63",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774211,
+                "latitude": 1.30054,
+                "PointID": "64",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774131,
+                "latitude": 1.300579,
+                "PointID": "65",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77406,
+                "latitude": 1.300627,
+                "PointID": "66",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773981,
+                "latitude": 1.30067,
+                "PointID": "67",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773902,
+                "latitude": 1.300714,
+                "PointID": "68",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773824,
+                "latitude": 1.300758,
+                "PointID": "69",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773746,
+                "latitude": 1.300803,
+                "PointID": "70",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773669,
+                "latitude": 1.300848,
+                "PointID": "71",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773591,
+                "latitude": 1.300894,
+                "PointID": "72",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773508,
+                "latitude": 1.300929,
+                "PointID": "73",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773425,
+                "latitude": 1.300962,
+                "PointID": "74",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77334,
+                "latitude": 1.300991,
+                "PointID": "75",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773253,
+                "latitude": 1.301014,
+                "PointID": "76",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773165,
+                "latitude": 1.301034,
+                "PointID": "77",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773076,
+                "latitude": 1.301042,
+                "PointID": "78",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772986,
+                "latitude": 1.301046,
+                "PointID": "79",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772896,
+                "latitude": 1.301049,
+                "PointID": "80",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772807,
+                "latitude": 1.301039,
+                "PointID": "81",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772718,
+                "latitude": 1.301026,
+                "PointID": "82",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772629,
+                "latitude": 1.301013,
+                "PointID": "83",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77254,
+                "latitude": 1.301005,
+                "PointID": "84",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77245,
+                "latitude": 1.300997,
+                "PointID": "85",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772361,
+                "latitude": 1.30099,
+                "PointID": "86",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772271,
+                "latitude": 1.30099,
+                "PointID": "87",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772181,
+                "latitude": 1.300993,
+                "PointID": "88",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772091,
+                "latitude": 1.300999,
+                "PointID": "89",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772001,
+                "latitude": 1.301005,
+                "PointID": "90",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771912,
+                "latitude": 1.301012,
+                "PointID": "91",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771825,
+                "latitude": 1.301035,
+                "PointID": "92",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771738,
+                "latitude": 1.301058,
+                "PointID": "93",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771654,
+                "latitude": 1.301089,
+                "PointID": "94",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771569,
+                "latitude": 1.301118,
+                "PointID": "95",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771483,
+                "latitude": 1.301144,
+                "PointID": "96",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771399,
+                "latitude": 1.301176,
+                "PointID": "97",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771314,
+                "latitude": 1.301207,
+                "PointID": "98",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77123,
+                "latitude": 1.301237,
+                "PointID": "99",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771145,
+                "latitude": 1.301268,
+                "PointID": "100",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771061,
+                "latitude": 1.301299,
+                "PointID": "101",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770976,
+                "latitude": 1.30133,
+                "PointID": "102",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770892,
+                "latitude": 1.30136,
+                "PointID": "103",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770807,
+                "latitude": 1.301391,
+                "PointID": "104",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770723,
+                "latitude": 1.301423,
+                "PointID": "105",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770639,
+                "latitude": 1.301454,
+                "PointID": "106",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770555,
+                "latitude": 1.301485,
+                "PointID": "107",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770471,
+                "latitude": 1.301518,
+                "PointID": "108",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770389,
+                "latitude": 1.301556,
+                "PointID": "109",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770311,
+                "latitude": 1.301601,
+                "PointID": "110",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770232,
+                "latitude": 1.301642,
+                "PointID": "111",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770149,
+                "latitude": 1.301676,
+                "PointID": "112",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770066,
+                "latitude": 1.301711,
+                "PointID": "113",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769994,
+                "latitude": 1.301761,
+                "PointID": "114",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769921,
+                "latitude": 1.301807,
+                "PointID": "115",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769836,
+                "latitude": 1.301837,
+                "PointID": "116",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769751,
+                "latitude": 1.301866,
+                "PointID": "117",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769667,
+                "latitude": 1.301899,
+                "PointID": "118",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769585,
+                "latitude": 1.301933,
+                "PointID": "119",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769501,
+                "latitude": 1.301966,
+                "PointID": "120",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769417,
+                "latitude": 1.301996,
+                "PointID": "121",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769334,
+                "latitude": 1.30203,
+                "PointID": "122",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.76925,
+                "latitude": 1.302063,
+                "PointID": "123",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769172,
+                "latitude": 1.302077,
+                "PointID": "124",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769101,
+                "latitude": 1.302025,
+                "PointID": "125",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769016,
+                "latitude": 1.302037,
+                "PointID": "126",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.76896,
+                "latitude": 1.302102,
+                "PointID": "127",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.76897,
+                "latitude": 1.30219,
+                "PointID": "128",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769036,
+                "latitude": 1.302247,
+                "PointID": "129",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769122,
+                "latitude": 1.302234,
+                "PointID": "130",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769177,
+                "latitude": 1.30217,
+                "PointID": "131",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769186,
+                "latitude": 1.302088,
+                "PointID": "132",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.76927,
+                "latitude": 1.302055,
+                "PointID": "133",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769354,
+                "latitude": 1.302024,
+                "PointID": "134",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769435,
+                "latitude": 1.301988,
+                "PointID": "135",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769521,
+                "latitude": 1.30196,
+                "PointID": "136",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769603,
+                "latitude": 1.301924,
+                "PointID": "137",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769686,
+                "latitude": 1.30189,
+                "PointID": "138",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769771,
+                "latitude": 1.301859,
+                "PointID": "139",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769856,
+                "latitude": 1.30183,
+                "PointID": "140",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769941,
+                "latitude": 1.3018,
+                "PointID": "141",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770027,
+                "latitude": 1.301804,
+                "PointID": "142",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770112,
+                "latitude": 1.301787,
+                "PointID": "143",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770196,
+                "latitude": 1.301755,
+                "PointID": "144",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770281,
+                "latitude": 1.301726,
+                "PointID": "145",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770367,
+                "latitude": 1.301698,
+                "PointID": "146",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770449,
+                "latitude": 1.301663,
+                "PointID": "147",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770533,
+                "latitude": 1.30163,
+                "PointID": "148",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770537,
+                "latitude": 1.301564,
+                "PointID": "149",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770497,
+                "latitude": 1.301483,
+                "PointID": "150",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770454,
+                "latitude": 1.301405,
+                "PointID": "151",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770415,
+                "latitude": 1.301324,
+                "PointID": "152",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770376,
+                "latitude": 1.301243,
+                "PointID": "153",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770336,
+                "latitude": 1.301162,
+                "PointID": "154",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770296,
+                "latitude": 1.301082,
+                "PointID": "155",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770256,
+                "latitude": 1.301001,
+                "PointID": "156",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770216,
+                "latitude": 1.300921,
+                "PointID": "157",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770175,
+                "latitude": 1.300841,
+                "PointID": "158",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770139,
+                "latitude": 1.300758,
+                "PointID": "159",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770111,
+                "latitude": 1.300673,
+                "PointID": "160",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770083,
+                "latitude": 1.300588,
+                "PointID": "161",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770053,
+                "latitude": 1.300503,
+                "PointID": "162",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770029,
+                "latitude": 1.300416,
+                "PointID": "163",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770006,
+                "latitude": 1.300329,
+                "PointID": "164",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769982,
+                "latitude": 1.300243,
+                "PointID": "165",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.76996,
+                "latitude": 1.300156,
+                "PointID": "166",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.76995,
+                "latitude": 1.300066,
+                "PointID": "167",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.76994,
+                "latitude": 1.299977,
+                "PointID": "168",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.76993,
+                "latitude": 1.299888,
+                "PointID": "169",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769921,
+                "latitude": 1.299798,
+                "PointID": "170",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769911,
+                "latitude": 1.299709,
+                "PointID": "171",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.76991,
+                "latitude": 1.299619,
+                "PointID": "172",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769907,
+                "latitude": 1.299529,
+                "PointID": "173",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769903,
+                "latitude": 1.299439,
+                "PointID": "174",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.7699,
+                "latitude": 1.299349,
+                "PointID": "175",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769899,
+                "latitude": 1.299259,
+                "PointID": "176",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769897,
+                "latitude": 1.29917,
+                "PointID": "177",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769896,
+                "latitude": 1.29908,
+                "PointID": "178",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769894,
+                "latitude": 1.29899,
+                "PointID": "179",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769893,
+                "latitude": 1.2989,
+                "PointID": "180",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769891,
+                "latitude": 1.29881,
+                "PointID": "181",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769889,
+                "latitude": 1.29872,
+                "PointID": "182",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769883,
+                "latitude": 1.29863,
+                "PointID": "183",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769876,
+                "latitude": 1.298541,
+                "PointID": "184",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.76987,
+                "latitude": 1.298451,
+                "PointID": "185",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769863,
+                "latitude": 1.298361,
+                "PointID": "186",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769857,
+                "latitude": 1.298272,
+                "PointID": "187",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.76985,
+                "latitude": 1.298182,
+                "PointID": "188",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769846,
+                "latitude": 1.298092,
+                "PointID": "189",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769842,
+                "latitude": 1.298002,
+                "PointID": "190",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.76983,
+                "latitude": 1.297915,
+                "PointID": "191",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769826,
+                "latitude": 1.297825,
+                "PointID": "192",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769818,
+                "latitude": 1.297735,
+                "PointID": "193",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.76981,
+                "latitude": 1.297646,
+                "PointID": "194",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769804,
+                "latitude": 1.297556,
+                "PointID": "195",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769798,
+                "latitude": 1.297467,
+                "PointID": "196",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769792,
+                "latitude": 1.297377,
+                "PointID": "197",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769786,
+                "latitude": 1.297287,
+                "PointID": "198",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.76978,
+                "latitude": 1.297197,
+                "PointID": "199",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769774,
+                "latitude": 1.297108,
+                "PointID": "200",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769768,
+                "latitude": 1.297018,
+                "PointID": "201",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769762,
+                "latitude": 1.296928,
+                "PointID": "202",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769756,
+                "latitude": 1.296838,
+                "PointID": "203",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.76975,
+                "latitude": 1.296749,
+                "PointID": "204",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769743,
+                "latitude": 1.296659,
+                "PointID": "205",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769736,
+                "latitude": 1.296569,
+                "PointID": "206",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769734,
+                "latitude": 1.29648,
+                "PointID": "207",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769753,
+                "latitude": 1.296392,
+                "PointID": "208",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769779,
+                "latitude": 1.296308,
+                "PointID": "209",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769838,
+                "latitude": 1.296243,
+                "PointID": "210",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.769914,
+                "latitude": 1.296198,
+                "PointID": "211",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770002,
+                "latitude": 1.296201,
+                "PointID": "212",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770089,
+                "latitude": 1.296224,
+                "PointID": "213",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770176,
+                "latitude": 1.296247,
+                "PointID": "214",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770262,
+                "latitude": 1.296272,
+                "PointID": "215",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770348,
+                "latitude": 1.296297,
+                "PointID": "216",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770435,
+                "latitude": 1.296322,
+                "PointID": "217",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770521,
+                "latitude": 1.296347,
+                "PointID": "218",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770609,
+                "latitude": 1.296365,
+                "PointID": "219",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770698,
+                "latitude": 1.296382,
+                "PointID": "220",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770787,
+                "latitude": 1.296392,
+                "PointID": "221",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770877,
+                "latitude": 1.296397,
+                "PointID": "222",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.770966,
+                "latitude": 1.2964,
+                "PointID": "223",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771056,
+                "latitude": 1.296392,
+                "PointID": "224",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771145,
+                "latitude": 1.296386,
+                "PointID": "225",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771235,
+                "latitude": 1.296381,
+                "PointID": "226",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771325,
+                "latitude": 1.296376,
+                "PointID": "227",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771415,
+                "latitude": 1.296371,
+                "PointID": "228",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771504,
+                "latitude": 1.296366,
+                "PointID": "229",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771594,
+                "latitude": 1.296361,
+                "PointID": "230",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771684,
+                "latitude": 1.296369,
+                "PointID": "231",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771773,
+                "latitude": 1.296379,
+                "PointID": "232",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771862,
+                "latitude": 1.29639,
+                "PointID": "233",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.771951,
+                "latitude": 1.296401,
+                "PointID": "234",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772034,
+                "latitude": 1.296435,
+                "PointID": "235",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772117,
+                "latitude": 1.29647,
+                "PointID": "236",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772189,
+                "latitude": 1.296523,
+                "PointID": "237",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772245,
+                "latitude": 1.296591,
+                "PointID": "238",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77229,
+                "latitude": 1.296669,
+                "PointID": "239",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772352,
+                "latitude": 1.296734,
+                "PointID": "240",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772409,
+                "latitude": 1.296804,
+                "PointID": "241",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77247,
+                "latitude": 1.29687,
+                "PointID": "242",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772533,
+                "latitude": 1.296933,
+                "PointID": "243",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772593,
+                "latitude": 1.297,
+                "PointID": "244",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772648,
+                "latitude": 1.297071,
+                "PointID": "245",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772701,
+                "latitude": 1.297144,
+                "PointID": "246",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772753,
+                "latitude": 1.297217,
+                "PointID": "247",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772806,
+                "latitude": 1.297289,
+                "PointID": "248",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772856,
+                "latitude": 1.297364,
+                "PointID": "249",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772904,
+                "latitude": 1.29744,
+                "PointID": "250",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772935,
+                "latitude": 1.297524,
+                "PointID": "251",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772966,
+                "latitude": 1.297609,
+                "PointID": "252",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.772995,
+                "latitude": 1.297694,
+                "PointID": "253",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773026,
+                "latitude": 1.297779,
+                "PointID": "254",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773075,
+                "latitude": 1.297854,
+                "PointID": "255",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773131,
+                "latitude": 1.297924,
+                "PointID": "256",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773191,
+                "latitude": 1.29799,
+                "PointID": "257",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773262,
+                "latitude": 1.298045,
+                "PointID": "258",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773334,
+                "latitude": 1.298098,
+                "PointID": "259",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773407,
+                "latitude": 1.298151,
+                "PointID": "260",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773481,
+                "latitude": 1.298203,
+                "PointID": "261",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773556,
+                "latitude": 1.298251,
+                "PointID": "262",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773632,
+                "latitude": 1.2983,
+                "PointID": "263",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773707,
+                "latitude": 1.298349,
+                "PointID": "264",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773781,
+                "latitude": 1.298401,
+                "PointID": "265",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773853,
+                "latitude": 1.298454,
+                "PointID": "266",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773912,
+                "latitude": 1.298522,
+                "PointID": "267",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773971,
+                "latitude": 1.29859,
+                "PointID": "268",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774024,
+                "latitude": 1.298663,
+                "PointID": "269",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774077,
+                "latitude": 1.298735,
+                "PointID": "270",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77413,
+                "latitude": 1.298807,
+                "PointID": "271",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774182,
+                "latitude": 1.298881,
+                "PointID": "272",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774226,
+                "latitude": 1.298959,
+                "PointID": "273",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77427,
+                "latitude": 1.299038,
+                "PointID": "274",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774314,
+                "latitude": 1.299116,
+                "PointID": "275",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774357,
+                "latitude": 1.299195,
+                "PointID": "276",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774398,
+                "latitude": 1.299275,
+                "PointID": "277",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774422,
+                "latitude": 1.299362,
+                "PointID": "278",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774437,
+                "latitude": 1.29945,
+                "PointID": "279",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774466,
+                "latitude": 1.299535,
+                "PointID": "280",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774517,
+                "latitude": 1.299607,
+                "PointID": "281",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77452,
+                "latitude": 1.299696,
+                "PointID": "282",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77452,
+                "latitude": 1.299785,
+                "PointID": "283",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77452,
+                "latitude": 1.299875,
+                "PointID": "284",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774511,
+                "latitude": 1.299965,
+                "PointID": "285",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774493,
+                "latitude": 1.300053,
+                "PointID": "286",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774465,
+                "latitude": 1.300138,
+                "PointID": "287",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77443,
+                "latitude": 1.30022,
+                "PointID": "288",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77439,
+                "latitude": 1.300301,
+                "PointID": "289",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774349,
+                "latitude": 1.300381,
+                "PointID": "290",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774308,
+                "latitude": 1.300461,
+                "PointID": "291",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774234,
+                "latitude": 1.300511,
+                "PointID": "292",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774159,
+                "latitude": 1.300561,
+                "PointID": "293",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77411,
+                "latitude": 1.300631,
+                "PointID": "294",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774128,
+                "latitude": 1.300717,
+                "PointID": "295",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774204,
+                "latitude": 1.300761,
+                "PointID": "296",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774273,
+                "latitude": 1.300819,
+                "PointID": "297",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774346,
+                "latitude": 1.30087,
+                "PointID": "298",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774403,
+                "latitude": 1.300934,
+                "PointID": "299",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774443,
+                "latitude": 1.301013,
+                "PointID": "300",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774462,
+                "latitude": 1.301101,
+                "PointID": "301",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77447,
+                "latitude": 1.30119,
+                "PointID": "302",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774477,
+                "latitude": 1.30128,
+                "PointID": "303",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774472,
+                "latitude": 1.301369,
+                "PointID": "304",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774457,
+                "latitude": 1.301458,
+                "PointID": "305",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774426,
+                "latitude": 1.301542,
+                "PointID": "306",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774395,
+                "latitude": 1.301626,
+                "PointID": "307",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774356,
+                "latitude": 1.301707,
+                "PointID": "308",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774317,
+                "latitude": 1.301788,
+                "PointID": "309",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774278,
+                "latitude": 1.301869,
+                "PointID": "310",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774239,
+                "latitude": 1.30195,
+                "PointID": "311",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.7742,
+                "latitude": 1.302031,
+                "PointID": "312",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77416,
+                "latitude": 1.302112,
+                "PointID": "313",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774121,
+                "latitude": 1.302193,
+                "PointID": "314",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774082,
+                "latitude": 1.302274,
+                "PointID": "315",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774048,
+                "latitude": 1.302357,
+                "PointID": "316",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774021,
+                "latitude": 1.302443,
+                "PointID": "317",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773993,
+                "latitude": 1.302528,
+                "PointID": "318",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773973,
+                "latitude": 1.302616,
+                "PointID": "319",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77396,
+                "latitude": 1.302705,
+                "PointID": "320",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773952,
+                "latitude": 1.302794,
+                "PointID": "321",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773961,
+                "latitude": 1.302883,
+                "PointID": "322",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.773978,
+                "latitude": 1.302971,
+                "PointID": "323",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774003,
+                "latitude": 1.303057,
+                "PointID": "324",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77404,
+                "latitude": 1.303139,
+                "PointID": "325",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774089,
+                "latitude": 1.303214,
+                "PointID": "326",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77415,
+                "latitude": 1.30328,
+                "PointID": "327",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774214,
+                "latitude": 1.303344,
+                "PointID": "328",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774284,
+                "latitude": 1.3034,
+                "PointID": "329",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774356,
+                "latitude": 1.303453,
+                "PointID": "330",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77443,
+                "latitude": 1.3035,
+                "PointID": "331",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.774503,
+                "latitude": 1.303553,
+                "PointID": "332",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77458,
+                "latitude": 1.3036,
+                "PointID": "333",
+                "routeid": 90296
+            },
+            {
+                "longitude": 103.77466,
+                "latitude": 1.30364,
+                "PointID": "334",
+                "routeid": 90296
+            }
+        ]
+}
