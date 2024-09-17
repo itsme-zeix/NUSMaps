@@ -111,15 +111,17 @@ For more information about our considerations and implementation details, check 
 <a id="expo-go-section"></a>
 
 ### Try out the app with minimal setup
+  1. **Download Expo Go** on your iOS/Android device.
+  
+  2. **Scan the following QR code:** <br>
+    <div align="center">
+      <img src="./README-assets/expogo-qrcode.png" alt="Expo Go QR Code" width="200" height="200">
+    </div>
+    <br>
+  3. This will redirect you to NUSMaps in Expo Go. Enjoy! 🎉
 
-1. **Download Expo Go** on your iOS/Android device.
-
-2. **Scan the following QR code:** <br>
-<div align="center">
-  <img src="./README-assets/expogo-qrcode.png" alt="Expo Go QR Code" width="200" height="200">
-</div>
-<br>
-3. This will redirect you to NUSMaps in Expo Go. Enjoy! 🎉
+> [!IMPORTANT]
+> **Please note that the walking route service is no longer hosted, so the route-finding feature is currently unavailable. If you need to test the routing functionality, feel free to reach out to us for assistance.**
 
 ### Setting up NUSMaps Application to run locally
 
