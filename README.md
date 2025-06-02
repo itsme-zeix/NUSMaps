@@ -123,7 +123,7 @@ For more information about our considerations and implementation details, check 
 > [!IMPORTANT]
 > **Please note that the walking route service is no longer hosted, so the route-finding feature is currently unavailable. If you need to test the routing functionality, feel free to reach out to us for assistance.**
 > 
-> Nov 2024: Expo Go 52 broke the frontend for the Expo Go app.. APK still works fine, but using the app through Expo Go for iOS/Android will no longer work. Sorry! I hope to rewrite this app some day in something more maintainable.
+> Nov 2024: Expo Go 52 broke the frontend for the Expo Go app. APK still works fine, but using the app through Expo Go for iOS/Android will no longer work. Sorry! I hope to rewrite this app some day in something more maintainable.
 
 ### Setting up NUSMaps Application to run locally
 
